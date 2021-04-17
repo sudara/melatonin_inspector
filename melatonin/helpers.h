@@ -3,6 +3,8 @@
 
 namespace melatonin
 {
+    using namespace juce;
+    
     // https://stackoverflow.com/a/4541470
     static inline std::string demangle (const char* name)
     {

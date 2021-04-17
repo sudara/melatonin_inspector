@@ -36,17 +36,17 @@ namespace melatonin
                 g.drawDashedLine (lineFromLeftToParent, dashes, 2, 1.0f);
 
                 // corners outside
-                g.fillRect (Rectangle (selectedBounds.getTopLeft().translated (-4, -4), selectedBounds.getTopLeft().translated (4, 4)));
-                g.fillRect (Rectangle (selectedBounds.getTopRight().translated (-4, -4), selectedBounds.getTopRight().translated (4, 4)));
-                g.fillRect (Rectangle (selectedBounds.getBottomRight().translated (-4, -4), selectedBounds.getBottomRight().translated (4, 4)));
-                g.fillRect (Rectangle (selectedBounds.getBottomLeft().translated (-4, -4), selectedBounds.getBottomLeft().translated (4, 4)));
+                g.fillRect (Rectangle<int> (selectedBounds.getTopLeft().translated (-4, -4), selectedBounds.getTopLeft().translated (4, 4)));
+                g.fillRect (Rectangle<int> (selectedBounds.getTopRight().translated (-4, -4), selectedBounds.getTopRight().translated (4, 4)));
+                g.fillRect (Rectangle<int> (selectedBounds.getBottomRight().translated (-4, -4), selectedBounds.getBottomRight().translated (4, 4)));
+                g.fillRect (Rectangle<int> (selectedBounds.getBottomLeft().translated (-4, -4), selectedBounds.getBottomLeft().translated (4, 4)));
 
                 // corners inside
                 g.setColour (color::white);
-                g.fillRect (Rectangle (selectedBounds.getTopLeft().translated (-3, -3), selectedBounds.getTopLeft().translated (3, 3)));
-                g.fillRect (Rectangle (selectedBounds.getTopRight().translated (-3, -3), selectedBounds.getTopRight().translated (3, 3)));
-                g.fillRect (Rectangle (selectedBounds.getBottomRight().translated (-3, -3), selectedBounds.getBottomRight().translated (3, 3)));
-                g.fillRect (Rectangle (selectedBounds.getBottomLeft().translated (-3, -3), selectedBounds.getBottomLeft().translated (3, 3)));
+                g.fillRect (Rectangle<int> (selectedBounds.getTopLeft().translated (-3, -3), selectedBounds.getTopLeft().translated (3, 3)));
+                g.fillRect (Rectangle<int> (selectedBounds.getTopRight().translated (-3, -3), selectedBounds.getTopRight().translated (3, 3)));
+                g.fillRect (Rectangle<int> (selectedBounds.getBottomRight().translated (-3, -3), selectedBounds.getBottomRight().translated (3, 3)));
+                g.fillRect (Rectangle<int> (selectedBounds.getBottomLeft().translated (-3, -3), selectedBounds.getBottomLeft().translated (3, 3)));
 
                 g.setColour (color::blueLabelBackgroundColor);
                 // text doesn't vertically center very nicely without manual offset
@@ -165,8 +165,8 @@ namespace melatonin
             auto localLeft = getLocalPoint (selectedComponent->getParentComponent(), leftOfComponent);
             auto localParentLeft = getLocalPoint (selectedComponent->getParentComponent(), leftOfComponent.withX (0));
 
-            lineFromTopToParent = Line (localTop, localParentTop).toFloat();
-            lineFromLeftToParent = Line (localLeft, localParentLeft).toFloat();
+            lineFromTopToParent = Line<int> (localTop, localParentTop).toFloat();
+            lineFromLeftToParent = Line<int> (localLeft, localParentLeft).toFloat();
         }
 
         void setSelectedAndResizeableBounds (Component* component)

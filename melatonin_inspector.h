@@ -19,7 +19,7 @@ class MelatoninInspector : public juce::ComponentListener, public juce::Document
 {
 public:
     MelatoninInspector (juce::Component& rootComponent)
-        : juce::DocumentWindow ("Melatonin Inspector", Colours::black, 7, true),
+        : juce::DocumentWindow ("Melatonin Inspector", juce::Colours::black, 7, true),
           panel (rootComponent, overlay),
           mouseInspector (rootComponent),
           root (rootComponent)

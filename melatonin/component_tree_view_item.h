@@ -35,7 +35,7 @@ namespace melatonin
 
         bool mightContainSubItems() override
         {
-            return component->getNumChildComponents() > 0;
+            return component ? (component->getNumChildComponents() > 0) : false;
         }
 
         // naive but functional...
@@ -60,7 +60,7 @@ namespace melatonin
 
         void paintItem (Graphics& g, int w, int h) override
         {
-            jassert (component);
+            if (!component) return;
             if (isSelected())
             {
                 g.setColour (color::blueLabelBackgroundColor);
