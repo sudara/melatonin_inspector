@@ -8,6 +8,10 @@ It's inspired by [Figma](https://figma.com) (where I prefer to design UI), brows
 
 ### Hover over Component to view size and bounds to parent
 
+
+![](https://user-images.githubusercontent.com/472/115127488-20ae2200-9fd7-11eb-9f68-d5a7bfa6ce40.mp4)
+
+
 ### Single click a Component to select it and resize
 
 (Note: size changes aren't permanent, it's similar to how you can play with things in a browser's web inspector)
