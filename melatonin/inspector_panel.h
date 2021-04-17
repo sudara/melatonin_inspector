@@ -19,7 +19,7 @@ namespace melatonin
             //g.drawRect ()
         }
 
-        void setRoot()
+        void reconstructRoot()
         {
             jassert (selectComponentCallback);
             rootSet = true;
@@ -36,7 +36,7 @@ namespace melatonin
         void displayComponentInfo (Component* component)
         {
             if (! rootSet)
-                setRoot();
+                reconstructRoot();
             selectedComponent = component;
             boxModel.setComponent (component);
             repaint();

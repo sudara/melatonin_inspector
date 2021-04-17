@@ -76,10 +76,16 @@ public:
 
 private:
     // Resize our overlay when the root component changes
-    void componentMovedOrResized (Component& component, bool /*wasMoved*/, bool wasResized) override
+    void componentMovedOrResized (Component& root, bool /*wasMoved*/, bool wasResized) override
     {
         if (wasResized)
-            overlay.setBounds (component.getBounds());
+            overlay.setBounds (root.getBounds());
+    }
+
+    // Reconstruct the tree when things are deleted
+    void componentChildrenChanged (Component& root) override
+    {
+        panel.reconstructRoot();
     }
 
     juce::Component& root;
