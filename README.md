@@ -60,6 +60,13 @@ Add the inspector as a private member to your Editor, passing a reference to the
 MelatoninInspector inspector { *this };
 ```
 
+If you'd like the inspector to be disabled by default, add the member like so:
+
+```cpp
+MelatoninInspector inspector { *this, false };
+```
+
+
 ## FAQ
 
 ### Can I save my resizes or edits?

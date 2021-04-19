@@ -18,12 +18,12 @@ END_JUCE_MODULE_DECLARATION
 class MelatoninInspector : public juce::ComponentListener, public juce::DocumentWindow
 {
 public:
-    MelatoninInspector (juce::Component& rootComponent, bool enabledAtStart)
+    MelatoninInspector (juce::Component& rootComponent, bool enabledAtStart = true)
         : juce::DocumentWindow ("Melatonin Inspector", juce::Colours::black, 7, true),
           panel (rootComponent, overlay, enabledAtStart),
           root (rootComponent),
           mouseInspector (rootComponent),
-          enabled(enabledAtStart)
+          enabled (enabledAtStart)
     {
         root.addAndMakeVisible (overlay);
         root.addComponentListener (this);
@@ -55,7 +55,7 @@ public:
     void outlineComponent (Component* c)
     {
         // don't dogfood the overlay
-        if (!enabled || overlay.isParentOf (c))
+        if (! enabled || overlay.isParentOf (c))
             return;
 
         overlay.outlineComponent (c);
@@ -64,7 +64,7 @@ public:
 
     void selectComponent (Component* c, bool collapseTree = true)
     {
-        if (!enabled || overlay.isParentOf (c))
+        if (! enabled || overlay.isParentOf (c))
             return;
         overlay.selectComponent (c);
         panel.displayComponentInfo (c);
@@ -74,7 +74,7 @@ public:
     // closing the window means turning off the inspector
     void closeButtonPressed() override
     {
-        toggle(false);
+        toggle (false);
         setVisible (false);
     }
 
