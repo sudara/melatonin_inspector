@@ -4,14 +4,17 @@
 
 namespace melatonin
 {
-    class InspectorPanel : public Component
+    class InspectorPanel : public Component, public Button::Listener
     {
     public:
-        InspectorPanel (Component& rootComponent, Component& overlay) : root (rootComponent)
+        InspectorPanel (Component& rootComponent, Component& overlay, bool enabledAtStart = true) : root (rootComponent)
         {
             addAndMakeVisible (tree);
             addAndMakeVisible (boxModel);
-            //tree.setLookAndFeel (&getLookAndFeel());
+            toggleButton.setButtonText ("Enabled");
+            toggleButton.setToggleState (enabledAtStart, dontSendNotification);
+            addAndMakeVisible (toggleButton);
+            toggleButton.addListener (this);
         }
 
         void paint (Graphics& g) override
@@ -31,8 +34,11 @@ namespace melatonin
 
         void resized() override
         {
-            boxModel.setBounds (0, 0, getWidth(), 250);
-            tree.setBounds (30, 250, getWidth() - 30, getHeight() - 250);
+            auto area = getLocalBounds();
+            area.removeFromTop (20);
+            toggleButton.setBounds (area.removeFromTop (20).withTrimmedLeft (27));
+            boxModel.setBounds (area.removeFromTop (250));
+            tree.setBounds (area.withTrimmedLeft (25)); // 3px discrepancy from normal padding
         }
 
         void displayComponentInfo (Component* component)
@@ -55,14 +61,26 @@ namespace melatonin
             tree.scrollToKeepItemVisible (dynamic_cast<ComponentTreeViewItem*> (tree.getSelectedItem (0)));
         }
 
+        void buttonClicked (juce::Button* button) override
+        {
+            if (button == &toggleButton)
+            {
+                auto enabled = toggleButton.getToggleState();
+                toggleCallback (enabled);
+                tree.setVisible (enabled);
+            }
+        }
+
         std::function<void (Component* c)> selectComponentCallback;
         std::function<void (Component* c)> outlineComponentCallback;
+        std::function<void (bool enabled)> toggleCallback;
 
     private:
         Component::SafePointer<Component> selectedComponent;
         Component& root;
-        TreeView tree;
+        ToggleButton toggleButton;
         BoxModel boxModel;
+        TreeView tree;
         bool rootSet = false;
 
         ComponentTreeViewItem* getRoot()

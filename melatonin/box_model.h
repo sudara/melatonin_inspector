@@ -9,7 +9,12 @@ namespace melatonin
         BoxModel()
         {
             addAndMakeVisible (componentLabel);
-            componentLabel.setText ("Select a Component!", dontSendNotification);
+            componentLabel.setColour(Label::textColourId, color::blueLabelBackgroundColor);
+            componentLabel.setJustificationType(Justification::centredLeft);
+
+            addAndMakeVisible (parentComponentLabel);
+            parentComponentLabel.setColour(Label::textColourId, color::redLineColor);
+            parentComponentLabel.setJustificationType(Justification::centredLeft);
 
             addAndMakeVisible (widthLabel);
             widthLabel.setEditable (true);
@@ -35,24 +40,23 @@ namespace melatonin
                 addAndMakeVisible (parentLabel);
                 parentLabel->setText ("-", dontSendNotification);
                 parentLabel->setJustificationType (Justification::centred);
+                parentLabel->setColour(Label::textColourId, color::redLineColor);
             }
         }
 
         void paint (Graphics& g) override
         {
-            // dotted rectangles be hard yo
+            // dashed line rectangles be hard, yo!
             g.setColour (color::redLineColor);
             float dashLengths[2] = { 3.f, 3.f };
-            parentRectangle.clear();
-            parentRectangle.addRectangle (getLocalBounds().reduced (padding));
-
+            parentRectanglePath.clear();
+            parentRectanglePath.addRectangle (parentComponentRectangle());
             auto parentStroke = PathStrokeType (0.5);
-            parentStroke.createDashedStroke (parentRectangle, parentRectangle, dashLengths, 2);
-            g.strokePath (parentRectangle, parentStroke);
+            parentStroke.createDashedStroke (parentRectanglePath, parentRectanglePath, dashLengths, 2);
+            g.strokePath (parentRectanglePath, parentStroke);
 
-            auto paddingPerSide = padding + paddingToParent;
             g.setColour (color::blueLineColor);
-            g.drawRect (getLocalBounds().reduced (paddingPerSide));
+            g.drawRect (componentRectangle(), 2.0);
         }
 
         void resized() override
@@ -60,6 +64,10 @@ namespace melatonin
             auto center = getLocalBounds().getCentre();
             auto labelWidth = 60;
             auto labelHeight = 30;
+
+            parentComponentLabel.setBounds(parentComponentRectangle().getX(), parentComponentRectangle().getY()-labelHeight+5, parentComponentRectangle().getWidth(), labelHeight);
+            componentLabel.setBounds(componentRectangle().getX(), componentRectangle().getY()-labelHeight+5, componentRectangle().getWidth(), labelHeight);
+
             widthLabel.setBounds (center.getX() - 70, center.getY() - 15, labelWidth, labelHeight);
             byLabel.setBounds (center.getX() - 10, center.getY() - 15, 20, labelHeight);
             heightLabel.setBounds (center.getX() + 10, center.getY() - 15, labelWidth, labelHeight);
@@ -74,7 +82,10 @@ namespace melatonin
         {
             component = selectedComponent;
             auto boundsInParent = component->getBoundsInParent();
+
+            parentComponentLabel.setText (componentString (component->getParentComponent()), dontSendNotification);
             componentLabel.setText (componentString (component), dontSendNotification);
+
             widthLabel.setText (String (component->getWidth()), dontSendNotification);
             heightLabel.setText (String (component->getHeight()), dontSendNotification);
 
@@ -95,7 +106,10 @@ namespace melatonin
 
     private:
         Component::SafePointer<Component> component;
+
         Label componentLabel;
+        Label parentComponentLabel;
+
         Label widthLabel;
         Label byLabel;
         Label heightLabel;
@@ -105,8 +119,19 @@ namespace melatonin
         Label bottomToParentLabel;
         Label leftToParentLabel;
 
-        int padding = 50;
+        int padding = 30;
         int paddingToParent = 50;
-        Path parentRectangle;
+        Path parentRectanglePath; // complicated b/c it's dashed
+
+        Rectangle<int> parentComponentRectangle()
+        {
+            return getLocalBounds().reduced (padding);
+        }
+
+        Rectangle<int> componentRectangle()
+        {
+            return parentComponentRectangle().reduced (paddingToParent).withTrimmedTop(5);
+        }
+
     };
 }

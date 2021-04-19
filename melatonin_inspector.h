@@ -18,11 +18,12 @@ END_JUCE_MODULE_DECLARATION
 class MelatoninInspector : public juce::ComponentListener, public juce::DocumentWindow
 {
 public:
-    MelatoninInspector (juce::Component& rootComponent)
+    MelatoninInspector (juce::Component& rootComponent, bool enabledAtStart)
         : juce::DocumentWindow ("Melatonin Inspector", juce::Colours::black, 7, true),
-          panel (rootComponent, overlay),
+          panel (rootComponent, overlay, enabledAtStart),
+          root (rootComponent),
           mouseInspector (rootComponent),
-          root (rootComponent)
+          enabled(enabledAtStart)
     {
         root.addAndMakeVisible (overlay);
         root.addComponentListener (this);
@@ -31,6 +32,7 @@ public:
         mouseInspector.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, true); };
         panel.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, false); };
         panel.outlineComponentCallback = [this] (Component* c) { this->outlineComponent (c); };
+        panel.toggleCallback = [this] (bool enabled) { this->toggle (enabled); };
         panel.setSize (400, 400);
         // don't use the app's lnf for overlay or panel
         setLookAndFeel (&inspectorLookAndFeel);
@@ -39,7 +41,7 @@ public:
 
         setResizable (true, false);
         setResizeLimits (300, 500, 1200, 1200);
-        setSize (350, 550);
+        setSize (350, 650);
         setUsingNativeTitleBar (true);
         setContentNonOwned (&panel, true);
         setVisible (true);
@@ -53,25 +55,33 @@ public:
     void outlineComponent (Component* c)
     {
         // don't dogfood the overlay
-        if (overlay.isParentOf (c))
+        if (!enabled || overlay.isParentOf (c))
             return;
 
         overlay.outlineComponent (c);
         panel.displayComponentInfo (c);
     }
 
-    void selectComponent (Component* c, bool collapseTree=true)
+    void selectComponent (Component* c, bool collapseTree = true)
     {
-        if (overlay.isParentOf (c))
+        if (!enabled || overlay.isParentOf (c))
             return;
         overlay.selectComponent (c);
         panel.displayComponentInfo (c);
         panel.selectComponent (c, collapseTree);
     }
 
+    // closing the window means turning off the inspector
     void closeButtonPressed() override
     {
+        toggle(false);
         setVisible (false);
+    }
+
+    void toggle (bool newStatus)
+    {
+        enabled = newStatus;
+        overlay.setVisible (newStatus);
     }
 
 private:
@@ -82,6 +92,8 @@ private:
             overlay.setBounds (root.getBounds());
     }
 
+    bool enabled;
+
     // LNF has to be declared before components using it
     melatonin::InspectorLookAndFeel inspectorLookAndFeel;
 
@@ -89,5 +101,4 @@ private:
     melatonin::InspectorPanel panel;
     melatonin::Overlay overlay;
     melatonin::MouseInspector mouseInspector;
-    float originalWidth = 0.f;
 };

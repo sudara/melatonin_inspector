@@ -4,7 +4,7 @@
 namespace melatonin
 {
     using namespace juce;
-    
+
     // https://stackoverflow.com/a/4541470
     static inline std::string demangle (const char* name)
     {
@@ -35,13 +35,13 @@ namespace melatonin
         {
             return String ("Editor: ") + editor->getAudioProcessor()->getName();
         }
-        else if (c->getName().isEmpty())
+        else if (c && ! c->getName().isEmpty())
         {
-            return type (*c);
+            return c->getName();
         }
         else
         {
-            return c->getName();
+            return type (*c);
         }
     }
 
@@ -67,14 +67,16 @@ namespace melatonin
         InspectorLookAndFeel()
         {
             // often the app overrides this
-            setDefaultSansSerifTypefaceName (Font::getDefaultSansSerifFontName());
             setColour (Label::outlineWhenEditingColourId, color::redLineColor);
         }
+
+        // we don't want our resizer in the overlay to have a fugly border
         void drawResizableFrame (Graphics& g, int w, int h, const BorderSize<int>& border) override
         {
             ignoreUnused (g, w, h, border);
         }
 
+        // For some reason this is actually *needed* which is strange. But we want to adjust triangles anyway...
         void drawTreeviewPlusMinusBox (Graphics& g, const Rectangle<float>& area, Colour backgroundColour, bool isOpen, bool isMouseOver) override
         {
             Path p;
@@ -82,5 +84,24 @@ namespace melatonin
             g.setColour (backgroundColour);
             g.fillPath (p, p.getTransformToScaleToFit (area.reduced (2, area.getHeight() / 4).translated (3, 0), true));
         }
+
+        // more friendly scrolling
+        int getDefaultScrollbarWidth() override
+        {
+            return 10;
+        }
+
+        // don't use the target app's font
+        Font getLabelFont (Label& label) override
+        {
+            return Font ("Verdana", label.getFont().getHeight(), Font::FontStyleFlags::plain);
+        }
+
+        // oh i dream of css resets...
+        BorderSize<int> getLabelBorderSize (Label&) override
+        {
+            return BorderSize<int> (0);
+        }
     };
+
 }

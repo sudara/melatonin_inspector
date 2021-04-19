@@ -77,7 +77,7 @@ namespace melatonin
             if (! component->isVisible())
                 g.setColour (Colours::grey);
 
-            g.setFont (16.0f);
+            g.setFont (Font ("Verdana", 14, Font::FontStyleFlags::plain));
             g.drawText (componentString (component), 5, 0, w - 5, h, Justification::left, true);
         }
 
@@ -109,7 +109,6 @@ namespace melatonin
         // Callback from the component listener. Reconstruct children when component is deleted
         void componentChildrenChanged (Component& changedComponent) override
         {
-            DBG ("Validating subitems for " << componentString (&changedComponent));
             validateSubItems();
         }
 
@@ -131,11 +130,11 @@ namespace melatonin
         void addItemsForChildComponents()
         {
             for (int i = 0; i < component->getNumChildComponents(); ++i)
-                {
-                    auto child = component->getChildComponent (i);
-                    if (componentString (child) != "Melatonin Overlay")
-                        recursivelyAddChildrenFor (child);
-                }
+            {
+                auto child = component->getChildComponent (i);
+                if (componentString (child) != "Melatonin Overlay")
+                    recursivelyAddChildrenFor (child);
+            }
         }
 
         void validateSubItems()
@@ -149,7 +148,6 @@ namespace melatonin
                     // this is because we don't explicitly know if things were added or removed
                     clearSubItems();
                     addItemsForChildComponents();
-
                     break;
                 }
             }
