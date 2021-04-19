@@ -7,7 +7,8 @@ namespace melatonin
 
     class ComponentTreeViewItem
         : public TreeViewItem,
-          public MouseListener
+          public MouseListener,
+          public ComponentListener
     {
     public:
         explicit ComponentTreeViewItem (Component* c, std::function<void (Component* c)> outline, std::function<void (Component* c)> select)
@@ -18,19 +19,23 @@ namespace melatonin
             {
                 for (int i = 0; i < tabs->getNumTabs(); ++i)
                 {
-                    auto child = tabs->getTabContentComponent (i);
-                    addSubItem (new ComponentTreeViewItem (child, outlineComponentCallback, selectComponentCallback));
+                    recursivelyAddChildrenFor (tabs->getTabContentComponent (i));
                 }
+            }
+            else
+            {
+                addItemsForChildComponents();
             }
 
-            if (componentString (c) != "melatonin::Overlay")
-            {
-                for (int i = 0; i < component->getNumChildComponents(); ++i)
-                {
-                    auto child = component->getChildComponent (i);
-                    addSubItem (new ComponentTreeViewItem (child, outlineComponentCallback, selectComponentCallback));
-                }
-            }
+            // Make our tree self aware
+            component->addComponentListener (this);
+        }
+
+        ~ComponentTreeViewItem() override
+        {
+            // The component can be deleted before this tree view item
+            if (component)
+                component->removeComponentListener (this);
         }
 
         bool mightContainSubItems() override
@@ -60,7 +65,8 @@ namespace melatonin
 
         void paintItem (Graphics& g, int w, int h) override
         {
-            if (!component) return;
+            if (! component)
+                return;
             if (isSelected())
             {
                 g.setColour (color::blueLabelBackgroundColor);
@@ -95,9 +101,16 @@ namespace melatonin
         {
             for (int i = 0; i < getNumSubItems(); ++i)
             {
-                getSubItem (i)->setOpen (true);
+                getSubItem (i)->setOpen (false);
                 dynamic_cast<ComponentTreeViewItem*> (getSubItem (i))->recursivelyCloseSubItems();
             }
+        }
+
+        // Callback from the component listener. Reconstruct children when component is deleted
+        void componentChildrenChanged (Component& changedComponent) override
+        {
+            DBG ("Validating subitems for " << componentString (&changedComponent));
+            validateSubItems();
         }
 
         std::function<void (Component* c)> outlineComponentCallback;
@@ -106,5 +119,40 @@ namespace melatonin
     private:
         Component::SafePointer<Component> component;
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentTreeViewItem)
+
+        void recursivelyAddChildrenFor (Component* child)
+        {
+            // Components such as Labels can have a nullptr component child
+            // Rather than display empty placeholders in the tree view, we will hide them
+            if (child)
+                addSubItem (new ComponentTreeViewItem (child, outlineComponentCallback, selectComponentCallback));
+        }
+
+        void addItemsForChildComponents()
+        {
+            for (int i = 0; i < component->getNumChildComponents(); ++i)
+                {
+                    auto child = component->getChildComponent (i);
+                    if (componentString (child) != "Melatonin Overlay")
+                        recursivelyAddChildrenFor (child);
+                }
+        }
+
+        void validateSubItems()
+        {
+            for (int i = 0; i < getNumSubItems(); ++i)
+            {
+                auto subItemToValidate = dynamic_cast<ComponentTreeViewItem*> (getSubItem (i));
+                if (subItemToValidate->component == nullptr)
+                {
+                    // scorched earth: if any child has a deleted component, we re-render the whole branch
+                    // this is because we don't explicitly know if things were added or removed
+                    clearSubItems();
+                    addItemsForChildComponents();
+
+                    break;
+                }
+            }
+        }
     };
 }

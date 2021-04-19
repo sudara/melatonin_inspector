@@ -11,6 +11,7 @@ namespace melatonin
         Overlay()
         {
             setAlwaysOnTop (true);
+            setName("Melatonin Overlay");
             // need to click on the resizeable
             setInterceptsMouseClicks (false, true);
             addAndMakeVisible (dimensions);

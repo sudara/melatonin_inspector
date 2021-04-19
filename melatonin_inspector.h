@@ -28,8 +28,8 @@ public:
         root.addComponentListener (this);
 
         mouseInspector.outlineComponentCallback = [this] (Component* c) { this->outlineComponent (c); };
-        mouseInspector.selectComponentCallback = [this] (Component* c) { this->selectComponent (c); };
-        panel.selectComponentCallback = [this] (Component* c) { this->selectComponent (c); };
+        mouseInspector.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, true); };
+        panel.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, false); };
         panel.outlineComponentCallback = [this] (Component* c) { this->outlineComponent (c); };
         panel.setSize (400, 400);
         // don't use the app's lnf for overlay or panel
@@ -60,13 +60,13 @@ public:
         panel.displayComponentInfo (c);
     }
 
-    void selectComponent (Component* c)
+    void selectComponent (Component* c, bool collapseTree=true)
     {
         if (overlay.isParentOf (c))
             return;
         overlay.selectComponent (c);
         panel.displayComponentInfo (c);
-        panel.selectComponent (c);
+        panel.selectComponent (c, collapseTree);
     }
 
     void closeButtonPressed() override
@@ -82,16 +82,12 @@ private:
             overlay.setBounds (root.getBounds());
     }
 
-    // Reconstruct the tree when things are deleted
-    void componentChildrenChanged (Component& root) override
-    {
-        panel.reconstructRoot();
-    }
+    // LNF has to be declared before components using it
+    melatonin::InspectorLookAndFeel inspectorLookAndFeel;
 
     juce::Component& root;
     melatonin::InspectorPanel panel;
     melatonin::Overlay overlay;
     melatonin::MouseInspector mouseInspector;
-    melatonin::InspectorLookAndFeel inspectorLookAndFeel;
     float originalWidth = 0.f;
 };

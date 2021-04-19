@@ -22,15 +22,17 @@ namespace melatonin
         void reconstructRoot()
         {
             jassert (selectComponentCallback);
+            if (rootSet)
+                tree.deleteRootItem();
             rootSet = true;
             tree.setRootItem (new ComponentTreeViewItem (&root, outlineComponentCallback, selectComponentCallback));
-            getRoot()->setOpenness(ComponentTreeViewItem::Openness::opennessOpen);
+            getRoot()->setOpenness (ComponentTreeViewItem::Openness::opennessOpen);
         }
 
         void resized() override
         {
             boxModel.setBounds (0, 0, getWidth(), 250);
-            tree.setBounds (30, 250, getWidth()-30, getHeight() - 250);
+            tree.setBounds (30, 250, getWidth() - 30, getHeight() - 250);
         }
 
         void displayComponentInfo (Component* component)
@@ -42,9 +44,12 @@ namespace melatonin
             repaint();
         }
 
-        void selectComponent (Component* component)
+        void selectComponent (Component* component, bool collapseTree)
         {
-            resetTree();
+            if (collapseTree)
+            {
+                getRoot()->recursivelyCloseSubItems();
+            }
             getRoot()->openTreeAndSelect (component);
 
             tree.scrollToKeepItemVisible (dynamic_cast<ComponentTreeViewItem*> (tree.getSelectedItem (0)));
@@ -63,11 +68,6 @@ namespace melatonin
         ComponentTreeViewItem* getRoot()
         {
             return dynamic_cast<ComponentTreeViewItem*> (tree.getRootItem());
-        }
-
-        void resetTree()
-        {
-            getRoot()->recursivelyCloseSubItems();
         }
     };
 }
