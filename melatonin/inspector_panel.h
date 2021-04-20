@@ -45,7 +45,7 @@ namespace melatonin
         {
             if (! rootSet)
                 reconstructRoot();
-            boxModel.setComponent (component);
+            boxModel.displayComponent (component);
             repaint();
         }
 

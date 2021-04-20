@@ -3,18 +3,18 @@
 
 namespace melatonin
 {
-    class BoxModel : public Component, public Label::Listener
+    class BoxModel : public Component, public Label::Listener, public ComponentListener
     {
     public:
         BoxModel()
         {
             addAndMakeVisible (componentLabel);
-            componentLabel.setColour(Label::textColourId, color::blueLabelBackgroundColor);
-            componentLabel.setJustificationType(Justification::centredLeft);
+            componentLabel.setColour (Label::textColourId, color::blueLabelBackgroundColor);
+            componentLabel.setJustificationType (Justification::centredLeft);
 
             addAndMakeVisible (parentComponentLabel);
-            parentComponentLabel.setColour(Label::textColourId, color::redLineColor);
-            parentComponentLabel.setJustificationType(Justification::centredLeft);
+            parentComponentLabel.setColour (Label::textColourId, color::redLineColor);
+            parentComponentLabel.setJustificationType (Justification::centredLeft);
 
             addAndMakeVisible (widthLabel);
             widthLabel.setEditable (true);
@@ -40,7 +40,7 @@ namespace melatonin
                 addAndMakeVisible (parentLabel);
                 parentLabel->setText ("-", dontSendNotification);
                 parentLabel->setJustificationType (Justification::centred);
-                parentLabel->setColour(Label::textColourId, color::redLineColor);
+                parentLabel->setColour (Label::textColourId, color::redLineColor);
             }
         }
 
@@ -65,8 +65,8 @@ namespace melatonin
             auto labelWidth = 60;
             auto labelHeight = 30;
 
-            parentComponentLabel.setBounds(parentComponentRectangle().getX(), parentComponentRectangle().getY()-labelHeight+5, parentComponentRectangle().getWidth(), labelHeight);
-            componentLabel.setBounds(componentRectangle().getX(), componentRectangle().getY()-labelHeight+5, componentRectangle().getWidth(), labelHeight);
+            parentComponentLabel.setBounds (parentComponentRectangle().getX(), parentComponentRectangle().getY() - labelHeight + 5, parentComponentRectangle().getWidth(), labelHeight);
+            componentLabel.setBounds (componentRectangle().getX(), componentRectangle().getY() - labelHeight + 5, componentRectangle().getWidth(), labelHeight);
 
             widthLabel.setBounds (center.getX() - 70, center.getY() - 15, labelWidth, labelHeight);
             byLabel.setBounds (center.getX() - 10, center.getY() - 15, 20, labelHeight);
@@ -78,34 +78,38 @@ namespace melatonin
             leftToParentLabel.setBounds (padding + paddingToParent / 2 - labelWidth / 2, center.getY() - labelHeight / 2, labelWidth, labelHeight);
         }
 
-        void setComponent (Component* selectedComponent)
+        void displayComponent (Component* componentToDisplay)
         {
-            component = selectedComponent;
-            auto boundsInParent = component->getBoundsInParent();
+            if (displayedComponent)
+            {
+                displayedComponent->removeComponentListener (this);
+            }
 
-            parentComponentLabel.setText (componentString (component->getParentComponent()), dontSendNotification);
-            componentLabel.setText (componentString (component), dontSendNotification);
+            displayedComponent = componentToDisplay;
+            displayedComponent->addComponentListener (this);
 
-            widthLabel.setText (String (component->getWidth()), dontSendNotification);
-            heightLabel.setText (String (component->getHeight()), dontSendNotification);
-
-            topToParentLabel.setText (String (boundsInParent.getY()), dontSendNotification);
-            rightToParentLabel.setText (String (component->getParentWidth() - component->getWidth() - boundsInParent.getX()), dontSendNotification);
-            bottomToParentLabel.setText (String (component->getParentHeight() - component->getHeight() - boundsInParent.getY()), dontSendNotification);
-            leftToParentLabel.setText (String (boundsInParent.getX()), dontSendNotification);
-            repaint();
+            updateLabels();
         }
 
         void labelTextChanged (Label* changedLabel) override
         {
             if (changedLabel == &widthLabel || changedLabel == &heightLabel)
             {
-                component->setSize (widthLabel.getText().getIntValue(), heightLabel.getText().getIntValue());
+                displayedComponent->setSize (widthLabel.getText().getIntValue(), heightLabel.getText().getIntValue());
+            }
+        }
+
+        // A selected component has been dragged or resized and this is our callback
+        void componentMovedOrResized (Component& component, bool wasMoved, bool wasResized) override
+        {
+            if (wasResized)
+            {
+                updateLabels();
             }
         }
 
     private:
-        Component::SafePointer<Component> component;
+        Component::SafePointer<Component> displayedComponent;
 
         Label componentLabel;
         Label parentComponentLabel;
@@ -130,8 +134,24 @@ namespace melatonin
 
         Rectangle<int> componentRectangle()
         {
-            return parentComponentRectangle().reduced (paddingToParent).withTrimmedTop(5);
+            return parentComponentRectangle().reduced (paddingToParent).withTrimmedTop (5);
         }
 
+        void updateLabels()
+        {
+            auto boundsInParent = displayedComponent->getBoundsInParent();
+
+            parentComponentLabel.setText (componentString (displayedComponent->getParentComponent()), dontSendNotification);
+            componentLabel.setText (componentString (displayedComponent), dontSendNotification);
+
+            widthLabel.setText (String (displayedComponent->getWidth()), dontSendNotification);
+            heightLabel.setText (String (displayedComponent->getHeight()), dontSendNotification);
+
+            topToParentLabel.setText (String (boundsInParent.getY()), dontSendNotification);
+            rightToParentLabel.setText (String (displayedComponent->getParentWidth() - displayedComponent->getWidth() - boundsInParent.getX()), dontSendNotification);
+            bottomToParentLabel.setText (String (displayedComponent->getParentHeight() - displayedComponent->getHeight() - boundsInParent.getY()), dontSendNotification);
+            leftToParentLabel.setText (String (boundsInParent.getX()), dontSendNotification);
+            repaint();
+        }
     };
 }
