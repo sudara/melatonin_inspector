@@ -45,20 +45,34 @@ namespace melatonin
         {
             if (! rootSet)
                 reconstructRoot();
-            selectedComponent = component;
             boxModel.setComponent (component);
             repaint();
         }
 
-        void selectComponent (Component* component, bool collapseTree)
+        void redisplaySelectedComponent()
         {
-            if (collapseTree)
+            if (selectedComponent)
+            {
+                displayComponentInfo (selectedComponent);
+            }
+        }
+
+        void selectComponent (Component* component, bool collapseTreeBeforeSelection)
+        {
+            selectedComponent = component;
+            if (collapseTreeBeforeSelection)
             {
                 getRoot()->recursivelyCloseSubItems();
             }
             getRoot()->openTreeAndSelect (component);
 
             tree.scrollToKeepItemVisible (dynamic_cast<ComponentTreeViewItem*> (tree.getSelectedItem (0)));
+        }
+
+        void deselectComponent()
+        {
+            selectedComponent = nullptr;
+            deselectComponentCallback();
         }
 
         void buttonClicked (juce::Button* button) override
@@ -74,6 +88,7 @@ namespace melatonin
         std::function<void (Component* c)> selectComponentCallback;
         std::function<void (Component* c)> outlineComponentCallback;
         std::function<void (bool enabled)> toggleCallback;
+        std::function<void ()> deselectComponentCallback;
 
     private:
         Component::SafePointer<Component> selectedComponent;

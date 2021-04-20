@@ -11,7 +11,7 @@ namespace melatonin
         Overlay()
         {
             setAlwaysOnTop (true);
-            setName("Melatonin Overlay");
+            setName ("Melatonin Overlay");
             // need to click on the resizeable
             setInterceptsMouseClicks (false, true);
             addAndMakeVisible (dimensions);
@@ -79,25 +79,31 @@ namespace melatonin
 
         void selectComponent (Component* component)
         {
-            if (selectedComponent && selectedComponent == component)
+            if (component && selectedComponent == component)
             {
                 deselectComponent();
-                dimensions.setVisible (false);
-                component->removeComponentListener (this);
+                return;
             }
-            else
-            {
-                // we want to listen to resize calls
-                component->addComponentListener (this);
 
-                // take over the outline from the hover
-                outlinedComponent = nullptr;
-                selectedComponent = component;
-                resizable = std::make_unique<ResizableBorderComponent> (component, &constrainer);
-                resizable->setBorderThickness (BorderSize<int> (6));
-                addAndMakeVisible (*resizable);
-                setSelectedAndResizeableBounds (component);
-            }
+            // listen for those sweet resize calls
+            component->addComponentListener (this);
+
+            // take over the outline from the hover
+            outlinedComponent = nullptr;
+            selectedComponent = component;
+            resizable = std::make_unique<ResizableBorderComponent> (component, &constrainer);
+            resizable->setBorderThickness (BorderSize<int> (6));
+            addAndMakeVisible (*resizable);
+            setSelectedAndResizeableBounds (component);
+            repaint();
+        }
+
+        void deselectComponent()
+        {
+            dimensions.setVisible (false);
+            selectedComponent->removeComponentListener (this);
+            selectedComponent = nullptr;
+            deselectComponentCallback();
             repaint();
         }
 
@@ -115,6 +121,13 @@ namespace melatonin
             }
         }
 
+        void mouseExit (const MouseEvent& event) override
+        {
+            selectComponent (selectedComponent);
+        }
+
+        std::function<void()> deselectComponentCallback;
+
     private:
         Component::SafePointer<Component> outlinedComponent;
         Rectangle<int> outlinedBounds;
@@ -129,11 +142,6 @@ namespace melatonin
 
         Label dimensions;
         Rectangle<int> dimensionsLabelBounds;
-
-        void deselectComponent()
-        {
-            selectedComponent = nullptr;
-        }
 
         Rectangle<int> getLocalAreaForOutline (Component* component, int borderSize = 2)
         {
@@ -180,8 +188,8 @@ namespace melatonin
         }
     };
 
-    // Unfortunately the DocumentWindow cannot behave as the global mouse listener
-    // Without some strange side effects. That's why we are doing the lambda dance...
+    // Unfortunately the DocumentWindow cannot behave as our root component mouse listener
+    // without some strange side effects. That's why we are doing the lambda dance...
     class MouseInspector : public MouseListener
     {
     public:
@@ -209,8 +217,17 @@ namespace melatonin
             }
         }
 
+        void mouseExit (const MouseEvent& event) override
+        {
+            if (event.originalComponent == &root)
+            {
+                mouseExitCallback();
+            }
+        }
+
         std::function<void (Component* c)> outlineComponentCallback;
         std::function<void (Component* c)> selectComponentCallback;
+        std::function<void()> mouseExitCallback;
 
     private:
         Component& root;

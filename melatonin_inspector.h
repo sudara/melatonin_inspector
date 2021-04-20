@@ -19,7 +19,7 @@ class MelatoninInspector : public juce::ComponentListener, public juce::Document
 {
 public:
     MelatoninInspector (juce::Component& rootComponent, bool enabledAtStart = true)
-        : juce::DocumentWindow ("Melatonin Inspector", juce::Colours::black, 7, true),
+        : juce::DocumentWindow ("Melatonin Inspector", melatonin::color::background, 7, true),
           panel (rootComponent, overlay, enabledAtStart),
           root (rootComponent),
           mouseInspector (rootComponent),
@@ -28,12 +28,6 @@ public:
         root.addAndMakeVisible (overlay);
         root.addComponentListener (this);
 
-        mouseInspector.outlineComponentCallback = [this] (Component* c) { this->outlineComponent (c); };
-        mouseInspector.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, true); };
-        panel.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, false); };
-        panel.outlineComponentCallback = [this] (Component* c) { this->outlineComponent (c); };
-        panel.toggleCallback = [this] (bool enabled) { this->toggle (enabled); };
-        panel.setSize (400, 400);
         // don't use the app's lnf for overlay or panel
         setLookAndFeel (&inspectorLookAndFeel);
         overlay.setLookAndFeel (&inspectorLookAndFeel);
@@ -42,9 +36,12 @@ public:
         setResizable (true, false);
         setResizeLimits (300, 500, 1200, 1200);
         setSize (350, 650);
+        panel.setSize (400, 400);
         setUsingNativeTitleBar (true);
         setContentNonOwned (&panel, true);
         setVisible (true);
+
+        setupCallbacks();
     }
 
     ~MelatoninInspector() override
@@ -66,6 +63,7 @@ public:
     {
         if (! enabled || overlay.isParentOf (c))
             return;
+
         overlay.selectComponent (c);
         panel.displayComponentInfo (c);
         panel.selectComponent (c, collapseTree);
@@ -85,13 +83,6 @@ public:
     }
 
 private:
-    // Resize our overlay when the root component changes
-    void componentMovedOrResized (Component& root, bool /*wasMoved*/, bool wasResized) override
-    {
-        if (wasResized)
-            overlay.setBounds (root.getBounds());
-    }
-
     bool enabled;
 
     // LNF has to be declared before components using it
@@ -101,4 +92,25 @@ private:
     melatonin::InspectorPanel panel;
     melatonin::Overlay overlay;
     melatonin::MouseInspector mouseInspector;
+
+    // Resize our overlay when the root component changes
+    void componentMovedOrResized (Component& root, bool /*wasMoved*/, bool wasResized) override
+    {
+        if (wasResized)
+            overlay.setBounds (root.getBounds());
+    }
+
+    void setupCallbacks()
+    {
+        mouseInspector.outlineComponentCallback = [this] (Component* c) { this->outlineComponent (c); };
+        mouseInspector.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, true); };
+        mouseInspector.mouseExitCallback = [&]() { panel.redisplaySelectedComponent(); };
+
+        overlay.deselectComponentCallback = [&]() { panel.deselectComponent(); };
+
+        panel.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, false); };
+        panel.deselectComponentCallback = [&]() { overlay.deselectComponent(); };
+        panel.outlineComponentCallback = [this] (Component* c) { this->outlineComponent (c); };
+        panel.toggleCallback = [this] (bool enabled) { this->toggle (enabled); };
+    }
 };
