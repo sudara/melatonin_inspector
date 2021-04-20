@@ -124,6 +124,8 @@ namespace melatonin
         void mouseExit (const MouseEvent& event) override
         {
             selectComponent (selectedComponent);
+            outlinedComponent = nullptr;
+            repaint();
         }
 
         std::function<void()> deselectComponentCallback;
