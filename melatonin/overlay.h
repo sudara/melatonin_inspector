@@ -51,7 +51,7 @@ namespace melatonin
 
                 g.setColour (color::blueLabelBackgroundColor);
                 // text doesn't vertically center very nicely without manual offset
-                g.fillRoundedRectangle (dimensionsLabelBounds.toFloat().withBottom (dimensionsLabelBounds.getBottom() + 4), 2.0f);
+                g.fillRoundedRectangle (dimensionsLabelBounds.toFloat().withBottom (dimensionsLabelBounds.getBottom()), 2.0f);
             }
         }
 
@@ -144,7 +144,7 @@ namespace melatonin
         void drawDimensionsLabel()
         {
             auto labelWidth = dimensions.getFont().getStringWidthFloat (dimensionsString (selectedBounds)) + 15;
-            auto paddingToLabel = 2;
+            auto paddingToLabel = 3;
             if ((selectedBounds.getBottom() + 20 + paddingToLabel) < getBottom())
             {
                 // label on bottom
