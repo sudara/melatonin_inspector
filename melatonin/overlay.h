@@ -15,8 +15,8 @@ namespace melatonin
             // need to click on the resizeable
             setInterceptsMouseClicks (false, true);
             addAndMakeVisible (dimensions);
-            // if app has setDefaultLookAndFeel, every component needs this
-            dimensions.setLookAndFeel (&getLookAndFeel());
+
+            dimensions.setFont (13.f);
             dimensions.setJustificationType (Justification::centred);
             dimensions.setColour (1, color::blueLabelTextColor);
         }
@@ -143,12 +143,12 @@ namespace melatonin
         void drawDimensionsLabel()
         {
             auto labelWidth = dimensions.getFont().getStringWidthFloat (dimensionsString (selectedBounds)) + 15;
-            auto paddingToLabel = 3;
+            auto paddingToLabel = 4;
             if ((selectedBounds.getBottom() + 20 + paddingToLabel) < getBottom())
             {
                 // label on bottom
                 auto labelCenter = selectedBounds.getX() + selectedBounds.getWidth() / 2;
-                dimensionsLabelBounds = Rectangle<int> (labelCenter - labelWidth / 2, selectedBounds.getBottom() + paddingToLabel, labelWidth, 15);
+                dimensionsLabelBounds = Rectangle<int> (labelCenter - labelWidth / 2, selectedBounds.getBottom() + paddingToLabel, labelWidth, 15).expanded(2, 1);
                 dimensions.setText (dimensionsString (selectedBounds), dontSendNotification);
                 dimensions.setBounds (dimensionsLabelBounds);
                 dimensions.setVisible (true);
