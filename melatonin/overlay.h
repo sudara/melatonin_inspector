@@ -98,12 +98,15 @@ namespace melatonin
             repaint();
         }
 
-        // A selected component has been dragged or resized and this is our callback
-        // We *must* manually managed the resizeable size
+        // When our selected component has been dragged or resized this is our callback
+        // We *must* then manually manage the size of the ResizableBorderComponent
         void componentMovedOrResized (Component& component, bool wasMoved, bool wasResized) override
         {
             if (wasResized)
             {
+                // sort of annoying if hover triggers on resize
+                if(outlinedComponent)
+                    outlinedComponent = nullptr;
                 setSelectedAndResizeableBounds (&component);
             }
             else if (wasMoved)
@@ -143,16 +146,23 @@ namespace melatonin
         void drawDimensionsLabel()
         {
             auto labelWidth = dimensions.getFont().getStringWidthFloat (dimensionsString (selectedBounds)) + 15;
+            auto labelHeight = 15;
             auto paddingToLabel = 4;
+            auto labelCenterX = selectedBounds.getX() + selectedBounds.getWidth() / 2;
+
             if ((selectedBounds.getBottom() + 20 + paddingToLabel) < getBottom())
             {
                 // label on bottom
-                auto labelCenter = selectedBounds.getX() + selectedBounds.getWidth() / 2;
-                dimensionsLabelBounds = Rectangle<int> (labelCenter - labelWidth / 2, selectedBounds.getBottom() + paddingToLabel, labelWidth, 15).expanded(2, 1);
-                dimensions.setText (dimensionsString (selectedBounds), dontSendNotification);
-                dimensions.setBounds (dimensionsLabelBounds);
-                dimensions.setVisible (true);
+                dimensionsLabelBounds = Rectangle<int> (labelCenterX - labelWidth / 2, selectedBounds.getBottom() + paddingToLabel, labelWidth, labelHeight).expanded(2, 1);
             }
+            else
+            {
+                // label on top
+                dimensionsLabelBounds = Rectangle<int> (labelCenterX - labelWidth / 2, selectedBounds.getY() - labelHeight - paddingToLabel, labelWidth, labelHeight).expanded(2, 1);
+            }
+            dimensions.setText (dimensionsString (selectedBounds), dontSendNotification);
+            dimensions.setBounds (dimensionsLabelBounds);
+            dimensions.setVisible (true);
         }
 
         void calculateLinesToParent()
