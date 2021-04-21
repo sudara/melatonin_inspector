@@ -16,8 +16,12 @@ namespace melatonin
         explicit ComponentTreeViewItem (Component* c, std::function<void (Component* c)> outline, std::function<void (Component* c)> select)
             : outlineComponentCallback (outline), selectComponentCallback (select), component (c)
         {
-            // TabbedComponents don't offer up their children easily...
-            if (auto tabs = dynamic_cast<TabbedComponent*> (c))
+            // A few JUCE component types need massaging to get their child components
+            if (auto multiPanel = dynamic_cast<MultiDocumentPanel*> (c))
+            {
+                recursivelyAddChildrenFor (multiPanel->getCurrentTabbedComponent ());
+            }
+            else if (auto tabs = dynamic_cast<TabbedComponent*> (c))
             {
                 hasTabbedComponent = true;
                 for (int i = 0; i < tabs->getNumTabs(); ++i)
@@ -151,7 +155,7 @@ namespace melatonin
             for (int i = 0; i < getNumSubItems(); ++i)
             {
                 auto subItemToValidate = dynamic_cast<ComponentTreeViewItem*> (getSubItem (i));
-                if (subItemToValidate->component == nullptr)
+                if (true) // subItemToValidate->component == nullptr
                 {
                     // scorched earth: if any child has a deleted component, we re-render the whole branch
                     // this is because we don't explicitly know if things were added or removed
