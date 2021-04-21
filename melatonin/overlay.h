@@ -98,15 +98,6 @@ namespace melatonin
             repaint();
         }
 
-        void deselectComponent()
-        {
-            dimensions.setVisible (false);
-            selectedComponent->removeComponentListener (this);
-            selectedComponent = nullptr;
-            deselectComponentCallback();
-            repaint();
-        }
-
         // A selected component has been dragged or resized and this is our callback
         // We *must* manually managed the resizeable size
         void componentMovedOrResized (Component& component, bool wasMoved, bool wasResized) override
@@ -127,8 +118,6 @@ namespace melatonin
             outlinedComponent = nullptr;
             repaint();
         }
-
-        std::function<void()> deselectComponentCallback;
 
     private:
         Component::SafePointer<Component> outlinedComponent;
@@ -186,6 +175,14 @@ namespace melatonin
             drawDimensionsLabel();
             calculateLinesToParent();
             resizable->setBounds (selectedBounds);
+            repaint();
+        }
+
+        void deselectComponent()
+        {
+            dimensions.setVisible (false);
+            selectedComponent->removeComponentListener (this);
+            selectedComponent = nullptr;
             repaint();
         }
     };

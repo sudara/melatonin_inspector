@@ -108,6 +108,18 @@ namespace melatonin
             }
         }
 
+        void reset()
+        {
+            Label* labels[6] = { &widthLabel, &heightLabel, &topToParentLabel, &rightToParentLabel, &bottomToParentLabel, &leftToParentLabel };
+
+            for (auto label : labels)
+            {
+                label->setText ("-", dontSendNotification);
+            }
+            componentLabel.setText ("", dontSendNotification);
+            parentComponentLabel.setText ("", dontSendNotification);
+        }
+
     private:
         Component::SafePointer<Component> displayedComponent;
 

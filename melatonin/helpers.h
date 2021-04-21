@@ -39,9 +39,13 @@ namespace melatonin
         {
             return c->getName();
         }
-        else
+        else if (c)
         {
             return type (*c);
+        }
+        else
+        {
+            return "";
         }
     }
 

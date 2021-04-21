@@ -105,11 +105,8 @@ private:
         mouseInspector.outlineComponentCallback = [this] (Component* c) { this->outlineComponent (c); };
         mouseInspector.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, true); };
         mouseInspector.mouseExitCallback = [&]() { panel.redisplaySelectedComponent(); };
-
-        overlay.deselectComponentCallback = [&]() { panel.deselectComponent(); };
-
+        
         panel.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, false); };
-        panel.deselectComponentCallback = [&]() { overlay.deselectComponent(); };
         panel.outlineComponentCallback = [this] (Component* c) { this->outlineComponent (c); };
         panel.toggleCallback = [this] (bool enabled) { this->toggle (enabled); };
     }

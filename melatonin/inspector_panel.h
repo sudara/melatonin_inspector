@@ -59,6 +59,11 @@ namespace melatonin
 
         void selectComponent (Component* component, bool collapseTreeBeforeSelection)
         {
+            if (component && selectedComponent == component)
+            {
+                deselectComponent();
+                return;
+            }
             selectedComponent = component;
             if (collapseTreeBeforeSelection)
             {
@@ -69,12 +74,6 @@ namespace melatonin
             tree.scrollToKeepItemVisible (dynamic_cast<ComponentTreeViewItem*> (tree.getSelectedItem (0)));
         }
 
-        void deselectComponent()
-        {
-            selectedComponent = nullptr;
-            deselectComponentCallback();
-        }
-
         void buttonClicked (juce::Button* button) override
         {
             if (button == &toggleButton)
@@ -82,13 +81,13 @@ namespace melatonin
                 auto enabled = toggleButton.getToggleState();
                 toggleCallback (enabled);
                 tree.setVisible (enabled);
+                boxModel.reset();
             }
         }
 
         std::function<void (Component* c)> selectComponentCallback;
         std::function<void (Component* c)> outlineComponentCallback;
         std::function<void (bool enabled)> toggleCallback;
-        std::function<void ()> deselectComponentCallback;
 
     private:
         Component::SafePointer<Component> selectedComponent;
@@ -101,6 +100,13 @@ namespace melatonin
         ComponentTreeViewItem* getRoot()
         {
             return dynamic_cast<ComponentTreeViewItem*> (tree.getRootItem());
+        }
+
+        void deselectComponent()
+        {
+            selectedComponent = nullptr;
+            tree.clearSelectedItems();
+            boxModel.reset();
         }
     };
 }

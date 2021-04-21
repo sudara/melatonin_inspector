@@ -11,12 +11,15 @@ namespace melatonin
           public ComponentListener
     {
     public:
+        bool hasTabbedComponent = false;
+
         explicit ComponentTreeViewItem (Component* c, std::function<void (Component* c)> outline, std::function<void (Component* c)> select)
             : outlineComponentCallback (outline), selectComponentCallback (select), component (c)
         {
             // TabbedComponents don't offer up their children easily...
             if (auto tabs = dynamic_cast<TabbedComponent*> (c))
             {
+                hasTabbedComponent = true;
                 for (int i = 0; i < tabs->getNumTabs(); ++i)
                 {
                     recursivelyAddChildrenFor (tabs->getTabContentComponent (i));
@@ -50,12 +53,13 @@ namespace melatonin
             if (component == target && ! isSelected())
             {
                 setSelected (true, true);
+                setOpen(true);
             }
             else if (component->isParentOf (target))
             {
                 jassert (target);
                 setOpen (true);
-                // recurse to open up tree
+                // recursively open up tree to get at target
                 for (int i = 0; i < getNumSubItems(); ++i)
                 {
                     dynamic_cast<ComponentTreeViewItem*> (getSubItem (i))->openTreeAndSelect (target);
@@ -90,6 +94,7 @@ namespace melatonin
         void itemClicked (const MouseEvent&) override
         {
             selectComponentCallback (component);
+            openTabIfNeeded();
         }
 
         void mouseEnter (const MouseEvent& event) override
@@ -150,6 +155,18 @@ namespace melatonin
                     addItemsForChildComponents();
                     break;
                 }
+            }
+        }
+
+        void openTabIfNeeded()
+        {
+            if (!getParentItem())
+                return;
+            
+            auto parent = dynamic_cast<ComponentTreeViewItem*> (getParentItem());
+            if (parent->hasTabbedComponent && ! component->isVisible())
+            {
+                dynamic_cast<TabbedComponent*> (parent->component.getComponent())->setCurrentTabIndex (getIndexInParent());
             }
         }
     };
