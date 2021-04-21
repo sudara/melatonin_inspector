@@ -15,6 +15,7 @@ namespace melatonin
             toggleButton.setToggleState (enabledAtStart, dontSendNotification);
             addAndMakeVisible (toggleButton);
             toggleButton.addListener (this);
+            tree.setIndentSize(12);
         }
 
         void paint (Graphics& g) override
@@ -38,7 +39,7 @@ namespace melatonin
             area.removeFromTop (20);
             toggleButton.setBounds (area.removeFromTop (20).withTrimmedLeft (27));
             boxModel.setBounds (area.removeFromTop (250));
-            tree.setBounds (area.withTrimmedLeft (25)); // 3px discrepancy from normal padding
+            tree.setBounds (area.withTrimmedLeft (25)); // padding in these default components are a mess
         }
 
         void displayComponentInfo (Component* component)

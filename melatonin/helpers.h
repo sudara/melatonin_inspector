@@ -80,13 +80,14 @@ namespace melatonin
             ignoreUnused (g, w, h, border);
         }
 
-        // For some reason this is actually *needed* which is strange. But we want to adjust triangles anyway...
+        // For some reason this is actually *needed* which is strange.
+        // But we want to adjust the color and size of triangles anyway
         void drawTreeviewPlusMinusBox (Graphics& g, const Rectangle<float>& area, Colour backgroundColour, bool isOpen, bool isMouseOver) override
         {
             Path p;
             p.addTriangle (0.0f, 0.0f, 1.0f, isOpen ? 0.0f : 0.5f, isOpen ? 0.5f : 0.0f, 1.0f);
             g.setColour (backgroundColour);
-            g.fillPath (p, p.getTransformToScaleToFit (area.reduced (2, area.getHeight() / 4).translated (3, 0), true));
+            g.fillPath (p, p.getTransformToScaleToFit (area.reduced (0, area.getHeight() / 4).translated (1, 0), true));
         }
 
         // more friendly scrolling

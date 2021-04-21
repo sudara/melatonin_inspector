@@ -53,7 +53,7 @@ namespace melatonin
             if (component == target && ! isSelected())
             {
                 setSelected (true, true);
-                setOpen(true);
+                setOpen (true);
             }
             else if (component->isParentOf (target))
             {
@@ -74,7 +74,7 @@ namespace melatonin
             if (isSelected())
             {
                 g.setColour (color::blueLabelBackgroundColor);
-                g.fillRect (0, 0, w - 30, h);
+                g.fillRect (3, 0, w - 30, h);
             }
 
             g.setColour (color::blueLabelTextColor);
@@ -82,7 +82,9 @@ namespace melatonin
                 g.setColour (Colours::grey);
 
             g.setFont (Font ("Verdana", 14, Font::FontStyleFlags::plain));
-            g.drawText (componentString (component), 5, 0, w - 5, h, Justification::left, true);
+
+            auto textIndent = mightContainSubItems() ? 7 : 5;
+            g.drawText (componentString (component), textIndent, 0, w - textIndent, h, Justification::left, true);
         }
 
         // must override to set the disclosure triangle color
@@ -94,7 +96,9 @@ namespace melatonin
         void itemClicked (const MouseEvent&) override
         {
             selectComponentCallback (component);
-            openTabIfNeeded();
+            selectTabbedComponentChildIfNeeded();
+            if (mightContainSubItems())
+                setOpen (true);
         }
 
         void mouseEnter (const MouseEvent& event) override
@@ -158,11 +162,11 @@ namespace melatonin
             }
         }
 
-        void openTabIfNeeded()
+        void selectTabbedComponentChildIfNeeded()
         {
-            if (!getParentItem())
+            if (! getParentItem())
                 return;
-            
+
             auto parent = dynamic_cast<ComponentTreeViewItem*> (getParentItem());
             if (parent->hasTabbedComponent && ! component->isVisible())
             {
