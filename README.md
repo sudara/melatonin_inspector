@@ -1,13 +1,14 @@
 ## Melatonin Component Inspector
 
-This is a JUCE module that helps you lay out your JUCE UI by giving you the ability to inspect and resize components. 
+This is a JUCE module that gives you the ability to inspect and resize components in your UI.
 
 It's inspired by [Figma](https://figma.com) (where I prefer to design UI), browser web inspectors and Jim Credland's [Component Debugger](https://github.com/jcredland/juce-toys/blob/master/jcf_debug/source/component_debugger.cpp) [juce-toys](https://github.com/jcredland/juce-toys). 
+
+![](https://user-images.githubusercontent.com/472/115612633-c7eacc00-a2eb-11eb-8333-1b43ff7ed793.mp4)
 
 ## Features
 
 ### Hover over Component to view size and bounds to parent
-
 
 ![](https://user-images.githubusercontent.com/472/115127488-20ae2200-9fd7-11eb-9f68-d5a7bfa6ce40.mp4)
 
