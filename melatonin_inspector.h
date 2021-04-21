@@ -65,7 +65,6 @@ public:
             return;
 
         overlay.selectComponent (c);
-        panel.displayComponentInfo (c);
         panel.selectComponent (c, collapseTree);
     }
 
@@ -105,7 +104,7 @@ private:
         mouseInspector.outlineComponentCallback = [this] (Component* c) { this->outlineComponent (c); };
         mouseInspector.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, true); };
         mouseInspector.mouseExitCallback = [&]() { panel.redisplaySelectedComponent(); };
-        
+
         panel.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, false); };
         panel.outlineComponentCallback = [this] (Component* c) { this->outlineComponent (c); };
         panel.toggleCallback = [this] (bool enabled) { this->toggle (enabled); };

@@ -15,7 +15,7 @@ namespace melatonin
             toggleButton.setToggleState (enabledAtStart, dontSendNotification);
             addAndMakeVisible (toggleButton);
             toggleButton.addListener (this);
-            tree.setIndentSize(12);
+            tree.setIndentSize (12);
         }
 
         void paint (Graphics& g) override
@@ -44,10 +44,15 @@ namespace melatonin
 
         void displayComponentInfo (Component* component)
         {
-            if (! rootSet)
+            if (!rootSet)
                 reconstructRoot();
-            boxModel.displayComponent (component);
-            repaint();
+
+            // only show on hover if there isn't something selected
+            if (!selectedComponent || selectedComponent == component)
+            {
+                boxModel.displayComponent (component);
+                repaint();
+            }
         }
 
         void redisplaySelectedComponent()
@@ -65,7 +70,9 @@ namespace melatonin
                 deselectComponent();
                 return;
             }
+
             selectedComponent = component;
+            displayComponentInfo (selectedComponent);
             if (collapseTreeBeforeSelection)
             {
                 getRoot()->recursivelyCloseSubItems();
