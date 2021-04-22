@@ -52,7 +52,7 @@ public:
     void outlineComponent (Component* c)
     {
         // don't dogfood the overlay
-        if (! enabled || overlay.isParentOf (c))
+        if (!enabled || overlay.isParentOf (c))
             return;
 
         overlay.outlineComponent (c);
@@ -61,7 +61,7 @@ public:
 
     void selectComponent (Component* c, bool collapseTree = true)
     {
-        if (! enabled || overlay.isParentOf (c))
+        if (!enabled || overlay.isParentOf (c))
             return;
 
         overlay.selectComponent (c);
@@ -103,7 +103,7 @@ private:
     {
         mouseInspector.outlineComponentCallback = [this] (Component* c) { this->outlineComponent (c); };
         mouseInspector.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, true); };
-        mouseInspector.mouseExitCallback = [&]() { panel.redisplaySelectedComponent(); };
+        mouseInspector.mouseExitCallback = [this]() { if (this->enabled) panel.redisplaySelectedComponent(); };
 
         panel.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, false); };
         panel.outlineComponentCallback = [this] (Component* c) { this->outlineComponent (c); };
