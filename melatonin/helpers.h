@@ -1,6 +1,6 @@
 #pragma once
+#if !defined(_MSC_VER)
 #include <cxxabi.h>
-
 namespace melatonin
 {
     using namespace juce;
@@ -23,7 +23,17 @@ namespace melatonin
     {
         return demangle (typeid (t).name());
     }
+}
+#else
+    template <class T>
+    static inline String type (const T& t)
+    {
+        return typeid (t).name();
+    }
+#endif
 
+namespace melatonin
+{
     // do our best to derive a useful UI string from a component
     static inline String componentString (Component* c)
     {
