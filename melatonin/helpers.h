@@ -28,7 +28,7 @@ namespace melatonin
     template <class T>
     static inline String type (const T& t)
     {
-        return typeid (t).name();
+        return String(typeid (t).name()).replace("class ","").replace("struct ","");
     }
 #endif
 
