@@ -22,7 +22,6 @@ public:
         : juce::DocumentWindow ("Melatonin Inspector", melatonin::color::background, 7, true),
           panel (rootComponent, overlay, enabledAtStart),
           root (rootComponent),
-          mouseInspector (rootComponent),
           enabled (enabledAtStart)
     {
         root.addAndMakeVisible (overlay);
@@ -47,6 +46,7 @@ public:
     ~MelatoninInspector() override
     {
         root.removeComponentListener (this);
+        setLookAndFeel (nullptr);
     }
 
     void outlineComponent (Component* c)
@@ -90,7 +90,7 @@ private:
     juce::Component& root;
     melatonin::InspectorPanel panel;
     melatonin::Overlay overlay;
-    melatonin::MouseInspector mouseInspector;
+    melatonin::MouseInspector mouseInspector { root };
 
     // Resize our overlay when the root component changes
     void componentMovedOrResized (Component& root, bool /*wasMoved*/, bool wasResized) override
