@@ -9,7 +9,7 @@ It's inspired by [Figma](https://figma.com) (where I prefer to design UI), brows
 
 ## How to install
 
-### 1. Add the module
+### 1. Download
 
 Assuming 
 
@@ -23,27 +23,31 @@ git submodule add -b main https://github.com/sudara/melatonin_inspector modules/
 git commit -m "Added melatonin_inspector submodule."
 ```
 
-To update melatonin_inspector, you can:
+To update melatonin_inspector down the road (gasp! maintained dependencies!?) you can:
 ```git
 git submodule update --remote --merge modules/melatonin_inspector
 ```
 
-If you use CMake, you can inform JUCE about the module in your `CMakeLists.txt`:
+### 2. Tell JUCE about the module
+
+If you use CMake, inform JUCE about the module in your `CMakeLists.txt`. Important: Do this *before* your call to `juce_add_module`!!
 ```
 juce_add_module("modules/melatonin_inspector")
 ```
 
-If you use projucer, you will have to add the module manually.
+If you use projucer, add the module manually.
  
-### 2. Add as a member of your Editor
+### 3. Add an include to your Editor
 
-Make sure to include the module header:
+Include the module header:
 
 ```cpp
 #include "melatonin_inspector/melatonin_inspector.h"
 ```
 
-Add the inspector as a private member to your Editor, passing a reference to the root component of your UI (typically the the Editor itself, but you could also inspect another window, etc).
+### 4. Add the inspector as a private member to your Editor
+
+Pass a reference to the root component of your UI (typically the the Editor itself, but you could also inspect another window, etc).
 
 ```cpp
 MelatoninInspector inspector { *this };
