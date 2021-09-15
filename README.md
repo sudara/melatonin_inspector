@@ -35,6 +35,12 @@ If you use CMake, inform JUCE about the module in your `CMakeLists.txt`. Importa
 juce_add_module("modules/melatonin_inspector")
 ```
 
+In addition, you'll need to link the module to your plugin, for example:
+
+```
+target_link_libraries("YourProject" PRIVATE melatonin_inspector)
+```
+
 If you use projucer, add the module manually.
  
 ### 3. Add an include to your Editor
