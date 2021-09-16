@@ -27,9 +27,9 @@ namespace melatonin
 }
 #else
     template <class T>
-    static inline String type (const T& t)
+    static inline juce::String type (const T& t)
     {
-        return String(typeid (t).name()).replace("class ","").replace("struct ","");
+        return juce::String(typeid (t).name()).replace("class ","").replace("struct ","");
     }
 #endif
 
