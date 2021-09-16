@@ -1,6 +1,7 @@
 #pragma once
 #if !defined(_MSC_VER)
 #include <cxxabi.h>
+
 namespace melatonin
 {
     using namespace juce;
@@ -34,6 +35,8 @@ namespace melatonin
 
 namespace melatonin
 {
+    using namespace juce;
+
     // do our best to derive a useful UI string from a component
     static inline String componentString (Component* c)
     {
