@@ -92,7 +92,7 @@ namespace melatonin
         }
 
         // must override to set the disclosure triangle color
-        void paintOpenCloseButton (Graphics& g, const Rectangle<float>& area, Colour backgroundColour, bool isMouseOver) override
+        void paintOpenCloseButton (Graphics& g, const Rectangle<float>& area, Colour /*backgroundColour*/, bool isMouseOver) override
         {
             getOwnerView()->getLookAndFeel().drawTreeviewPlusMinusBox (g, area, color::blueLabelBackgroundColor, isOpen(), isMouseOver);
         }
@@ -105,7 +105,7 @@ namespace melatonin
                 setOpen (true);
         }
 
-        void mouseEnter (const MouseEvent& event) override
+        void mouseEnter (const MouseEvent& /*event*/) override
         {
             outlineComponentCallback (component);
         }
@@ -120,7 +120,7 @@ namespace melatonin
         }
 
         // Callback from the component listener. Reconstruct children when component is deleted
-        void componentChildrenChanged (Component& changedComponent) override
+        void componentChildrenChanged (Component& /*changedComponent*/) override
         {
             validateSubItems();
         }
@@ -154,15 +154,15 @@ namespace melatonin
         {
             for (int i = 0; i < getNumSubItems(); ++i)
             {
-                auto subItemToValidate = dynamic_cast<ComponentTreeViewItem*> (getSubItem (i));
-                if (true) // subItemToValidate->component == nullptr
-                {
-                    // scorched earth: if any child has a deleted component, we re-render the whole branch
-                    // this is because we don't explicitly know if things were added or removed
-                    clearSubItems();
-                    addItemsForChildComponents();
-                    break;
-                }
+                // Ideally we'd just re-render the sub-items branch:
+                // auto subItemToValidate = dynamic_cast<ComponentTreeViewItem*> (getSubItem (i));
+
+                // However, that wasn't working so the scorched earth strategy is
+                // if any child has a deleted component, we re-render the whole branch
+                // (we don't explicitly know if things were added or removed)
+                clearSubItems();
+                addItemsForChildComponents();
+                break;
             }
         }
 

@@ -7,7 +7,7 @@ namespace melatonin
     class InspectorPanel : public Component, public Button::Listener
     {
     public:
-        InspectorPanel (Component& rootComponent, Component& overlay, bool enabledAtStart = true) : root (rootComponent)
+        explicit InspectorPanel (Component& rootComponent, bool enabledAtStart = true) : root (rootComponent)
         {
             addAndMakeVisible (tree);
             addAndMakeVisible (boxModel);
@@ -16,11 +16,6 @@ namespace melatonin
             addAndMakeVisible (toggleButton);
             toggleButton.addListener (this);
             tree.setIndentSize (12);
-        }
-
-        void paint (Graphics& g) override
-        {
-            //g.drawRect ()
         }
 
         void reconstructRoot()

@@ -100,7 +100,7 @@ namespace melatonin
         }
 
         // A selected component has been dragged or resized and this is our callback
-        void componentMovedOrResized (Component& component, bool wasMoved, bool wasResized) override
+        void componentMovedOrResized (Component& /*component*/, bool /*wasMoved*/, bool wasResized) override
         {
             if (wasResized)
             {

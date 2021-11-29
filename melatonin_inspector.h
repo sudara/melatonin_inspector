@@ -20,7 +20,7 @@ class MelatoninInspector : public juce::ComponentListener, public juce::Document
 public:
     MelatoninInspector (juce::Component& rootComponent, bool enabledAtStart = true)
         : juce::DocumentWindow ("Melatonin Inspector", melatonin::color::background, 7, true),
-          panel (rootComponent, overlay, enabledAtStart),
+          panel (rootComponent, enabledAtStart),
           root (rootComponent),
           enabled (enabledAtStart)
     {
@@ -82,21 +82,20 @@ public:
     }
 
 private:
-    bool enabled;
-
     // LNF has to be declared before components using it
     melatonin::InspectorLookAndFeel inspectorLookAndFeel;
 
-    juce::Component& root;
     melatonin::InspectorPanel panel;
+    juce::Component& root;
+    bool enabled;
     melatonin::Overlay overlay;
     melatonin::MouseInspector mouseInspector { root };
 
     // Resize our overlay when the root component changes
-    void componentMovedOrResized (Component& root, bool /*wasMoved*/, bool wasResized) override
+    void componentMovedOrResized (Component& rootComponent, bool /*wasMoved*/, bool wasResized) override
     {
         if (wasResized)
-            overlay.setBounds (root.getBounds());
+            overlay.setBounds (rootComponent.getBounds());
     }
 
     void setupCallbacks()
@@ -107,6 +106,6 @@ private:
 
         panel.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, false); };
         panel.outlineComponentCallback = [this] (Component* c) { this->outlineComponent (c); };
-        panel.toggleCallback = [this] (bool enabled) { this->toggle (enabled); };
+        panel.toggleCallback = [this] (bool enable) { this->toggle (enable); };
     }
 };

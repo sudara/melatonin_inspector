@@ -115,7 +115,7 @@ namespace melatonin
             }
         }
 
-        void mouseExit (const MouseEvent& event) override
+        void mouseExit (const MouseEvent& /*event*/) override
         {
             selectComponent (selectedComponent);
             outlinedComponent = nullptr;
@@ -145,20 +145,20 @@ namespace melatonin
 
         void drawDimensionsLabel()
         {
-            auto labelWidth = dimensions.getFont().getStringWidthFloat (dimensionsString (selectedBounds)) + 15;
-            auto labelHeight = 15;
+            int labelWidth = (int) dimensions.getFont().getStringWidthFloat (dimensionsString (selectedBounds)) + 15;
+            int labelHeight = 15;
             auto paddingToLabel = 4;
             auto labelCenterX = selectedBounds.getX() + selectedBounds.getWidth() / 2;
 
             if ((selectedBounds.getBottom() + 20 + paddingToLabel) < getBottom())
             {
                 // label on bottom
-                dimensionsLabelBounds = Rectangle<int> (labelCenterX - labelWidth / 2, selectedBounds.getBottom() + paddingToLabel, labelWidth, labelHeight).expanded(2, 1);
+                dimensionsLabelBounds = Rectangle<int> ((int) (labelCenterX - labelWidth / 2), selectedBounds.getBottom() + paddingToLabel, labelWidth, labelHeight).expanded(2, 1);
             }
             else
             {
                 // label on top
-                dimensionsLabelBounds = Rectangle<int> (labelCenterX - labelWidth / 2, selectedBounds.getY() - labelHeight - paddingToLabel, labelWidth, labelHeight).expanded(2, 1);
+                dimensionsLabelBounds = Rectangle<int> ((int) (labelCenterX - labelWidth / 2), selectedBounds.getY() - labelHeight - paddingToLabel, labelWidth, labelHeight).expanded(2, 1);
             }
             dimensions.setText (dimensionsString (selectedBounds), dontSendNotification);
             dimensions.setBounds (dimensionsLabelBounds);
