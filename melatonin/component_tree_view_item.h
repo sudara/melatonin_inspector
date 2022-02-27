@@ -34,7 +34,7 @@ namespace melatonin
                 addItemsForChildComponents();
             }
 
-            // Make our tree self aware
+            // Make our tree self-aware
             component->addComponentListener (this);
         }
 
@@ -88,7 +88,8 @@ namespace melatonin
             g.setFont (Font ("Verdana", 14, Font::FontStyleFlags::plain));
 
             auto textIndent = mightContainSubItems() ? 7 : 5;
-            g.drawText (componentString (component), textIndent, 0, w - textIndent, h, Justification::left, true);
+            juce::String keyboard = component->getWantsKeyboardFocus() ? " (wantsKeyboard)" : "";
+            g.drawText (componentString (component) + keyboard, textIndent, 0, w - textIndent, h, Justification::left, true);
         }
 
         // must override to set the disclosure triangle color

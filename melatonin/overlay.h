@@ -79,7 +79,10 @@ namespace melatonin
 
         void selectComponent (Component* component)
         {
-            if (component && selectedComponent == component)
+            if(!component)
+                return;
+
+            if (selectedComponent == component)
             {
                 deselectComponent();
                 return;

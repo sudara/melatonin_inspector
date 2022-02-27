@@ -53,17 +53,21 @@ Include the module header:
 
 ### 4. Add the inspector as a private member to your Editor
 
-Pass a reference to the root component of your UI (typically the the Editor itself, but you could also inspect another window, etc).
+Pass a reference to the root component of your UI (typically the  Editor itself, but you could also inspect another window, etc).
 
 ```cpp
-MelatoninInspector inspector { *this };
+melatonin::Inspector inspector { *this };
 ```
 
 If you'd like the inspector to be disabled by default, pass false as the second argument.
 
 ```cpp
-MelatoninInspector inspector { *this, false };
+melatonin::Inspector inspector { *this, false };
 ```
+
+### 5. Set it visible
+
+Out of the box, the window won't popup until you call `setVisible(true)` on the inspector!
 
 ## Features
 
