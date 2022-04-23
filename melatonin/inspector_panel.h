@@ -4,15 +4,15 @@
 
 namespace melatonin
 {
-    class InspectorPanel : public Component, public Button::Listener
+    class InspectorPanel : public juce::Component, public juce::Button::Listener
     {
     public:
-        explicit InspectorPanel (Component& rootComponent, bool enabledAtStart = true) : root (rootComponent)
+        explicit InspectorPanel (juce::Component& rootComponent, bool enabledAtStart = true) : root (rootComponent)
         {
             addAndMakeVisible (tree);
             addAndMakeVisible (boxModel);
             toggleButton.setButtonText ("Enabled");
-            toggleButton.setToggleState (enabledAtStart, dontSendNotification);
+            toggleButton.setToggleState (enabledAtStart, juce::dontSendNotification);
             addAndMakeVisible (toggleButton);
             toggleButton.addListener (this);
             tree.setIndentSize (12);
@@ -101,9 +101,9 @@ namespace melatonin
     private:
         Component::SafePointer<Component> selectedComponent;
         Component& root;
-        ToggleButton toggleButton;
+        juce::ToggleButton toggleButton;
         BoxModel boxModel;
-        TreeView tree;
+        juce::TreeView tree;
         bool rootSet = false;
 
         ComponentTreeViewItem* getRoot()

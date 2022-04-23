@@ -6,22 +6,22 @@ namespace melatonin
     class Overlay;
 
     class ComponentTreeViewItem
-        : public TreeViewItem,
-          public MouseListener,
-          public ComponentListener
+        : public juce::TreeViewItem,
+          public juce::MouseListener,
+          public juce::ComponentListener
     {
     public:
         bool hasTabbedComponent = false;
 
-        explicit ComponentTreeViewItem (Component* c, std::function<void (Component* c)> outline, std::function<void (Component* c)> select)
+        explicit ComponentTreeViewItem (juce::Component* c, std::function<void (juce::Component* c)> outline, std::function<void (juce::Component* c)> select)
             : outlineComponentCallback (outline), selectComponentCallback (select), component (c)
         {
             // A few JUCE component types need massaging to get their child components
-            if (auto multiPanel = dynamic_cast<MultiDocumentPanel*> (c))
+            if (auto multiPanel = dynamic_cast<juce::MultiDocumentPanel*> (c))
             {
                 recursivelyAddChildrenFor (multiPanel->getCurrentTabbedComponent ());
             }
-            else if (auto tabs = dynamic_cast<TabbedComponent*> (c))
+            else if (auto tabs = dynamic_cast<juce::TabbedComponent*> (c))
             {
                 hasTabbedComponent = true;
                 for (int i = 0; i < tabs->getNumTabs(); ++i)
@@ -51,7 +51,7 @@ namespace melatonin
         }
 
         // naive but functional...
-        void openTreeAndSelect (Component* target)
+        void openTreeAndSelect (juce::Component* target)
         {
             // don't let us select something already selected
             if (component == target && ! isSelected())
@@ -71,7 +71,7 @@ namespace melatonin
             }
         }
 
-        void paintItem (Graphics& g, int w, int h) override
+        void paintItem (juce::Graphics& g, int w, int h) override
         {
             if (! component)
                 return;
@@ -83,22 +83,22 @@ namespace melatonin
 
             g.setColour (color::blueLabelTextColor);
             if (! component->isVisible())
-                g.setColour (Colours::grey);
+                g.setColour (juce::Colours::grey);
 
-            g.setFont (Font ("Verdana", 14, Font::FontStyleFlags::plain));
+            g.setFont (juce::Font ("Verdana", 14, juce::Font::FontStyleFlags::plain));
 
             auto textIndent = mightContainSubItems() ? 7 : 5;
             juce::String keyboard = component->getWantsKeyboardFocus() ? " (wantsKeyboard)" : "";
-            g.drawText (componentString (component) + keyboard, textIndent, 0, w - textIndent, h, Justification::left, true);
+            g.drawText (componentString (component) + keyboard, textIndent, 0, w - textIndent, h, juce::Justification::left, true);
         }
 
         // must override to set the disclosure triangle color
-        void paintOpenCloseButton (Graphics& g, const Rectangle<float>& area, Colour /*backgroundColour*/, bool isMouseOver) override
+        void paintOpenCloseButton (juce::Graphics& g, const juce::Rectangle<float>& area, juce::Colour /*backgroundColour*/, bool isMouseOver) override
         {
             getOwnerView()->getLookAndFeel().drawTreeviewPlusMinusBox (g, area, color::blueLabelBackgroundColor, isOpen(), isMouseOver);
         }
 
-        void itemClicked (const MouseEvent&) override
+        void itemClicked (const juce::MouseEvent&) override
         {
             selectComponentCallback (component);
             selectTabbedComponentChildIfNeeded();
@@ -106,7 +106,7 @@ namespace melatonin
                 setOpen (true);
         }
 
-        void mouseEnter (const MouseEvent& /*event*/) override
+        void mouseEnter (const juce::MouseEvent& /*event*/) override
         {
             outlineComponentCallback (component);
         }
@@ -121,19 +121,19 @@ namespace melatonin
         }
 
         // Callback from the component listener. Reconstruct children when component is deleted
-        void componentChildrenChanged (Component& /*changedComponent*/) override
+        void componentChildrenChanged (juce::Component& /*changedComponent*/) override
         {
             validateSubItems();
         }
 
-        std::function<void (Component* c)> outlineComponentCallback;
-        std::function<void (Component* c)> selectComponentCallback;
+        std::function<void (juce::Component* c)> outlineComponentCallback;
+        std::function<void (juce::Component* c)> selectComponentCallback;
 
     private:
-        Component::SafePointer<Component> component;
+        juce::Component::SafePointer<juce::Component> component;
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentTreeViewItem)
 
-        void recursivelyAddChildrenFor (Component* child)
+        void recursivelyAddChildrenFor (juce::Component* child)
         {
             // Components such as Labels can have a nullptr component child
             // Rather than display empty placeholders in the tree view, we will hide them
@@ -175,7 +175,7 @@ namespace melatonin
             auto parent = dynamic_cast<ComponentTreeViewItem*> (getParentItem());
             if (parent->hasTabbedComponent && ! component->isVisible())
             {
-                dynamic_cast<TabbedComponent*> (parent->component.getComponent())->setCurrentTabIndex (getIndexInParent());
+                dynamic_cast<juce::TabbedComponent*> (parent->component.getComponent())->setCurrentTabIndex (getIndexInParent());
             }
         }
     };

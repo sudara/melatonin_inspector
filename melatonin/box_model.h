@@ -3,55 +3,55 @@
 
 namespace melatonin
 {
-    class BoxModel : public Component, public Label::Listener, public ComponentListener
+    class BoxModel : public juce::Component, public juce::Label::Listener, public juce::ComponentListener
     {
     public:
         BoxModel()
         {
             addAndMakeVisible (componentLabel);
-            componentLabel.setColour (Label::textColourId, color::blueLabelBackgroundColor);
-            componentLabel.setJustificationType (Justification::centredLeft);
+            componentLabel.setColour (juce::Label::textColourId, color::blueLabelBackgroundColor);
+            componentLabel.setJustificationType (juce::Justification::centredLeft);
 
             addAndMakeVisible (parentComponentLabel);
-            parentComponentLabel.setColour (Label::textColourId, color::redLineColor);
-            parentComponentLabel.setJustificationType (Justification::centredLeft);
+            parentComponentLabel.setColour (juce::Label::textColourId, color::redLineColor);
+            parentComponentLabel.setJustificationType (juce::Justification::centredLeft);
 
             addAndMakeVisible (widthLabel);
             widthLabel.setEditable (true);
             widthLabel.addListener (this);
             widthLabel.setFont (20.0f);
-            widthLabel.setJustificationType (Justification::centredRight);
+            widthLabel.setJustificationType (juce::Justification::centredRight);
 
             addAndMakeVisible (byLabel);
-            byLabel.setText (L" × ", dontSendNotification);
+            byLabel.setText (L" × ", juce::dontSendNotification);
             byLabel.setFont (20.f);
-            byLabel.setJustificationType (Justification::centred);
+            byLabel.setJustificationType (juce::Justification::centred);
 
             addAndMakeVisible (heightLabel);
             heightLabel.setEditable (true);
             heightLabel.addListener (this);
             heightLabel.setFont (20.0f);
-            heightLabel.setJustificationType (Justification::centredLeft);
+            heightLabel.setJustificationType (juce::Justification::centredLeft);
 
-            Label* parentLabels[4] = { &topToParentLabel, &rightToParentLabel, &bottomToParentLabel, &leftToParentLabel };
+            juce::Label* parentLabels[4] = { &topToParentLabel, &rightToParentLabel, &bottomToParentLabel, &leftToParentLabel };
 
             for (auto parentLabel : parentLabels)
             {
                 addAndMakeVisible (parentLabel);
-                parentLabel->setText ("-", dontSendNotification);
-                parentLabel->setJustificationType (Justification::centred);
-                parentLabel->setColour (Label::textColourId, color::redLineColor);
+                parentLabel->setText ("-", juce::dontSendNotification);
+                parentLabel->setJustificationType (juce::Justification::centred);
+                parentLabel->setColour (juce::Label::textColourId, color::redLineColor);
             }
         }
 
-        void paint (Graphics& g) override
+        void paint (juce::Graphics& g) override
         {
             // dashed line rectangles be hard, yo!
             g.setColour (color::redLineColor);
             float dashLengths[2] = { 3.f, 3.f };
             parentRectanglePath.clear();
             parentRectanglePath.addRectangle (parentComponentRectangle());
-            auto parentStroke = PathStrokeType (0.5);
+            auto parentStroke = juce::PathStrokeType (0.5);
             parentStroke.createDashedStroke (parentRectanglePath, parentRectanglePath, dashLengths, 2);
             g.strokePath (parentRectanglePath, parentStroke);
 
@@ -91,7 +91,7 @@ namespace melatonin
             updateLabels();
         }
 
-        void labelTextChanged (Label* changedLabel) override
+        void labelTextChanged (juce::Label* changedLabel) override
         {
             if (changedLabel == &widthLabel || changedLabel == &heightLabel)
             {
@@ -110,41 +110,41 @@ namespace melatonin
 
         void reset()
         {
-            Label* labels[6] = { &widthLabel, &heightLabel, &topToParentLabel, &rightToParentLabel, &bottomToParentLabel, &leftToParentLabel };
+            juce::Label* labels[6] = { &widthLabel, &heightLabel, &topToParentLabel, &rightToParentLabel, &bottomToParentLabel, &leftToParentLabel };
 
             for (auto label : labels)
             {
-                label->setText ("-", dontSendNotification);
+                label->setText ("-", juce::dontSendNotification);
             }
-            componentLabel.setText ("", dontSendNotification);
-            parentComponentLabel.setText ("", dontSendNotification);
+            componentLabel.setText ("", juce::dontSendNotification);
+            parentComponentLabel.setText ("", juce::dontSendNotification);
         }
 
     private:
         Component::SafePointer<Component> displayedComponent;
 
-        Label componentLabel;
-        Label parentComponentLabel;
+        juce::Label componentLabel;
+        juce::Label parentComponentLabel;
 
-        Label widthLabel;
-        Label byLabel;
-        Label heightLabel;
+        juce::Label widthLabel;
+        juce::Label byLabel;
+        juce::Label heightLabel;
 
-        Label topToParentLabel;
-        Label rightToParentLabel;
-        Label bottomToParentLabel;
-        Label leftToParentLabel;
+        juce::Label topToParentLabel;
+        juce::Label rightToParentLabel;
+        juce::Label bottomToParentLabel;
+        juce::Label leftToParentLabel;
 
         int padding = 30;
         int paddingToParent = 50;
-        Path parentRectanglePath; // complicated b/c it's dashed
+        juce::Path parentRectanglePath; // complicated b/c it's dashed
 
-        Rectangle<int> parentComponentRectangle()
+        juce::Rectangle<int> parentComponentRectangle()
         {
             return getLocalBounds().reduced (padding);
         }
 
-        Rectangle<int> componentRectangle()
+        juce::Rectangle<int> componentRectangle()
         {
             return parentComponentRectangle().reduced (paddingToParent).withTrimmedTop (5);
         }
@@ -153,16 +153,16 @@ namespace melatonin
         {
             auto boundsInParent = displayedComponent->getBoundsInParent();
 
-            parentComponentLabel.setText (componentString (displayedComponent->getParentComponent()), dontSendNotification);
-            componentLabel.setText (componentString (displayedComponent), dontSendNotification);
+            parentComponentLabel.setText (componentString (displayedComponent->getParentComponent()), juce::dontSendNotification);
+            componentLabel.setText (componentString (displayedComponent), juce::dontSendNotification);
 
-            widthLabel.setText (String (displayedComponent->getWidth()), dontSendNotification);
-            heightLabel.setText (String (displayedComponent->getHeight()), dontSendNotification);
+            widthLabel.setText (juce::String (displayedComponent->getWidth()), juce::dontSendNotification);
+            heightLabel.setText (juce::String (displayedComponent->getHeight()), juce::dontSendNotification);
 
-            topToParentLabel.setText (String (boundsInParent.getY()), dontSendNotification);
-            rightToParentLabel.setText (String (displayedComponent->getParentWidth() - displayedComponent->getWidth() - boundsInParent.getX()), dontSendNotification);
-            bottomToParentLabel.setText (String (displayedComponent->getParentHeight() - displayedComponent->getHeight() - boundsInParent.getY()), dontSendNotification);
-            leftToParentLabel.setText (String (boundsInParent.getX()), dontSendNotification);
+            topToParentLabel.setText (juce::String (boundsInParent.getY()), juce::dontSendNotification);
+            rightToParentLabel.setText (juce::String (displayedComponent->getParentWidth() - displayedComponent->getWidth() - boundsInParent.getX()), juce::dontSendNotification);
+            bottomToParentLabel.setText (juce::String (displayedComponent->getParentHeight() - displayedComponent->getHeight() - boundsInParent.getY()), juce::dontSendNotification);
+            leftToParentLabel.setText (juce::String (boundsInParent.getX()), juce::dontSendNotification);
             repaint();
         }
     };
