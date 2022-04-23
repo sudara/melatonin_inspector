@@ -82,16 +82,16 @@ namespace melatonin
             if (button == &toggleButton)
             {
                 auto enabled = toggleButton.getToggleState();
-                toggle(enabled);
+                toggle (enabled);
                 toggleCallback (enabled);
                 tree.setVisible (enabled);
                 boxModel.reset();
             }
         }
 
-        void toggle(bool enabled)
+        void toggle (bool enabled)
         {
-            toggleButton.setToggleState(enabled, juce::dontSendNotification);
+            toggleButton.setToggleState (enabled, juce::dontSendNotification);
         }
 
         std::function<void (Component* c)> selectComponentCallback;

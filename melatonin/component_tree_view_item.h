@@ -19,7 +19,7 @@ namespace melatonin
             // A few JUCE component types need massaging to get their child components
             if (auto multiPanel = dynamic_cast<juce::MultiDocumentPanel*> (c))
             {
-                recursivelyAddChildrenFor (multiPanel->getCurrentTabbedComponent ());
+                recursivelyAddChildrenFor (multiPanel->getCurrentTabbedComponent());
             }
             else if (auto tabs = dynamic_cast<juce::TabbedComponent*> (c))
             {
@@ -54,7 +54,7 @@ namespace melatonin
         void openTreeAndSelect (juce::Component* target)
         {
             // don't let us select something already selected
-            if (component == target && ! isSelected())
+            if (component == target && !isSelected())
             {
                 setSelected (true, true);
                 setOpen (true);
@@ -73,7 +73,7 @@ namespace melatonin
 
         void paintItem (juce::Graphics& g, int w, int h) override
         {
-            if (! component)
+            if (!component)
                 return;
             if (isSelected())
             {
@@ -82,7 +82,7 @@ namespace melatonin
             }
 
             g.setColour (color::blueLabelTextColor);
-            if (! component->isVisible())
+            if (!component->isVisible())
                 g.setColour (juce::Colours::grey);
 
             g.setFont (juce::Font ("Verdana", 14, juce::Font::FontStyleFlags::plain));
@@ -169,11 +169,11 @@ namespace melatonin
 
         void selectTabbedComponentChildIfNeeded()
         {
-            if (! getParentItem())
+            if (!getParentItem())
                 return;
 
             auto parent = dynamic_cast<ComponentTreeViewItem*> (getParentItem());
-            if (parent->hasTabbedComponent && ! component->isVisible())
+            if (parent->hasTabbedComponent && !component->isVisible())
             {
                 dynamic_cast<juce::TabbedComponent*> (parent->component.getComponent())->setCurrentTabIndex (getIndexInParent());
             }

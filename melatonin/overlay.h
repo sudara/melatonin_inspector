@@ -79,7 +79,7 @@ namespace melatonin
 
         void selectComponent (Component* component)
         {
-            if(!component)
+            if (!component)
                 return;
 
             if (selectedComponent == component)
@@ -108,7 +108,7 @@ namespace melatonin
             if (wasResized)
             {
                 // sort of annoying if hover triggers on resize
-                if(outlinedComponent)
+                if (outlinedComponent)
                     outlinedComponent = nullptr;
                 setSelectedAndResizeableBounds (&component);
             }
@@ -156,12 +156,12 @@ namespace melatonin
             if ((selectedBounds.getBottom() + 20 + paddingToLabel) < getBottom())
             {
                 // label on bottom
-                dimensionsLabelBounds = Rectangle<int> ((int) (labelCenterX - labelWidth / 2), selectedBounds.getBottom() + paddingToLabel, labelWidth, labelHeight).expanded(2, 1);
+                dimensionsLabelBounds = Rectangle<int> ((int) (labelCenterX - labelWidth / 2), selectedBounds.getBottom() + paddingToLabel, labelWidth, labelHeight).expanded (2, 1);
             }
             else
             {
                 // label on top
-                dimensionsLabelBounds = Rectangle<int> ((int) (labelCenterX - labelWidth / 2), selectedBounds.getY() - labelHeight - paddingToLabel, labelWidth, labelHeight).expanded(2, 1);
+                dimensionsLabelBounds = Rectangle<int> ((int) (labelCenterX - labelWidth / 2), selectedBounds.getY() - labelHeight - paddingToLabel, labelWidth, labelHeight).expanded (2, 1);
             }
             dimensions.setText (dimensionsString (selectedBounds), dontSendNotification);
             dimensions.setBounds (dimensionsLabelBounds);
