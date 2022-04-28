@@ -1,10 +1,9 @@
 #pragma once
 
-#include <cxxabi.h>
 #include <juce_audio_processors/juce_audio_processors.h>
 
 #if !defined(_MSC_VER)
-
+#include <cxxabi.h>
 namespace melatonin
 {
     // https://stackoverflow.com/a/4541470
