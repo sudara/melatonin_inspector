@@ -56,7 +56,7 @@ namespace melatonin
             // don't let us select something already selected
             if (component == target && !isSelected())
             {
-                setSelected (true, true);
+                setSelected (true, true, juce::dontSendNotification);
                 setOpen (true);
             }
             else if (component->isParentOf (target))

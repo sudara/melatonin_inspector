@@ -57,6 +57,54 @@ namespace melatonin
 
             g.setColour (color::blueLineColor);
             g.drawRect (componentRectangle(), 2.0);
+            drawPaddingIfNeeded (g);
+        }
+
+        // See Melatonin's PaddedComponent or store this info in your component's getProperties
+        void drawPaddingIfNeeded (juce::Graphics& g)
+        {
+            auto component = displayedComponent.getComponent();
+            auto props = component->getProperties();
+            int paddingTop = props["paddingTop"];
+            int paddingBottom = props["paddingBottom"];
+            int paddingLeft = props["paddingLeft"];
+            int paddingRight = props["paddingRight"];
+
+            if (paddingTop > 0)
+            {
+                auto area = componentRectangle().removeFromTop (20);
+                g.setColour (color::blueLineColor.withAlpha (0.5f));
+                g.fillRect (area);
+                g.setColour (color::white);
+                g.drawText (juce::String (paddingTop), area, juce::Justification::centred, false);
+            }
+
+            if (paddingBottom > 0)
+            {
+                auto area = componentRectangle().removeFromBottom (20);
+                g.setColour (color::blueLineColor.withAlpha (0.5f));
+                g.fillRect (area);
+                g.setColour (color::white);
+                g.drawText (juce::String (paddingBottom), area, juce::Justification::centred, false);
+            }
+
+            if (paddingLeft > 0)
+            {
+                auto area = componentRectangle().removeFromLeft (20);
+                g.setColour (color::blueLineColor.withAlpha (0.5f));
+                g.fillRect (area);
+                g.setColour (color::white);
+                g.drawText (juce::String (paddingLeft), area, juce::Justification::centred, false);
+            }
+
+            if (paddingRight > 0)
+            {
+                auto area = componentRectangle().removeFromRight (20);
+                g.setColour (color::blueLineColor.withAlpha (0.5f));
+                g.fillRect (area);
+                g.setColour (color::white);
+                g.drawText (juce::String(paddingRight), area, juce::Justification::centred, false);
+            }
         }
 
         void resized() override

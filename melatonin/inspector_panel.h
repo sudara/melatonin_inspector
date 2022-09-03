@@ -74,7 +74,7 @@ namespace melatonin
             }
             getRoot()->openTreeAndSelect (component);
 
-            tree.scrollToKeepItemVisible (dynamic_cast<ComponentTreeViewItem*> (tree.getSelectedItem (0)));
+            tree.scrollToKeepItemVisible (tree.getSelectedItem(0));
         }
 
         void buttonClicked (juce::Button* button) override
