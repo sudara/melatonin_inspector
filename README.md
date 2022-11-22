@@ -4,7 +4,8 @@ This is a JUCE module that gives you the ability to inspect and resize component
 
 It's inspired by [Figma](https://figma.com) (where I prefer to design UI), browser web inspectors and Jim Credland's [Component Debugger](https://github.com/jcredland/juce-toys/blob/master/jcf_debug/source/component_debugger.cpp) [juce-toys](https://github.com/jcredland/juce-toys). 
 
-https://user-images.githubusercontent.com/472/115873623-6f2e4700-a443-11eb-9ba1-03d992cc12e1.mp4
+
+![](https://user-images.githubusercontent.com/472/115873623-6f2e4700-a443-11eb-9ba1-03d992cc12e1.mp4)
 
 ## How to install
 
