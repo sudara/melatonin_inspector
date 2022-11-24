@@ -63,6 +63,12 @@ namespace melatonin
         // See Melatonin's PaddedComponent or store this info in your component's getProperties
         void drawPaddingIfNeeded (juce::Graphics& g)
         {
+            if (!displayedComponent)
+            {
+                //if displayedComponent is null, getting props will fail,
+                //so skipping this drawing all along
+                return;
+            }
             auto component = displayedComponent.getComponent();
             auto props = component->getProperties();
             int paddingTop = props["paddingTop"];

@@ -61,6 +61,20 @@ namespace melatonin
         }
     }
 
+    //returns name of assigned LnF
+    static inline juce::String lnfString (juce::Component* c)
+    {
+        if (c)
+        {
+            auto &lnf = c->getLookAndFeel();
+            return type (lnf);
+        }
+        else
+        {
+            return "";
+        }
+    }
+
     static inline juce::String dimensionsString (juce::Rectangle<int> bounds)
     {
         return juce::String (bounds.getWidth()) + L" × " + juce::String (bounds.getHeight());
@@ -75,6 +89,7 @@ namespace melatonin
         const juce::Colour blueLabelTextColor = juce::Colour::fromString ("FFF4FDFF");
         const juce::Colour redLineColor = juce::Colour::fromString ("FFD4563F");
         const juce::Colour redLabelBackgroundColor = juce::Colour::fromString ("FFF54514");
+        const juce::Colour greyLineColor = juce::Colours::lightgrey;
     }
 
     class InspectorLookAndFeel : public juce::LookAndFeel_V4

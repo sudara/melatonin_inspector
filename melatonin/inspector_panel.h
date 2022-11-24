@@ -1,6 +1,7 @@
 #pragma once
 #include "box_model.h"
 #include "component_tree_view_item.h"
+#include "properties_model.h"
 
 namespace melatonin
 {
@@ -11,6 +12,7 @@ namespace melatonin
         {
             addAndMakeVisible (tree);
             addAndMakeVisible (boxModel);
+            addAndMakeVisible (propertiesModel);
             toggleButton.setButtonText ("Enabled");
             toggleButton.setToggleState (enabledAtStart, juce::dontSendNotification);
             addAndMakeVisible (toggleButton);
@@ -31,10 +33,15 @@ namespace melatonin
         void resized() override
         {
             auto area = getLocalBounds();
+
+            auto columnMinWidth = juce::jmax(380, area.getWidth() / 2);
             area.removeFromTop (20);
-            toggleButton.setBounds (area.removeFromTop (20).withTrimmedLeft (27));
-            boxModel.setBounds (area.removeFromTop (250));
-            tree.setBounds (area.withTrimmedLeft (25)); // padding in these default components are a mess
+
+            auto mainCol = area.removeFromLeft(columnMinWidth);
+            toggleButton.setBounds (mainCol.removeFromTop (20).withTrimmedLeft (27));
+            boxModel.setBounds (mainCol.removeFromTop (250));
+            propertiesModel.setBounds (mainCol.removeFromTop (250));
+            tree.setBounds (area); // padding in these default components are a mess
         }
 
         void displayComponentInfo (Component* component)
@@ -46,6 +53,7 @@ namespace melatonin
             if (!selectedComponent || selectedComponent == component)
             {
                 boxModel.displayComponent (component);
+                propertiesModel.displayComponent (component);
                 repaint();
             }
         }
@@ -86,6 +94,7 @@ namespace melatonin
                 toggleCallback (enabled);
                 tree.setVisible (enabled);
                 boxModel.reset();
+                propertiesModel.reset();
             }
         }
 
@@ -103,6 +112,7 @@ namespace melatonin
         Component& root;
         juce::ToggleButton toggleButton;
         BoxModel boxModel;
+        PropertiesModel propertiesModel;
         juce::TreeView tree;
         bool rootSet = false;
 
@@ -116,6 +126,7 @@ namespace melatonin
             selectedComponent = nullptr;
             tree.clearSelectedItems();
             boxModel.reset();
+            propertiesModel.reset();
         }
     };
 }

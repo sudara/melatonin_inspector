@@ -35,8 +35,8 @@ namespace melatonin
             panel.setLookAndFeel (&inspectorLookAndFeel);
 
             setResizable (true, false);
-            setResizeLimits (300, 500, 1200, 1200);
-            setSize (350, 650);
+            setResizeLimits (740, 500, 1200, 1200);
+            setSize (740, 650);
             panel.setSize (400, 400);
             setUsingNativeTitleBar (true);
             setContentNonOwned (&panel, true);
