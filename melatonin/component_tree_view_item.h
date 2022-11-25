@@ -85,10 +85,14 @@ namespace melatonin
             if (!component->isVisible())
                 g.setColour (juce::Colours::grey);
 
-            g.setFont (juce::Font ("Verdana", 14, juce::Font::FontStyleFlags::plain));
 
             auto textIndent = mightContainSubItems() ? 7 : 5;
-            juce::String keyboard = component->getWantsKeyboardFocus() ? " (wantsKeyboard)" : "";
+            auto wantKeyboardFocus = component->getWantsKeyboardFocus();
+            juce::String keyboard = wantKeyboardFocus ? " (wantsKeyboard)" : "";
+
+            if(wantKeyboardFocus)
+                g.setColour(color::redLineColor);
+            g.setFont (juce::Font ("Verdana", wantKeyboardFocus ? 16 : 14, juce::Font::FontStyleFlags::plain));
             g.drawText (componentString (component) + keyboard, textIndent, 0, w - textIndent, h, juce::Justification::left, true);
         }
 
