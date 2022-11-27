@@ -1,5 +1,4 @@
 #pragma once
-
 #include "helpers.h"
 
 namespace melatonin {
