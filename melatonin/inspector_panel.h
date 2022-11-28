@@ -10,10 +10,10 @@ namespace melatonin
     public:
         explicit InspectorPanel (juce::Component& rootComponent, bool enabledAtStart = true) : root (rootComponent)
         {
-            addChildComponent(tree);
+            addChildComponent (tree);
             addAndMakeVisible (emptySelectionPrompt);
             emptySelectionPrompt.setColour (juce::Label::textColourId, color::white);
-            emptySelectionPrompt.setJustificationType(juce::Justification::centredTop);
+            emptySelectionPrompt.setJustificationType (juce::Justification::centredTop);
             addAndMakeVisible (boxModel);
             addAndMakeVisible (propertiesModel);
             toggleButton.setButtonText ("Enabled");
@@ -50,8 +50,7 @@ namespace melatonin
             //using btn toggle state (better to switch to using class variable
             //or inspectors prop)
 
-            auto hasSelected = selectedComponent != nullptr;
-            if (hasSelected)
+            if (tree.isVisible())
                 tree.setBounds (area); // padding in these default components are a mess
             else
                 emptySelectionPrompt.setBounds (area);
@@ -67,12 +66,17 @@ namespace melatonin
             {
                 boxModel.displayComponent (component);
                 propertiesModel.displayComponent (component);
+
+                emptySelectionPrompt.setVisible (false);
+                tree.setVisible (true);
+
                 repaint();
             }
-
-            tree.setVisible (true);
-            emptySelectionPrompt.setVisible(false);
-
+            else
+            {
+                tree.setVisible (true);
+                emptySelectionPrompt.setVisible (false);
+            }
             resized();
         }
 
@@ -138,7 +142,7 @@ namespace melatonin
         BoxModel boxModel;
         PropertiesModel propertiesModel;
         juce::TreeView tree;
-        juce::Label emptySelectionPrompt {"SelectionPrompt", "Select any component to see the tree" };
+        juce::Label emptySelectionPrompt { "SelectionPrompt", "Select any component to see components tree" };
         bool rootSet = false;
 
         ComponentTreeViewItem* getRoot()
@@ -153,8 +157,8 @@ namespace melatonin
             boxModel.reset();
             propertiesModel.reset();
 
-            emptySelectionPrompt.setVisible(true);
-            tree.setVisible(false);
+            emptySelectionPrompt.setVisible (true);
+            tree.setVisible (false);
 
             resized();
         }
