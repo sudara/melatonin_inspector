@@ -91,8 +91,8 @@ namespace melatonin
             juce::String keyboard = wantKeyboardFocus ? " (wantsKeyboard)" : "";
 
             if(wantKeyboardFocus)
-                g.setColour(color::redLineColor);
-            g.setFont (juce::Font ("Verdana", wantKeyboardFocus ? 16 : 14, juce::Font::FontStyleFlags::plain));
+                g.setColour(isSelected() ? color::redLineColor.darker(0.7f) : color::redLineColor);
+            g.setFont (juce::Font ("Verdana", 14, juce::Font::FontStyleFlags::plain));
             g.drawText (componentString (component) + keyboard, textIndent, 0, w - textIndent, h, juce::Justification::left, true);
         }
 
