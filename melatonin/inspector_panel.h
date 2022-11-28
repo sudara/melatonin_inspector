@@ -10,7 +10,10 @@ namespace melatonin
     public:
         explicit InspectorPanel (juce::Component& rootComponent, bool enabledAtStart = true) : root (rootComponent)
         {
-            addAndMakeVisible (tree);
+            addChildComponent(tree);
+            addAndMakeVisible (emptySelectionPrompt);
+            emptySelectionPrompt.setColour (juce::Label::textColourId, color::white);
+            emptySelectionPrompt.setJustificationType(juce::Justification::centredTop);
             addAndMakeVisible (boxModel);
             addAndMakeVisible (propertiesModel);
             toggleButton.setButtonText ("Enabled");
@@ -34,14 +37,24 @@ namespace melatonin
         {
             auto area = getLocalBounds();
 
-            auto columnMinWidth = juce::jmax(380, area.getWidth() / 2);
+            auto inspectorEnabled = toggleButton.getToggleState();
+            auto columnMinWidth = inspectorEnabled ? juce::jmax (380, area.getWidth() / 2)
+                                                   : getWidth();
             area.removeFromTop (20);
 
-            auto mainCol = area.removeFromLeft(columnMinWidth);
+            auto mainCol = area.removeFromLeft (columnMinWidth);
             toggleButton.setBounds (mainCol.removeFromTop (20).withTrimmedLeft (27));
             boxModel.setBounds (mainCol.removeFromTop (250));
             propertiesModel.setBounds (mainCol.removeFromTop (250));
-            tree.setBounds (area); // padding in these default components are a mess
+
+            //using btn toggle state (better to switch to using class variable
+            //or inspectors prop)
+
+            auto hasSelected = selectedComponent != nullptr;
+            if (hasSelected)
+                tree.setBounds (area); // padding in these default components are a mess
+            else
+                emptySelectionPrompt.setBounds (area);
         }
 
         void displayComponentInfo (Component* component)
@@ -56,6 +69,11 @@ namespace melatonin
                 propertiesModel.displayComponent (component);
                 repaint();
             }
+
+            tree.setVisible (true);
+            emptySelectionPrompt.setVisible(false);
+
+            resized();
         }
 
         void redisplaySelectedComponent()
@@ -82,7 +100,7 @@ namespace melatonin
             }
             getRoot()->openTreeAndSelect (component);
 
-            tree.scrollToKeepItemVisible (tree.getSelectedItem(0));
+            tree.scrollToKeepItemVisible (tree.getSelectedItem (0));
         }
 
         void buttonClicked (juce::Button* button) override
@@ -92,9 +110,15 @@ namespace melatonin
                 auto enabled = toggleButton.getToggleState();
                 toggle (enabled);
                 toggleCallback (enabled);
-                tree.setVisible (enabled);
+
+                auto hasSelected = selectedComponent != nullptr;
+                emptySelectionPrompt.setVisible (!hasSelected);
+                tree.setVisible (hasSelected);
+
                 boxModel.reset();
                 propertiesModel.reset();
+
+                resized();
             }
         }
 
@@ -114,6 +138,7 @@ namespace melatonin
         BoxModel boxModel;
         PropertiesModel propertiesModel;
         juce::TreeView tree;
+        juce::Label emptySelectionPrompt {"SelectionPrompt", "Select any component to see the tree" };
         bool rootSet = false;
 
         ComponentTreeViewItem* getRoot()
@@ -127,6 +152,11 @@ namespace melatonin
             tree.clearSelectedItems();
             boxModel.reset();
             propertiesModel.reset();
+
+            emptySelectionPrompt.setVisible(true);
+            tree.setVisible(false);
+
+            resized();
         }
     };
 }

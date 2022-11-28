@@ -35,12 +35,18 @@ namespace melatonin
             panel.setLookAndFeel (&inspectorLookAndFeel);
 
             setResizable (true, false);
-            setResizeLimits (740, 500, 1200, 1200);
-            setSize (740, 650);
-            panel.setSize (400, 400);
+
+            updateWindowSizeOnToggle();
+
             setUsingNativeTitleBar (true);
             setContentNonOwned (&panel, true);
             setupCallbacks();
+        }
+        void updateWindowSizeOnToggle()
+        {
+            setResizeLimits (enabled ? 700 : 380, 500, 1200, 1200);
+            setSize (enabled ? 700 : 380, 500);
+            panel.setSize (enabled ? 700 : 380, 500);
         }
 
         ~Inspector() override
@@ -80,6 +86,8 @@ namespace melatonin
             enabled = newStatus;
             overlay.setVisible (newStatus);
             panel.toggle (newStatus);
+
+            updateWindowSizeOnToggle();
         }
 
     private:
