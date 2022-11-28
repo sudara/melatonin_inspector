@@ -19,7 +19,7 @@ namespace melatonin
         {
             //just super simple separator line
             g.setColour (color::greyLineColor);
-            g.drawHorizontalLine(padding, padding, getRight() - padding);
+            g.drawHorizontalLine (padding, padding, getRight() - padding);
         }
 
         void resized() override
@@ -45,7 +45,6 @@ namespace melatonin
 
         void labelTextChanged (juce::Label* changedLabel) override
         {
-
         }
 
         // A selected component has been dragged or resized and this is our callback
@@ -82,7 +81,7 @@ namespace melatonin
 
         void updateLabels()
         {
-            lnfComponentLabel.setText ("LookAndFeel: " + lnfString(displayedComponent), juce::dontSendNotification);
+            lnfComponentLabel.setText ("LookAndFeel: " + lnfString (displayedComponent), juce::dontSendNotification);
             repaint();
         }
     };
