@@ -44,13 +44,31 @@ namespace melatonin
                 parentLabel->setColour (juce::Label::textColourId, color::redLineColor);
             }
 
-            for (auto paddingLabel : paddingLabels)
+            for (auto l : paddingLabels)
             {
-                addAndMakeVisible (paddingLabel);
-                paddingLabel->setVisible (false);
-                paddingLabel->setJustificationType (juce::Justification::centred);
-                paddingLabel->setColour (juce::Label::textColourId, color::white);
-                paddingLabel->setColour (juce::Label::backgroundColourId, color::blueLineColor);
+                addChildComponent(l);
+                l->setText ("-", juce::dontSendNotification);
+                l->setJustificationType (juce::Justification::centred);
+                l->setColour (juce::Label::textColourId, color::white);
+                l->setColour (juce::Label::backgroundColourId, color::blueLineColor);
+                l->setColour (juce::TextEditor::ColourIds::highlightColourId, color::blueLineColor.darker());
+
+                l->onEditorShow = [l] {
+                    if (auto editor = l->getCurrentTextEditor())
+                    {
+                        auto labelJustification = l->getJustificationType();
+                        if (editor->getJustificationType() != labelJustification)
+                        {
+                            editor->setJustification (l->getJustificationType());
+                        }
+                    }
+                };
+
+                l->onEditorHide = [l] {
+                    auto text = l->getText (true);
+                    if (text.getIntValue() == 0)
+                        l->setText ("0", juce::dontSendNotification);
+                };
             }
         }
 
@@ -67,74 +85,6 @@ namespace melatonin
 
             g.setColour (color::blueLineColor);
             g.drawRect (componentRectangle(), 2.0);
-        }
-
-        // See Melatonin's PaddedComponent or store this info in your component's getProperties
-        void updatePaddingLabelsIfNeeded()
-        {
-            if (!displayedComponent)
-            {
-                //if displayedComponent is null, getting props will fail,
-                //so skipping this drawing all along
-
-                paddingTopLabel.setVisible (false);
-                paddingBottomLabel.setVisible (false);
-                paddingLeftLabel.setVisible (false);
-                paddingRightLabel.setVisible (false);
-
-                paddingRightLabel.removeListener (this);
-                paddingRightLabel.removeListener (this);
-                paddingRightLabel.removeListener (this);
-                paddingRightLabel.removeListener (this);
-
-                return;
-            }
-            auto component = displayedComponent.getComponent();
-            auto props = component->getProperties();
-            int paddingTop = props["paddingTop"];
-            int paddingBottom = props["paddingBottom"];
-            int paddingLeft = props["paddingLeft"];
-            int paddingRight = props["paddingRight"];
-
-            paddingTopLabel.setVisible (paddingTop > 0);
-            if (paddingTop > 0)
-            {
-                auto area = componentRectangle().removeFromTop (24).withTrimmedLeft (24).withTrimmedRight (24);
-                paddingTopLabel.setText (juce::String (paddingTop), juce::dontSendNotification);
-                paddingTopLabel.setBounds (area);
-                paddingTopLabel.setEditable (true);
-                paddingTopLabel.addListener (this);
-            }
-
-            paddingBottomLabel.setVisible (paddingBottom > 0);
-            if (paddingBottom > 0)
-            {
-                auto area = componentRectangle().removeFromBottom (24).withTrimmedLeft (24).withTrimmedRight (24);
-                paddingBottomLabel.setText (juce::String (paddingTop), juce::dontSendNotification);
-                paddingBottomLabel.setBounds (area);
-                paddingBottomLabel.setEditable (true);
-                paddingBottomLabel.addListener (this);
-            }
-
-            paddingLeftLabel.setVisible (paddingLeft > 0);
-            if (paddingLeft > 0)
-            {
-                auto area = componentRectangle().removeFromLeft (24).withTrimmedTop (24).withTrimmedBottom (24);
-                paddingLeftLabel.setText (juce::String (paddingTop), juce::dontSendNotification);
-                paddingLeftLabel.setBounds (area);
-                paddingLeftLabel.setEditable (true);
-                paddingLeftLabel.addListener (this);
-            }
-
-            paddingRightLabel.setVisible (paddingRight > 0);
-            if (paddingRight > 0)
-            {
-                auto area = componentRectangle().removeFromRight (24).withTrimmedTop (24).withTrimmedBottom (24);
-                paddingRightLabel.setText (juce::String (paddingTop), juce::dontSendNotification);
-                paddingRightLabel.setBounds (area);
-                paddingRightLabel.setEditable (true);
-                paddingRightLabel.addListener (this);
-            }
         }
 
         void resized() override
@@ -155,16 +105,16 @@ namespace melatonin
             bottomToParentLabel.setBounds (center.getX() - labelWidth / 2, getHeight() - padding - paddingToParent / 2 - labelHeight / 2, labelWidth, labelHeight);
             leftToParentLabel.setBounds (padding + paddingToParent / 2 - labelWidth / 2, center.getY() - labelHeight / 2, labelWidth, labelHeight);
 
-            auto area1 = componentRectangle().removeFromTop (24).withTrimmedLeft (24).withTrimmedRight (24);
+            auto area1 = componentRectangle().removeFromTop (labelHeight);
             paddingTopLabel.setBounds (area1);
 
-            auto area2 = componentRectangle().removeFromBottom (24).withTrimmedLeft (24).withTrimmedRight (24);
+            auto area2 = componentRectangle().removeFromBottom (labelHeight);
             paddingBottomLabel.setBounds (area2);
 
-            auto area3 = componentRectangle().removeFromLeft (24).withTrimmedTop (24).withTrimmedBottom (24);
+            auto area3 = componentRectangle().removeFromLeft (labelHeight).withTrimmedTop (labelHeight).withTrimmedBottom (labelHeight);
             paddingLeftLabel.setBounds (area3);
 
-            auto area4 = componentRectangle().removeFromRight (24).withTrimmedTop (24).withTrimmedBottom (24);
+            auto area4 = componentRectangle().removeFromRight (labelHeight).withTrimmedTop (labelHeight).withTrimmedBottom (labelHeight);
             paddingRightLabel.setBounds (area4);
         }
 
@@ -191,21 +141,7 @@ namespace melatonin
             if (changedLabel == &paddingRightLabel || changedLabel == &paddingLeftLabel
                 || changedLabel == &paddingTopLabel || changedLabel == &paddingBottomLabel)
             {
-                updatePaddingsInProperties (paddingRightLabel.getText().getIntValue(), paddingLeftLabel.getText().getIntValue(), paddingTopLabel.getText().getIntValue(), paddingBottomLabel.getText().getIntValue());
-            }
-        }
-
-        void updatePaddingsInProperties (double paddingRight, double paddingLeft, double paddingTop, double paddingBottom)
-        {
-            if (displayedComponent)
-            {
-                auto& props = displayedComponent->getProperties();
-                props.set ("paddingLeft", paddingLeft);
-                props.set ("paddingTop", paddingTop);
-                props.set ("paddingRight", paddingRight);
-                props.set ("paddingBottom", paddingBottom);
-                displayedComponent->resized();
-                displayedComponent->repaint();
+                updateDispayedCompPaddingProperties (paddingRightLabel.getText().getIntValue(), paddingLeftLabel.getText().getIntValue(), paddingTopLabel.getText().getIntValue(), paddingBottomLabel.getText().getIntValue());
             }
         }
 
@@ -215,6 +151,7 @@ namespace melatonin
             if (wasResized)
             {
                 updateLabels();
+                updatePaddingLabelsIfNeeded();
             }
         }
 
@@ -226,9 +163,16 @@ namespace melatonin
             {
                 label->setText ("-", juce::dontSendNotification);
             }
+
+            juce::Label* paddingLabels[4] = { &paddingTopLabel, &paddingRightLabel, &paddingLeftLabel, &paddingBottomLabel };
+            for (auto label : paddingLabels)
+            {
+                label->setVisible(false);
+            }
+
             componentLabel.setText ("", juce::dontSendNotification);
             parentComponentLabel.setText ("", juce::dontSendNotification);
-            updatePaddingLabelsIfNeeded();
+            //updatePaddingLabelsIfNeeded();
         }
 
     private:
@@ -246,13 +190,13 @@ namespace melatonin
         juce::Label bottomToParentLabel;
         juce::Label leftToParentLabel;
 
-        juce::Label paddingTopLabel;
-        juce::Label paddingRightLabel;
-        juce::Label paddingBottomLabel;
-        juce::Label paddingLeftLabel;
+        juce::Label paddingTopLabel,
+            paddingRightLabel,
+            paddingBottomLabel,
+            paddingLeftLabel;
 
         int padding = 30;
-        int paddingToParent = 50;
+        int paddingToParent = 44;
         juce::Path parentRectanglePath; // complicated b/c it's dashed
 
         juce::Rectangle<int> parentComponentRectangle()
@@ -280,6 +224,71 @@ namespace melatonin
             bottomToParentLabel.setText (juce::String (displayedComponent->getParentHeight() - displayedComponent->getHeight() - boundsInParent.getY()), juce::dontSendNotification);
             leftToParentLabel.setText (juce::String (boundsInParent.getX()), juce::dontSendNotification);
             repaint();
+        }
+
+        // See Melatonin's PaddedComponent or store this info in your component's getProperties
+        void updatePaddingLabelsIfNeeded()
+        {
+            if (!displayedComponent)
+            {
+                //if displayedComponent is null, getting props will fail
+                juce::Label* paddingLabels[4] = { &paddingTopLabel, &paddingRightLabel, &paddingLeftLabel, &paddingBottomLabel };
+
+                for (auto pl : paddingLabels)
+                {
+                    pl->setText ("-", juce::dontSendNotification);
+                    pl->removeListener (this);
+                }
+
+                return;
+            }
+            auto component = displayedComponent.getComponent();
+            auto props = component->getProperties();
+            auto hasTopPadding = props.contains ("paddingTop");
+            auto hasBottomPadding = props.contains ("paddingBottom");
+            auto hasLeftPadding = props.contains ("paddingLeft");
+            auto hasRightPadding = props.contains ("paddingRight");
+
+            int paddingTop = props["paddingTop"];
+            int paddingBottom = props["paddingBottom"];
+            int paddingLeft = props["paddingLeft"];
+            int paddingRight = props["paddingRight"];
+
+            bool isPaddingComponent = hasBottomPadding || hasTopPadding || hasLeftPadding || hasRightPadding;
+            paddingTopLabel.setVisible(isPaddingComponent);
+            paddingBottomLabel.setVisible(isPaddingComponent);
+            paddingLeftLabel.setVisible(isPaddingComponent);
+            paddingRightLabel.setVisible(isPaddingComponent);
+
+            paddingTopLabel.setText (hasTopPadding ? juce::String (paddingTop) : "-", juce::dontSendNotification);
+            paddingTopLabel.setEditable (hasTopPadding);
+            paddingTopLabel.addListener (this);
+
+            paddingBottomLabel.setText (hasBottomPadding ? juce::String (paddingBottom) : "-", juce::dontSendNotification);
+            paddingBottomLabel.setEditable (hasBottomPadding);
+            paddingBottomLabel.addListener (this);
+
+            paddingLeftLabel.setText (hasLeftPadding ? juce::String (paddingLeft) : "-", juce::dontSendNotification);
+            paddingLeftLabel.setEditable (hasLeftPadding);
+            paddingLeftLabel.addListener (this);
+
+            paddingRightLabel.setText (hasRightPadding ? juce::String (paddingRight) : "-", juce::dontSendNotification);
+            paddingRightLabel.setEditable (hasRightPadding);
+            paddingRightLabel.addListener (this);
+        }
+
+        void updateDispayedCompPaddingProperties (double paddingRight, double paddingLeft, double paddingTop, double paddingBottom)
+        {
+            if (displayedComponent)
+            {
+                auto& props = displayedComponent->getProperties();
+                props.set ("paddingLeft", paddingLeft);
+                props.set ("paddingTop", paddingTop);
+                props.set ("paddingRight", paddingRight);
+                props.set ("paddingBottom", paddingBottom);
+                displayedComponent->resized();
+                displayedComponent->repaint();
+            }
         }
     };
 }
