@@ -172,7 +172,6 @@ namespace melatonin
 
             componentLabel.setText ("", juce::dontSendNotification);
             parentComponentLabel.setText ("", juce::dontSendNotification);
-            //updatePaddingLabelsIfNeeded();
         }
 
     private:
