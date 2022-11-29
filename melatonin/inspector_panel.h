@@ -1,6 +1,7 @@
 #pragma once
 #include "box_model.h"
 #include "component_tree_view_item.h"
+#include "properties_model.h"
 
 namespace melatonin
 {
@@ -9,8 +10,12 @@ namespace melatonin
     public:
         explicit InspectorPanel (juce::Component& rootComponent, bool enabledAtStart = true) : root (rootComponent)
         {
-            addAndMakeVisible (tree);
+            addChildComponent (tree);
+            addAndMakeVisible (emptySelectionPrompt);
+            emptySelectionPrompt.setColour (juce::Label::textColourId, color::white);
+            emptySelectionPrompt.setJustificationType (juce::Justification::centredTop);
             addAndMakeVisible (boxModel);
+            addAndMakeVisible (propertiesModel);
             toggleButton.setButtonText ("Enabled");
             toggleButton.setToggleState (enabledAtStart, juce::dontSendNotification);
             addAndMakeVisible (toggleButton);
@@ -31,10 +36,24 @@ namespace melatonin
         void resized() override
         {
             auto area = getLocalBounds();
+
+            auto inspectorEnabled = toggleButton.getToggleState();
+            auto columnMinWidth = inspectorEnabled ? juce::jmax (380, area.getWidth() / 2)
+                                                   : getWidth();
             area.removeFromTop (20);
-            toggleButton.setBounds (area.removeFromTop (20).withTrimmedLeft (27));
-            boxModel.setBounds (area.removeFromTop (250));
-            tree.setBounds (area.withTrimmedLeft (25)); // padding in these default components are a mess
+
+            auto mainCol = area.removeFromLeft (columnMinWidth);
+            toggleButton.setBounds (mainCol.removeFromTop (20).withTrimmedLeft (27));
+            boxModel.setBounds (mainCol.removeFromTop (250));
+            propertiesModel.setBounds (mainCol.removeFromTop (250));
+
+            //using btn toggle state (better to switch to using class variable
+            //or inspectors prop)
+
+            if (tree.isVisible())
+                tree.setBounds (area); // padding in these default components are a mess
+            else
+                emptySelectionPrompt.setBounds (area);
         }
 
         void displayComponentInfo (Component* component)
@@ -46,8 +65,19 @@ namespace melatonin
             if (!selectedComponent || selectedComponent == component)
             {
                 boxModel.displayComponent (component);
+                propertiesModel.displayComponent (component);
+
+                emptySelectionPrompt.setVisible (false);
+                tree.setVisible (true);
+
                 repaint();
             }
+            else
+            {
+                tree.setVisible (true);
+                emptySelectionPrompt.setVisible (false);
+            }
+            resized();
         }
 
         void redisplaySelectedComponent()
@@ -74,7 +104,7 @@ namespace melatonin
             }
             getRoot()->openTreeAndSelect (component);
 
-            tree.scrollToKeepItemVisible (tree.getSelectedItem(0));
+            tree.scrollToKeepItemVisible (tree.getSelectedItem (0));
         }
 
         void buttonClicked (juce::Button* button) override
@@ -84,8 +114,15 @@ namespace melatonin
                 auto enabled = toggleButton.getToggleState();
                 toggle (enabled);
                 toggleCallback (enabled);
-                tree.setVisible (enabled);
+
+                auto hasSelected = selectedComponent != nullptr;
+                emptySelectionPrompt.setVisible (!hasSelected);
+                tree.setVisible (hasSelected);
+
                 boxModel.reset();
+                propertiesModel.reset();
+
+                resized();
             }
         }
 
@@ -103,7 +140,9 @@ namespace melatonin
         Component& root;
         juce::ToggleButton toggleButton;
         BoxModel boxModel;
+        PropertiesModel propertiesModel;
         juce::TreeView tree;
+        juce::Label emptySelectionPrompt { "SelectionPrompt", "Select any component to see components tree" };
         bool rootSet = false;
 
         ComponentTreeViewItem* getRoot()
@@ -116,6 +155,12 @@ namespace melatonin
             selectedComponent = nullptr;
             tree.clearSelectedItems();
             boxModel.reset();
+            propertiesModel.reset();
+
+            emptySelectionPrompt.setVisible (true);
+            tree.setVisible (false);
+
+            resized();
         }
     };
 }
