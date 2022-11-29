@@ -70,6 +70,13 @@ namespace melatonin
                 emptySelectionPrompt.setVisible (false);
                 tree.setVisible (true);
 
+                //Selects and highlights
+                if(component != nullptr)
+                {
+                    getRoot()->openTreeAndSelect (component);
+                    tree.scrollToKeepItemVisible(tree.getSelectedItem(0));
+                }
+
                 repaint();
             }
             else

@@ -62,6 +62,7 @@ namespace melatonin
             else if (component->isParentOf (target))
             {
                 jassert (target);
+                setSelected (true, true, juce::dontSendNotification);
                 setOpen (true);
                 // recursively open up tree to get at target
                 for (int i = 0; i < getNumSubItems(); ++i)
