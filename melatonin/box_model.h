@@ -72,6 +72,11 @@ namespace melatonin
             }
         }
 
+        ~BoxModel() override{
+            if(displayedComponent)
+                displayedComponent->getTopLevelComponent()->removeComponentListener(this);
+        }
+
         void paint (juce::Graphics& g) override
         {
             // dashed line rectangles be hard, yo!
@@ -127,6 +132,8 @@ namespace melatonin
 
             displayedComponent = componentToDisplay;
             displayedComponent->addComponentListener (this);
+
+            displayedComponent->getTopLevelComponent()->addComponentListener(this);
 
             updateLabels();
             updatePaddingLabelsIfNeeded();
