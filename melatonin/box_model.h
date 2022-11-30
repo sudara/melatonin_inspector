@@ -17,7 +17,6 @@ namespace melatonin
             parentComponentLabel.setJustificationType (juce::Justification::centredLeft);
 
             addAndMakeVisible (widthLabel);
-            widthLabel.setEditable (true);
             widthLabel.addListener (this);
             widthLabel.setFont (20.0f);
             widthLabel.setJustificationType (juce::Justification::centredRight);
@@ -28,7 +27,6 @@ namespace melatonin
             byLabel.setJustificationType (juce::Justification::centred);
 
             addAndMakeVisible (heightLabel);
-            heightLabel.setEditable (true);
             heightLabel.addListener (this);
             heightLabel.setFont (20.0f);
             heightLabel.setJustificationType (juce::Justification::centredLeft);
@@ -42,6 +40,19 @@ namespace melatonin
                 parentLabel->setText ("-", juce::dontSendNotification);
                 parentLabel->setJustificationType (juce::Justification::centred);
                 parentLabel->setColour (juce::Label::textColourId, color::redLineColor);
+                parentLabel->addListener(this);
+
+                //centers juce::TextEditor (hack since juce::Label is not doing it by default)
+                parentLabel->onEditorShow = [parentLabel] {
+                    if (auto editor = parentLabel->getCurrentTextEditor())
+                    {
+                        auto labelJustification = parentLabel->getJustificationType();
+                        if (editor->getJustificationType() != labelJustification)
+                        {
+                            editor->setJustification (parentLabel->getJustificationType());
+                        }
+                    }
+                };
             }
 
             for (auto l : paddingLabels)
@@ -53,6 +64,7 @@ namespace melatonin
                 l->setColour (juce::Label::backgroundColourId, color::blueLineColor);
                 l->setColour (juce::TextEditor::ColourIds::highlightColourId, color::blueLineColor.darker());
 
+                //centers juce::TextEditor (hack since juce::Label is not doing it by default)
                 l->onEditorShow = [l] {
                     if (auto editor = l->getCurrentTextEditor())
                     {
@@ -150,12 +162,23 @@ namespace melatonin
             {
                 updateDispayedCompPaddingProperties (paddingRightLabel.getText().getIntValue(), paddingLeftLabel.getText().getIntValue(), paddingTopLabel.getText().getIntValue(), paddingBottomLabel.getText().getIntValue());
             }
+            if (changedLabel == &topToParentLabel || changedLabel == &bottomToParentLabel
+                || changedLabel == &leftToParentLabel || changedLabel == &rightToParentLabel)
+            {
+                auto topVal = topToParentLabel.getText().getIntValue();
+                auto leftVal = leftToParentLabel.getText().getIntValue();
+                auto bottomVal = bottomToParentLabel.getText().getIntValue();
+                auto rightVal = rightToParentLabel.getText().getIntValue();
+                displayedComponent->setTopLeftPosition(leftVal, topVal);
+                displayedComponent->setSize(displayedComponent->getParentWidth() - rightVal - leftVal,
+                    displayedComponent->getParentHeight() - bottomVal - topVal);
+            }
         }
 
         // A selected component has been dragged or resized and this is our callback
-        void componentMovedOrResized (Component& /*component*/, bool /*wasMoved*/, bool wasResized) override
+        void componentMovedOrResized (Component& /*component*/, bool wasMoved, bool wasResized) override
         {
-            if (wasResized)
+            if (wasResized || wasMoved)
             {
                 updateLabels();
                 updatePaddingLabelsIfNeeded();
@@ -169,6 +192,7 @@ namespace melatonin
             for (auto label : labels)
             {
                 label->setText ("-", juce::dontSendNotification);
+                label->setEditable (false);
             }
 
             juce::Label* paddingLabels[4] = { &paddingTopLabel, &paddingRightLabel, &paddingLeftLabel, &paddingBottomLabel };
@@ -225,10 +249,21 @@ namespace melatonin
             widthLabel.setText (juce::String (displayedComponent->getWidth()), juce::dontSendNotification);
             heightLabel.setText (juce::String (displayedComponent->getHeight()), juce::dontSendNotification);
 
+            widthLabel.setEditable(true);
+            heightLabel.setEditable(true);
+
             topToParentLabel.setText (juce::String (boundsInParent.getY()), juce::dontSendNotification);
+            topToParentLabel.setEditable(true);
+
             rightToParentLabel.setText (juce::String (displayedComponent->getParentWidth() - displayedComponent->getWidth() - boundsInParent.getX()), juce::dontSendNotification);
+            rightToParentLabel.setEditable(true);
+
             bottomToParentLabel.setText (juce::String (displayedComponent->getParentHeight() - displayedComponent->getHeight() - boundsInParent.getY()), juce::dontSendNotification);
+            bottomToParentLabel.setEditable(true);
+
             leftToParentLabel.setText (juce::String (boundsInParent.getX()), juce::dontSendNotification);
+            leftToParentLabel.setEditable(true);
+
             repaint();
         }
 
@@ -243,6 +278,7 @@ namespace melatonin
                 for (auto pl : paddingLabels)
                 {
                     pl->setText ("-", juce::dontSendNotification);
+                    pl->setEditable(false);
                     pl->removeListener (this);
                 }
 

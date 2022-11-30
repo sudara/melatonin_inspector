@@ -105,16 +105,12 @@ namespace melatonin
         // We *must* then manually manage the size of the ResizableBorderComponent
         void componentMovedOrResized (Component& component, bool wasMoved, bool wasResized) override
         {
-            if (wasResized)
+            if (wasResized || wasMoved)
             {
                 // sort of annoying if hover triggers on resize
                 if (outlinedComponent)
                     outlinedComponent = nullptr;
                 setSelectedAndResizeableBounds (&component);
-            }
-            else if (wasMoved)
-            {
-                // move our resizable
             }
         }
 

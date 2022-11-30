@@ -101,9 +101,9 @@ namespace melatonin
         melatonin::MouseInspector mouseInspector { root };
 
         // Resize our overlay when the root component changes
-        void componentMovedOrResized (Component& rootComponent, bool /*wasMoved*/, bool wasResized) override
+        void componentMovedOrResized (Component& rootComponent, bool wasMoved, bool wasResized) override
         {
-            if (wasResized)
+            if (wasResized || wasMoved)
                 overlay.setBounds (rootComponent.getBounds());
         }
 
