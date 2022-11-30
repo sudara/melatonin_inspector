@@ -99,6 +99,10 @@ namespace melatonin
             addAndMakeVisible (*resizable);
             setSelectedAndResizeableBounds (component);
             repaint();
+
+            if(selectedComponent)
+                constrainer.setMinimumOnscreenAmounts (selectedComponent->getHeight(), selectedComponent->getWidth(),
+                    selectedComponent->getHeight(), selectedComponent->getWidth());
         }
 
         // When our selected component has been dragged or resized this is our callback
@@ -121,9 +125,23 @@ namespace melatonin
             repaint();
         }
 
+        void startDraggingComponent(const MouseEvent& e){
+            if(selectedComponent)
+                componentDragger.startDraggingComponent(selectedComponent, e);
+        }
+
+        void dragSelectedComponent (const MouseEvent& e)
+        {
+            if(selectedComponent)
+                componentDragger.dragComponent (selectedComponent, e, &constrainer);
+        }
+
     private:
         Component::SafePointer<Component> outlinedComponent;
         Rectangle<int> outlinedBounds;
+
+        ComponentDragger componentDragger;
+        ComponentBoundsConstrainer boundsConstrainer;
 
         Component::SafePointer<Component> selectedComponent;
         Rectangle<int> selectedBounds;
@@ -224,11 +242,30 @@ namespace melatonin
             outlineComponentCallback (event.originalComponent);
         }
 
+        void mouseUp (const MouseEvent& event) override
+        {
+            if (event.mods.isLeftButtonDown() && !isDragging)
+            {
+                selectComponentCallback (event.originalComponent);
+            }
+            isDragging = false;
+        }
+
         void mouseDown (const MouseEvent& event) override
         {
             if (event.mods.isLeftButtonDown())
             {
-                selectComponentCallback (event.originalComponent);
+                componentStartDraggingCallback (event.originalComponent, event);
+            }
+        }
+
+        void mouseDrag (const MouseEvent& event) override
+        {
+            //takes care of small mouse position drift on selection
+            if(event.getDistanceFromDragStart() > 3)
+            {
+                isDragging = true;
+                componentDraggedCallback (event.originalComponent, event);
             }
         }
 
@@ -242,9 +279,13 @@ namespace melatonin
 
         std::function<void (Component* c)> outlineComponentCallback;
         std::function<void (Component* c)> selectComponentCallback;
+        std::function<void (Component* c, const MouseEvent& e)> componentStartDraggingCallback;
+        std::function<void (Component* c, const MouseEvent& e)> componentDraggedCallback;
         std::function<void()> mouseExitCallback;
 
     private:
         Component& root;
+
+        bool isDragging{false};
     };
 }

@@ -74,6 +74,23 @@ namespace melatonin
             panel.selectComponent (c, collapseTree);
         }
 
+        void dragComponent (Component* c, const MouseEvent& e)
+        {
+            if (!enabled || overlay.isParentOf (c))
+                return;
+
+            overlay.dragSelectedComponent(e);
+            panel.displayComponentInfo (c);
+        }
+
+        void startDragComponent (Component* c, const MouseEvent& e)
+        {
+            if (!enabled || overlay.isParentOf (c))
+                return;
+
+            overlay.startDraggingComponent(e);
+        }
+
         // closing the window means turning off the inspector
         void closeButtonPressed() override
         {
@@ -111,6 +128,8 @@ namespace melatonin
         {
             mouseInspector.outlineComponentCallback = [this] (Component* c) { this->outlineComponent (c); };
             mouseInspector.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, true); };
+            mouseInspector.componentStartDraggingCallback = [this] (Component* c, const MouseEvent& e) { this->startDragComponent (c, e); };
+            mouseInspector.componentDraggedCallback = [this] (Component* c, const MouseEvent& e) { this->dragComponent (c, e); };
             mouseInspector.mouseExitCallback = [this]() { if (this->enabled) panel.redisplaySelectedComponent(); };
 
             panel.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, true); };
