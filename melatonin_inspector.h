@@ -113,7 +113,7 @@ namespace melatonin
             mouseInspector.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, true); };
             mouseInspector.mouseExitCallback = [this]() { if (this->enabled) panel.redisplaySelectedComponent(); };
 
-            panel.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, false); };
+            panel.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, true); };
             panel.outlineComponentCallback = [this] (Component* c) { this->outlineComponent (c); };
             panel.toggleCallback = [this] (bool enable) { this->toggle (enable); };
         }

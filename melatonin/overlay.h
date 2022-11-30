@@ -170,6 +170,13 @@ namespace melatonin
 
         void calculateLinesToParent()
         {
+            //Todo(Investigate why this is happening)
+            if(selectedComponent == nullptr)
+            {
+                jassertfalse;
+                return;
+            }
+
             auto topOfComponent = selectedComponent->getBoundsInParent().getPosition().translated (selectedBounds.getWidth() / 2, -1);
             auto leftOfComponent = selectedComponent->getBoundsInParent().getPosition().translated (-1, selectedBounds.getHeight() / 2);
 

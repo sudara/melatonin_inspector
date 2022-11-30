@@ -26,10 +26,10 @@ namespace melatonin
         void reconstructRoot()
         {
             jassert (selectComponentCallback);
-            if (rootSet)
+            if (rootItem)
                 tree.deleteRootItem();
-            rootSet = true;
-            tree.setRootItem (new ComponentTreeViewItem (&root, outlineComponentCallback, selectComponentCallback));
+            rootItem = std::make_unique<ComponentTreeViewItem>(&root, outlineComponentCallback, selectComponentCallback);
+            tree.setRootItem (rootItem.get());
             getRoot()->setOpenness (ComponentTreeViewItem::Openness::opennessOpen);
         }
 
@@ -58,7 +58,7 @@ namespace melatonin
 
         void displayComponentInfo (Component* component)
         {
-            if (!rootSet)
+            if (!rootItem)
                 reconstructRoot();
 
             // only show on hover if there isn't something selected
@@ -70,21 +70,18 @@ namespace melatonin
                 emptySelectionPrompt.setVisible (false);
                 tree.setVisible (true);
 
+                repaint();
+                resized();
+
                 //Selects and highlights
                 if(component != nullptr)
                 {
+                    getRoot()->recursivelyCloseSubItems();
+
                     getRoot()->openTreeAndSelect (component);
                     tree.scrollToKeepItemVisible(tree.getSelectedItem(0));
                 }
-
-                repaint();
             }
-            else
-            {
-                tree.setVisible (true);
-                emptySelectionPrompt.setVisible (false);
-            }
-            resized();
         }
 
         void redisplaySelectedComponent()
@@ -150,7 +147,7 @@ namespace melatonin
         PropertiesModel propertiesModel;
         juce::TreeView tree;
         juce::Label emptySelectionPrompt { "SelectionPrompt", "Select any component to see components tree" };
-        bool rootSet = false;
+        std::unique_ptr<ComponentTreeViewItem> rootItem;
 
         ComponentTreeViewItem* getRoot()
         {
