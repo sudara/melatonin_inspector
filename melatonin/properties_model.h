@@ -1,60 +1,47 @@
 #pragma once
 #include "helpers.h"
+#include "model.h"
 
 namespace melatonin
 {
+    struct PropsLookAndFeel: juce::LookAndFeel_V4{
+        PropsLookAndFeel(){
+            setColour(juce::PropertyComponent::backgroundColourId, juce::Colours::transparentBlack);
+            setColour(juce::TextEditor::outlineColourId, juce::Colours::transparentBlack);
+            setColour(juce::TextPropertyComponent::backgroundColourId, juce::Colours::transparentBlack);
+            setColour(juce::TextPropertyComponent::outlineColourId, juce::Colours::transparentBlack);
+            setColour(juce::BooleanPropertyComponent::backgroundColourId, juce::Colours::transparentBlack);
+            setColour(juce::BooleanPropertyComponent::outlineColourId, juce::Colours::transparentBlack);
+        }
+    };
+
+
     class PropertiesModel : public juce::Component, public juce::Label::Listener, public juce::ComponentListener
     {
     public:
-        PropertiesModel()
+        PropertiesModel(ComponentModel& _model): model(_model)
         {
-            addAndMakeVisible (lnfComponentLabel);
-            lnfComponentLabel.setColour (juce::Label::textColourId, color::white);
-            lnfComponentLabel.setText("LookAndFeel: ", juce::dontSendNotification);
-            lnfComponentLabel.setJustificationType (juce::Justification::centredLeft);
-
-            addAndMakeVisible (lnfValLabel);
-            lnfValLabel.setColour (juce::Label::textColourId, color::white);
-            lnfValLabel.setJustificationType (juce::Justification::centredLeft);
-
-            for(auto* c: getComps())
-                addAndMakeVisible(c);
 
             reset();
+
+            panel.setLookAndFeel(&propsLookAndFeel);
+            addAndMakeVisible(panel);
         }
 
         void paint (juce::Graphics& g) override
         {
             //just super simple separator line
-            g.setColour (color::greyLineColor);
-            g.drawHorizontalLine (padding, padding, getRight() - padding);
+            if(displayedComponent)
+            {
+                g.setColour (color::greyLineColor);
+                g.drawHorizontalLine (0, padding, getRight() - padding);
+            }
         }
 
         void resized() override
         {
-            auto center = getLocalBounds().getCentre();
-            auto labelHeight = 30;
-
-            auto lnfLabelWidth = 100;
-            lnfComponentLabel.setBounds (lnfRectangle().getX(), lnfRectangle().getY() - labelHeight + 5, lnfLabelWidth, labelHeight);
-            lnfValLabel.setBounds (lnfLabelWidth + lnfRectangle().getX(), lnfRectangle().getY() - labelHeight + 5, lnfRectangle().getWidth() - lnfLabelWidth, labelHeight);
-
-            /*xLabel.setBounds (lnfRectangle().getX(), lnfRectangle().getY() - labelHeight + 5, lnfRectangle().getWidth(), labelHeight);
-            xValLabel.setBounds (lnfRectangle().getX(), lnfRectangle().getY() - labelHeight + 5, lnfRectangle().getWidth(), labelHeight);
-
-            lnfComponentLabel.setBounds (lnfRectangle().getX(), lnfRectangle().getY() - labelHeight + 5, lnfRectangle().getWidth(), labelHeight);
-            lnfComponentLabel.setBounds (lnfRectangle().getX(), lnfRectangle().getY() - labelHeight + 5, lnfRectangle().getWidth(), labelHeight);
-
-            lnfComponentLabel.setBounds (lnfRectangle().getX(), lnfRectangle().getY() - labelHeight + 5, lnfRectangle().getWidth(), labelHeight);
-            lnfComponentLabel.setBounds (lnfRectangle().getX(), lnfRectangle().getY() - labelHeight + 5, lnfRectangle().getWidth(), labelHeight);
-
-            lnfComponentLabel.setBounds (lnfRectangle().getX(), lnfRectangle().getY() - labelHeight + 5, lnfRectangle().getWidth(), labelHeight);
-            lnfComponentLabel.setBounds (lnfRectangle().getX(), lnfRectangle().getY() - labelHeight + 5, lnfRectangle().getWidth(), labelHeight);
-
-            lnfComponentLabel.setBounds (lnfRectangle().getX(), lnfRectangle().getY() - labelHeight + 5, lnfRectangle().getWidth(), labelHeight);
-            lnfComponentLabel.setBounds (lnfRectangle().getX(), lnfRectangle().getY() - labelHeight + 5, lnfRectangle().getWidth(), labelHeight);
-            lnfComponentLabel.setBounds (lnfRectangle().getX(), lnfRectangle().getY() - labelHeight + 5, lnfRectangle().getWidth(), labelHeight);
-        */}
+            panel.setBounds(propsRectangle());
+        }
 
         void displayComponent (Component* componentToDisplay)
         {
@@ -74,9 +61,9 @@ namespace melatonin
         }
 
         // A selected component has been dragged or resized and this is our callback
-        void componentMovedOrResized (Component& /*component*/, bool /*wasMoved*/, bool wasResized) override
+        void componentMovedOrResized (Component& /*component*/, bool wasMoved, bool wasResized) override
         {
-            if (wasResized)
+            if (wasResized || wasMoved)
             {
                 updateLabels();
             }
@@ -84,36 +71,22 @@ namespace melatonin
 
         void reset()
         {
-            lnfComponentLabel.setText ("", juce::dontSendNotification);
-            lnfValLabel.setText ("", juce::dontSendNotification);
-            xValLabel.setText ("", juce::dontSendNotification);
-            yValLabel.setText ("", juce::dontSendNotification);
-            widthValNameLabel.setText ("", juce::dontSendNotification);
-            heightValLabel.setText ("", juce::dontSendNotification);
             focusStateValLabel.setText ("", juce::dontSendNotification);
             isOpaqueToggle.setToggleState(false, juce::dontSendNotification);
             isOpaqueToggle.setEnabled(false);
 
             alphaValLabel.setText ("", juce::dontSendNotification);
+            panel.clear();
+            panel.setVisible(false);
         }
 
     private:
+        ComponentModel& model;
+
         Component::SafePointer<Component> displayedComponent;
 
-        juce::Label lnfComponentLabel,
-                lnfValLabel;
-
-        juce::Label xLabel,
-            xValLabel;
-
-        juce::Label yLabel;
-        juce::Label yValLabel;
-
-        juce::Label widthNameLabel;
-        juce::Label widthValNameLabel;
-
-        juce::Label heightLabel;
-        juce::Label heightValLabel;
+        PropsLookAndFeel propsLookAndFeel;
+        juce::PropertyPanel panel{"Properties"};
 
         juce::Label focusStateLabel;
         juce::Label focusStateValLabel;
@@ -125,39 +98,57 @@ namespace melatonin
         juce::Label alphaValLabel;
 
         int padding = 30;
-        int paddingToParent = 24;
+        int paddingToParent = 4;
 
         juce::Rectangle<int> parentComponentRectangle()
         {
-            return getLocalBounds().reduced (padding);
+            return getLocalBounds().reduced (padding, 0);
         }
 
-        juce::Rectangle<int> lnfRectangle()
+        juce::Rectangle<int> propsRectangle()
         {
-            return parentComponentRectangle().reduced (0, paddingToParent).withTrimmedTop (5);
-        }
-        juce::Rectangle<int> xyRectangle()
-        {
-            return parentComponentRectangle().reduced (0, paddingToParent).withTrimmedTop (25);
+            return parentComponentRectangle().reduced(0, paddingToParent).withTrimmedTop (5);
         }
 
         void updateLabels()
         {
-            lnfComponentLabel.setText("LookAndFeel: ", juce::dontSendNotification);
-            lnfValLabel.setText (lnfString (displayedComponent), juce::dontSendNotification);
-            repaint();
+            panel.setVisible(true);
+            panel.clear();
+            auto props = createTextEditors();
+            for(auto* p: props){
+                p->setLookAndFeel(&propsLookAndFeel);
+            }
+            panel.addProperties(props, 5);
+
+            resized();
         }
 
-        std::vector<juce::Component*> getComps(){
+        juce::Array<juce::PropertyComponent*> createTextEditors()
+        {
+            auto opaque = new juce::BooleanPropertyComponent (juce::Value(model.opaqueValue), "Opaque:", "");
+            opaque->setEnabled(false);
+
+            auto cachedImage = new juce::BooleanPropertyComponent (juce::Value(model.hasCachedImageValue), "CachedToImage:", "");
+            cachedImage->setEnabled(false);
+
+            auto focused = new juce::BooleanPropertyComponent (juce::Value(model.focused), "Focused:", "");
+            focused->setEnabled(false);
+
+            auto accessibilityHandled = new juce::BooleanPropertyComponent (juce::Value(model.accessibilityHandled), "Accessibility:", "");
+            accessibilityHandled->setEnabled(false);
+
             return {
-                &lnfComponentLabel, &lnfValLabel,
-                &xLabel, &xValLabel,
-                &yLabel, &yValLabel,
-                &widthNameLabel, &widthValNameLabel,
-                &heightLabel, &heightValLabel,
-                &focusStateLabel, &focusStateValLabel,
-                &opaqueStateLabel, &isOpaqueToggle,
-                &alphaLabel, &alphaValLabel
+                new juce::TextPropertyComponent (juce::Value (model.lookAndFeel), "LookAndFeel:", 200, false, false),
+                new juce::TextPropertyComponent (model.xValue, "X:", 5, false),
+                new juce::TextPropertyComponent (model.yValue, "Y:", 5, false),
+                new juce::TextPropertyComponent (model.widthValue, "Width:", 5, false),
+                new juce::TextPropertyComponent (model.heightValue, "Height:", 5, false),
+                new juce::TextPropertyComponent (juce::Value(model.fontValue), "Font:", 5, false, false),
+                new juce::TextPropertyComponent (juce::Value(model.alphaValue), "Alpha:", 5, false, false),
+                accessibilityHandled,
+                focused,
+                opaque,
+                cachedImage
             };
         }
     };

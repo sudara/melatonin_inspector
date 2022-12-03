@@ -61,6 +61,35 @@ namespace melatonin
         }
     }
 
+    // do our best to derive a useful UI string from a component
+    static inline juce::String componentFontValue (juce::Component* c)
+    {
+        if (auto* label = dynamic_cast<juce::Label*> (c))
+        {
+            auto font = label->getFont();
+            return juce::String (font.getTypefaceName() + " " + font.getTypefaceStyle() + " " + juce::String(font.getHeight()));
+        }
+        else if (auto btn = dynamic_cast<juce::TextButton*> (c))
+        {
+            auto font = btn->getLookAndFeel().getTextButtonFont(*btn, btn->getHeight());
+            return juce::String (font.getTypefaceName() + " " + font.getTypefaceStyle() + " " + juce::String(font.getHeight()));
+        }
+        else if (auto slider = dynamic_cast<juce::Slider*> (c))
+        {
+            auto font = slider->getLookAndFeel().getSliderPopupFont(*slider);
+            return juce::String (font.getTypefaceName() + " " + font.getTypefaceStyle() + " " + juce::String(font.getHeight()));
+        }
+        else if (auto cb = dynamic_cast<juce::ComboBox*> (c))
+        {
+            auto font = cb->getLookAndFeel().getComboBoxFont(*cb);
+            return juce::String (font.getTypefaceName() + " " + font.getTypefaceStyle() + " " + juce::String(font.getHeight()));
+        }
+        else
+        {
+            return "-";
+        }
+    }
+
     //returns name of assigned LnF
     static inline juce::String lnfString (juce::Component* c)
     {
@@ -71,7 +100,7 @@ namespace melatonin
         }
         else
         {
-            return "";
+            return "-";
         }
     }
 

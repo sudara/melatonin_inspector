@@ -45,7 +45,7 @@ namespace melatonin
             auto mainCol = area.removeFromLeft (columnMinWidth);
             toggleButton.setBounds (mainCol.removeFromTop (20).withTrimmedLeft (27));
             boxModel.setBounds (mainCol.removeFromTop (250));
-            propertiesModel.setBounds (mainCol.removeFromTop (250));
+            propertiesModel.setBounds (mainCol);
 
             //using btn toggle state (better to switch to using class variable
             //or inspectors prop)
@@ -101,6 +101,10 @@ namespace melatonin
             }
 
             selectedComponent = component;
+
+            //update value in the model
+            model.selectComponent(component);
+
             displayComponentInfo (selectedComponent);
             if (collapseTreeBeforeSelection)
             {
@@ -143,8 +147,9 @@ namespace melatonin
         Component::SafePointer<Component> selectedComponent;
         Component& root;
         juce::ToggleButton toggleButton;
+        ComponentModel model;
         BoxModel boxModel;
-        PropertiesModel propertiesModel;
+        PropertiesModel propertiesModel{model};
         juce::TreeView tree;
         juce::Label emptySelectionPrompt { "SelectionPrompt", "Select any component to see components tree" };
         std::unique_ptr<ComponentTreeViewItem> rootItem;
@@ -163,6 +168,8 @@ namespace melatonin
 
             emptySelectionPrompt.setVisible (true);
             tree.setVisible (false);
+
+            model.deselectComponent();
 
             resized();
         }

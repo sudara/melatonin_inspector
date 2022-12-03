@@ -44,9 +44,11 @@ namespace melatonin
         }
         void updateWindowSizeOnToggle()
         {
-            setResizeLimits (enabled ? 700 : 380, 500, 1200, 1200);
-            setSize (enabled ? 700 : 380, 500);
-            panel.setSize (enabled ? 700 : 380, 500);
+            auto width = enabled ? jmax(700, getWidth()) : 380;
+            auto height = jmax(getHeight(), 680);
+            setResizeLimits (width, height, 1200, 1200);
+            setSize (width, height);
+            panel.setSize (width, height);
         }
 
         ~Inspector() override
