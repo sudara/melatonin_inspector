@@ -2,6 +2,7 @@
 #include "box_model.h"
 #include "component_tree_view_item.h"
 #include "properties_model.h"
+#include "color_model.h"
 
 namespace melatonin
 {
@@ -15,6 +16,7 @@ namespace melatonin
             emptySelectionPrompt.setColour (juce::Label::textColourId, color::white);
             emptySelectionPrompt.setJustificationType (juce::Justification::centredTop);
             addAndMakeVisible (boxModel);
+            addAndMakeVisible (colorModel);
             addAndMakeVisible (propertiesModel);
             toggleButton.setButtonText ("Enabled");
             toggleButton.setToggleState (enabledAtStart, juce::dontSendNotification);
@@ -35,6 +37,7 @@ namespace melatonin
 
         void resized() override
         {
+            using namespace juce;
             auto area = getLocalBounds();
 
             auto inspectorEnabled = toggleButton.getToggleState();
@@ -45,6 +48,7 @@ namespace melatonin
             auto mainCol = area.removeFromLeft (columnMinWidth);
             toggleButton.setBounds (mainCol.removeFromTop (20).withTrimmedLeft (27));
             boxModel.setBounds (mainCol.removeFromTop (250));
+            colorModel.setBounds (mainCol.removeFromTop(static_cast<int> (jmin (180.0, mainCol.getHeight() * 0.25))).withTrimmedBottom(4));
             propertiesModel.setBounds (mainCol);
 
             //using btn toggle state (better to switch to using class variable
@@ -66,6 +70,7 @@ namespace melatonin
             {
                 boxModel.displayComponent (component);
                 propertiesModel.displayComponent (component);
+                colorModel.displayComponent(component);
 
                 emptySelectionPrompt.setVisible (false);
                 tree.setVisible (true);
@@ -129,6 +134,7 @@ namespace melatonin
 
                 boxModel.reset();
                 propertiesModel.reset();
+                colorModel.reset();
 
                 resized();
             }
@@ -149,6 +155,7 @@ namespace melatonin
         juce::ToggleButton toggleButton;
         ComponentModel model;
         BoxModel boxModel;
+        ColorModel colorModel;
         PropertiesModel propertiesModel{model};
         juce::TreeView tree;
         juce::Label emptySelectionPrompt { "SelectionPrompt", "Select any component to see components tree" };
@@ -165,6 +172,7 @@ namespace melatonin
             tree.clearSelectedItems();
             boxModel.reset();
             propertiesModel.reset();
+            colorModel.reset();
 
             emptySelectionPrompt.setVisible (true);
             tree.setVisible (false);

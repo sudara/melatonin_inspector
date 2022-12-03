@@ -106,7 +106,8 @@ namespace melatonin
 
     static inline juce::String dimensionsString (juce::Rectangle<int> bounds)
     {
-        return juce::String (bounds.getWidth()) + L" × " + juce::String (bounds.getHeight());
+        //account for outline border drawing (1 on each side)
+        return juce::String (bounds.getWidth() - 2) + L" × " + juce::String (bounds.getHeight() - 2);
     }
 
     namespace color

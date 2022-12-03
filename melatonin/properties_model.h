@@ -16,22 +16,21 @@ namespace melatonin
     };
 
 
-    class PropertiesModel : public juce::Component, public juce::Label::Listener, public juce::ComponentListener
+    class PropertiesModel : public juce::Component, public juce::ComponentListener
     {
     public:
         PropertiesModel(ComponentModel& _model): model(_model)
         {
-
             reset();
 
             panel.setLookAndFeel(&propsLookAndFeel);
-            addAndMakeVisible(panel);
+            addChildComponent(panel);
         }
 
         void paint (juce::Graphics& g) override
         {
             //just super simple separator line
-            if(displayedComponent)
+            if(displayedComponent && panel.isVisible())
             {
                 g.setColour (color::greyLineColor);
                 g.drawHorizontalLine (0, padding, getRight() - padding);
@@ -53,11 +52,7 @@ namespace melatonin
             displayedComponent = componentToDisplay;
             displayedComponent->addComponentListener (this);
 
-            updateLabels();
-        }
-
-        void labelTextChanged (juce::Label* changedLabel) override
-        {
+            updateProperties();
         }
 
         // A selected component has been dragged or resized and this is our callback
@@ -65,19 +60,16 @@ namespace melatonin
         {
             if (wasResized || wasMoved)
             {
-                updateLabels();
+                updateProperties();
             }
         }
 
         void reset()
         {
-            focusStateValLabel.setText ("", juce::dontSendNotification);
-            isOpaqueToggle.setToggleState(false, juce::dontSendNotification);
-            isOpaqueToggle.setEnabled(false);
-
-            alphaValLabel.setText ("", juce::dontSendNotification);
             panel.clear();
             panel.setVisible(false);
+
+            resized();
         }
 
     private:
@@ -87,15 +79,6 @@ namespace melatonin
 
         PropsLookAndFeel propsLookAndFeel;
         juce::PropertyPanel panel{"Properties"};
-
-        juce::Label focusStateLabel;
-        juce::Label focusStateValLabel;
-
-        juce::Label opaqueStateLabel;
-        juce::ToggleButton isOpaqueToggle{"opaque state"};
-
-        juce::Label alphaLabel;
-        juce::Label alphaValLabel;
 
         int padding = 30;
         int paddingToParent = 4;
@@ -110,7 +93,7 @@ namespace melatonin
             return parentComponentRectangle().reduced(0, paddingToParent).withTrimmedTop (5);
         }
 
-        void updateLabels()
+        void updateProperties()
         {
             panel.setVisible(true);
             panel.clear();
