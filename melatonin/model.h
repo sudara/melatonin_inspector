@@ -54,7 +54,6 @@ namespace melatonin{
                 alphaValue = juce::String(selectedComponent->getAlpha());
 
                 accessibilityHandled = selectedComponent->isAccessible();
-                focused = selectedComponent->isFocusContainer();
 
                 widthValue.addListener(this);
                 heightValue.addListener(this);

@@ -1,8 +1,9 @@
 #pragma once
 #include "box_model.h"
+#include "color_model.h"
 #include "component_tree_view_item.h"
 #include "properties_model.h"
-#include "color_model.h"
+#include "lookandfeel.h"
 
 namespace melatonin
 {
@@ -12,27 +13,74 @@ namespace melatonin
         explicit InspectorPanel (juce::Component& rootComponent, bool enabledAtStart = true) : root (rootComponent)
         {
             addChildComponent (tree);
+            addChildComponent (emptySearchLabel);
             addAndMakeVisible (emptySelectionPrompt);
-            emptySelectionPrompt.setColour (juce::Label::textColourId, color::white);
+
+            searchBox.setLookAndFeel(&melatoninLookAndFeel);
+            clearBtn.setLookAndFeel(&melatoninLookAndFeel);
+            emptySelectionPrompt.setLookAndFeel(&melatoninLookAndFeel);
+
             emptySelectionPrompt.setJustificationType (juce::Justification::centredTop);
+            emptySearchLabel.setJustificationType (juce::Justification::topLeft);
+
             addAndMakeVisible (boxModel);
             addAndMakeVisible (colorModel);
             addAndMakeVisible (propertiesModel);
+
             toggleButton.setButtonText ("Enabled");
             toggleButton.setToggleState (enabledAtStart, juce::dontSendNotification);
+
             addAndMakeVisible (toggleButton);
             toggleButton.addListener (this);
             tree.setIndentSize (12);
+
+            searchBox.setHelpText ("search");
+            searchBox.setTextToShowWhenEmpty("search", juce::Colours::white);
+            addAndMakeVisible (searchBox);
+            addAndMakeVisible (clearBtn);
+
+            searchBox.onTextChange = [this] {
+                auto searchText = searchBox.getText();
+                reconstructRoot();
+
+                //try to find the first item that matches the search string
+                if(searchText.isNotEmpty()){
+                    getRoot()->filterNodesRecursively (searchText);
+                }
+
+                //display empty label
+                if(getRoot()->getNumSubItems() == 0
+                    && !searchText.containsIgnoreCase(getRoot()->getComponentName())
+                    && tree.getNumSelectedItems() == 0)
+                {
+                    DBG(getRoot()->getComponentName());
+                    tree.setVisible(false);
+                    emptySearchLabel.setVisible(true);
+
+                    resized();
+                }
+
+                clearBtn.setVisible(searchBox.getText().isNotEmpty());
+            };
+            clearBtn.onClick = [this]{
+                searchBox.setText("");
+            };
+
         }
 
         void reconstructRoot()
         {
             jassert (selectComponentCallback);
             if (rootItem)
-                tree.deleteRootItem();
-            rootItem = std::make_unique<ComponentTreeViewItem>(&root, outlineComponentCallback, selectComponentCallback);
+                tree.setRootItem(nullptr);
+            rootItem = std::make_unique<ComponentTreeViewItem> (&root, outlineComponentCallback, selectComponentCallback);
             tree.setRootItem (rootItem.get());
             getRoot()->setOpenness (ComponentTreeViewItem::Openness::opennessOpen);
+
+            emptySearchLabel.setVisible(false);
+            tree.setVisible(true);
+
+            resized();
         }
 
         void resized() override
@@ -48,14 +96,22 @@ namespace melatonin
             auto mainCol = area.removeFromLeft (columnMinWidth);
             toggleButton.setBounds (mainCol.removeFromTop (20).withTrimmedLeft (27));
             boxModel.setBounds (mainCol.removeFromTop (250));
-            colorModel.setBounds (mainCol.removeFromTop(static_cast<int> (jmin (180.0, mainCol.getHeight() * 0.25))).withTrimmedBottom(4));
+            colorModel.setBounds (mainCol.removeFromTop (static_cast<int> (jmin (180.0, mainCol.getHeight() * 0.25))).withTrimmedBottom (4));
             propertiesModel.setBounds (mainCol);
 
             //using btn toggle state (better to switch to using class variable
             //or inspectors prop)
 
             if (tree.isVisible())
+            {
+                auto searchRow = area.removeFromTop (30).reduced(4, 4);
+                clearBtn.setBounds (searchRow.removeFromRight(56));
+                searchRow.removeFromRight(8);
+                searchBox.setBounds (searchRow);
+
                 tree.setBounds (area); // padding in these default components are a mess
+                emptySearchLabel.setBounds(area.reduced(4));
+            }
             else
                 emptySelectionPrompt.setBounds (area);
         }
@@ -70,21 +126,24 @@ namespace melatonin
             {
                 boxModel.displayComponent (component);
                 propertiesModel.displayComponent (component);
-                colorModel.displayComponent(component);
+                colorModel.displayComponent (component);
 
                 emptySelectionPrompt.setVisible (false);
+                emptySearchLabel.setVisible (false);
                 tree.setVisible (true);
+                searchBox.setVisible (true);
+                clearBtn.setVisible(searchBox.getText().isNotEmpty());
 
                 repaint();
                 resized();
 
                 //Selects and highlights
-                if(component != nullptr)
+                if (component != nullptr)
                 {
                     getRoot()->recursivelyCloseSubItems();
 
                     getRoot()->openTreeAndSelect (component);
-                    tree.scrollToKeepItemVisible(tree.getSelectedItem(0));
+                    tree.scrollToKeepItemVisible (tree.getSelectedItem (0));
                 }
             }
         }
@@ -108,7 +167,7 @@ namespace melatonin
             selectedComponent = component;
 
             //update value in the model
-            model.selectComponent(component);
+            model.selectComponent (component);
 
             displayComponentInfo (selectedComponent);
             if (collapseTreeBeforeSelection)
@@ -131,6 +190,8 @@ namespace melatonin
                 auto hasSelected = selectedComponent != nullptr;
                 emptySelectionPrompt.setVisible (!hasSelected);
                 tree.setVisible (hasSelected);
+                searchBox.setVisible (hasSelected);
+                clearBtn.setVisible(hasSelected && searchBox.getText().isNotEmpty());
 
                 boxModel.reset();
                 propertiesModel.reset();
@@ -156,9 +217,16 @@ namespace melatonin
         ComponentModel model;
         BoxModel boxModel;
         ColorModel colorModel;
-        PropertiesModel propertiesModel{model};
+        PropertiesModel propertiesModel { model };
+
+        MelatoninLookAndFeel melatoninLookAndFeel;
+
+        //todo move to it's own component
         juce::TreeView tree;
         juce::Label emptySelectionPrompt { "SelectionPrompt", "Select any component to see components tree" };
+        juce::Label emptySearchLabel { "EmptySearchResultsPrompt", "No component found" };
+        juce::TextEditor searchBox { "Search box" };
+        juce::TextButton clearBtn { "clear"};
         std::unique_ptr<ComponentTreeViewItem> rootItem;
 
         ComponentTreeViewItem* getRoot()
@@ -176,6 +244,9 @@ namespace melatonin
 
             emptySelectionPrompt.setVisible (true);
             tree.setVisible (false);
+            searchBox.setVisible (false);
+            clearBtn.setVisible (false);
+            emptySearchLabel.setVisible (false);
 
             model.deselectComponent();
 

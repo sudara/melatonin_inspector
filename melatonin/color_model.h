@@ -50,7 +50,7 @@ namespace melatonin
             colorValField.setBounds (fieldBounds.removeFromLeft (60));
 
             colorSelectorBounds = fieldBounds.removeFromRight (juce::jmin (fieldBounds.getWidth(), labelHeight))
-                                      .withSizeKeepingCentre (juce::jmin (fieldBounds.getWidth(), labelHeight), labelHeight * 0.75f);
+                                      .withSizeKeepingCentre (juce::jmin (fieldBounds.getWidth(), labelHeight), static_cast<int> (labelHeight * 0.75f));
         }
 
         void displayComponent (Component* componentToDisplay)

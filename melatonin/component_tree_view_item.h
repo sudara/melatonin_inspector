@@ -85,13 +85,12 @@ namespace melatonin
             if (!component->isVisible())
                 g.setColour (juce::Colours::grey);
 
-
             auto textIndent = mightContainSubItems() ? 7 : 5;
             auto wantKeyboardFocus = component->getWantsKeyboardFocus();
             juce::String keyboard = wantKeyboardFocus ? " (wantsKeyboard)" : "";
 
-            if(wantKeyboardFocus)
-                g.setColour(isSelected() ? color::redLineColor.darker(0.7f) : color::redLineColor);
+            if (wantKeyboardFocus)
+                g.setColour (isSelected() ? color::redLineColor.darker (0.7f) : color::redLineColor);
             g.setFont (juce::Font ("Verdana", 14, juce::Font::FontStyleFlags::plain));
             g.drawText (componentString (component) + keyboard, textIndent, 0, w - textIndent, h, juce::Justification::left, true);
         }
@@ -124,10 +123,58 @@ namespace melatonin
             }
         }
 
+        void filterNodesRecursively (const juce::String& searchString)
+        {
+            // Iterate over the child nodes of the current node
+            for (int i = getNumSubItems() - 1; i >= 0; --i)
+            {
+                // Recursively call the function on the current child node
+                if (auto* ct = dynamic_cast<ComponentTreeViewItem*> (getSubItem (i)))
+                {
+                    ct->filterNodesRecursively (searchString);
+                }
+            }
+            // Check if the current node's name does not contain the search string
+            if (!getComponentName().containsIgnoreCase(searchString))
+            {
+                // Remove the subtree rooted at the current node
+                if(getParentItem() != nullptr && getNumSubItems() == 0)
+                {
+                    getParentItem()->removeSubItem (getIndexInParent());
+                    DBG("For removal: "<< getComponentName());
+                }
+                else
+                    setOpen (true);
+            }
+            else if(getComponentName().startsWithIgnoreCase(searchString))
+            {
+                outlineComponentCallback (component);
+                setSelected(true, true);
+                setOpen (true);
+            }
+            else {
+                setOpen (true);
+            }
+        }
+
         // Callback from the component listener. Reconstruct children when component is deleted
         void componentChildrenChanged (juce::Component& /*changedComponent*/) override
         {
             validateSubItems();
+        }
+
+        juce::String getComponentName()
+        {
+            juce::String res = "";
+            if (component && !component->getName().isEmpty())
+            {
+                return component->getName();
+            }
+            else if (component)
+            {
+                return type (*component);
+            }
+            return res;
         }
 
         std::function<void (juce::Component* c)> outlineComponentCallback;
