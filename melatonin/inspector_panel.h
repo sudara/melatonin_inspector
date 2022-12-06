@@ -14,7 +14,6 @@ namespace melatonin
         {
             addChildComponent (tree);
             addChildComponent (emptySearchLabel);
-            addAndMakeVisible (emptySelectionPrompt);
 
             searchBox.setLookAndFeel(&melatoninLookAndFeel);
             clearBtn.setLookAndFeel(&melatoninLookAndFeel);
@@ -61,6 +60,7 @@ namespace melatonin
                 }
 
                 clearBtn.setVisible(searchBox.getText().isNotEmpty());
+                tree.setVisible(searchBox.getText().isNotEmpty());
             };
             clearBtn.onClick = [this]{
                 searchBox.setText("");
@@ -77,7 +77,6 @@ namespace melatonin
             tree.setRootItem (rootItem.get());
             getRoot()->setOpenness (ComponentTreeViewItem::Openness::opennessOpen);
 
-            emptySearchLabel.setVisible(false);
             tree.setVisible(true);
 
             resized();
@@ -128,11 +127,7 @@ namespace melatonin
                 propertiesModel.displayComponent (component);
                 colorModel.displayComponent (component);
 
-                emptySelectionPrompt.setVisible (false);
-                emptySearchLabel.setVisible (false);
                 tree.setVisible (true);
-                searchBox.setVisible (true);
-                clearBtn.setVisible(searchBox.getText().isNotEmpty());
 
                 repaint();
                 resized();
@@ -188,10 +183,6 @@ namespace melatonin
                 toggleCallback (enabled);
 
                 auto hasSelected = selectedComponent != nullptr;
-                emptySelectionPrompt.setVisible (!hasSelected);
-                tree.setVisible (hasSelected);
-                searchBox.setVisible (hasSelected);
-                clearBtn.setVisible(hasSelected && searchBox.getText().isNotEmpty());
 
                 boxModel.reset();
                 propertiesModel.reset();
@@ -242,13 +233,8 @@ namespace melatonin
             propertiesModel.reset();
             colorModel.reset();
 
-            emptySelectionPrompt.setVisible (true);
-            tree.setVisible (false);
-            searchBox.setVisible (false);
-            clearBtn.setVisible (false);
-            emptySearchLabel.setVisible (false);
-
             model.deselectComponent();
+            tree.setRootItem(getRoot());
 
             resized();
         }
