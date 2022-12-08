@@ -47,7 +47,7 @@ namespace melatonin
             photoImageBounds = r.reduced (2);
 
             colorField.setBounds (fieldBounds.removeFromLeft (labelWidth));
-            colorValField.setBounds (fieldBounds.removeFromLeft (60));
+            colorValField.setBounds (fieldBounds.removeFromLeft (100));
 
             colorSelectorBounds = fieldBounds.removeFromRight (juce::jmin (fieldBounds.getWidth(), labelHeight))
                                       .withSizeKeepingCentre (juce::jmin (fieldBounds.getWidth(), labelHeight), static_cast<int> (labelHeight * 0.75f));
@@ -148,8 +148,10 @@ namespace melatonin
         void updateLabels()
         {
             colorField.setText ("Color:", juce::dontSendNotification);
-            colorValField.setText (selectedColor.toDisplayString (true), juce::dontSendNotification);
-            colorValField.setEditable (true, juce::dontSendNotification);
+            juce::String rgbaString = juce::String::formatted("RGBA: (%d, %d, %d, %d)",
+                selectedColor.getRed(), selectedColor.getGreen(),
+                selectedColor.getBlue(), selectedColor.getAlpha());
+            colorValField.setText (rgbaString, juce::dontSendNotification);
 
             colorField.setVisible (true);
             colorValField.setVisible (true);
