@@ -82,14 +82,17 @@ namespace melatonin
             if (!component)
                 return;
 
-            if (selectedComponent == component)
+            if (selectedComponent)
             {
+                bool isSameComponent = selectedComponent == component;
                 deselectComponent();
-                return;
+                if(isSameComponent)
+                    return;
             }
 
             // listen for those sweet resize calls
             component->addComponentListener (this);
+            component->addMouseListener(this, false);
 
             // take over the outline from the hover
             outlinedComponent = nullptr;
@@ -101,8 +104,11 @@ namespace melatonin
             repaint();
 
             if(selectedComponent)
-                constrainer.setMinimumOnscreenAmounts (selectedComponent->getHeight(), selectedComponent->getWidth(),
-                    selectedComponent->getHeight(), selectedComponent->getWidth());
+            {
+                constrainer.setMinimumOnscreenAmounts (selectedComponent->getHeight(), selectedComponent->getWidth(), selectedComponent->getHeight(), selectedComponent->getWidth());
+                //reset previous selection and update mouse cursor
+                selectedComponent->setMouseCursor(MouseCursor::DraggingHandCursor);
+            }
         }
 
         // When our selected component has been dragged or resized this is our callback
@@ -120,14 +126,36 @@ namespace melatonin
 
         void mouseExit (const MouseEvent& /*event*/) override
         {
-            selectComponent (selectedComponent);
             outlinedComponent = nullptr;
+            if (!selectedComponent)
+                return;
+
+            selectedComponent->setMouseCursor(MouseCursor::NormalCursor);
+            repaint();
+        }
+
+        void mouseEnter (const MouseEvent& event) override
+        {
+            if (!selectedComponent)
+                return;
+
+            selectedComponent->setMouseCursor(MouseCursor::DraggingHandCursor);
+            repaint();
+        }
+
+        void mouseMove (const MouseEvent& event) override
+        {
+            if (!selectedComponent)
+                return;
+            selectedComponent->setMouseCursor(MouseCursor::DraggingHandCursor);
             repaint();
         }
 
         void startDraggingComponent(const MouseEvent& e){
             if(selectedComponent)
+            {
                 componentDragger.startDraggingComponent(selectedComponent, e);
+            }
         }
 
         void dragSelectedComponent (const MouseEvent& e)
@@ -215,7 +243,12 @@ namespace melatonin
         void deselectComponent()
         {
             dimensions.setVisible (false);
+
             selectedComponent->removeComponentListener (this);
+            selectedComponent->removeMouseListener(this);
+
+            selectedComponent->setMouseCursor(MouseCursor::NormalCursor);
+
             selectedComponent = nullptr;
             repaint();
         }
@@ -253,7 +286,7 @@ namespace melatonin
 
         void mouseDown (const MouseEvent& event) override
         {
-            if (event.mods.isLeftButtonDown())
+            if (event.mods.isLeftButtonDown() && event.originalComponent->isMouseOverOrDragging())
             {
                 componentStartDraggingCallback (event.originalComponent, event);
             }
@@ -262,7 +295,7 @@ namespace melatonin
         void mouseDrag (const MouseEvent& event) override
         {
             //takes care of small mouse position drift on selection
-            if(event.getDistanceFromDragStart() > 3)
+            if(event.getDistanceFromDragStart() > 3 && event.originalComponent->isMouseOverOrDragging())
             {
                 isDragging = true;
                 componentDraggedCallback (event.originalComponent, event);
