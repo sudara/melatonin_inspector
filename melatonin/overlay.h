@@ -152,7 +152,8 @@ namespace melatonin
         }
 
         void startDraggingComponent(const MouseEvent& e){
-            if(selectedComponent)
+            //only allow dragging if the mouse is inside the selected component
+            if(selectedComponent && selectedComponent->getLocalBounds().contains(e.getEventRelativeTo(selectedComponent).getPosition()))
             {
                 componentDragger.startDraggingComponent(selectedComponent, e);
             }
@@ -160,7 +161,8 @@ namespace melatonin
 
         void dragSelectedComponent (const MouseEvent& e)
         {
-            if(selectedComponent)
+            //only allow dragging if the mouse is inside the selected component
+            if(selectedComponent &&  selectedComponent->getLocalBounds().contains(e.getEventRelativeTo(selectedComponent).getPosition()))
                 componentDragger.dragComponent (selectedComponent, e, &constrainer);
         }
 
