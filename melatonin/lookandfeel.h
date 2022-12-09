@@ -36,6 +36,8 @@ namespace melatonin
 
             setColour(juce::TreeView::ColourIds::selectedItemBackgroundColourId, color::blackColor);
             setColour(juce::TreeView::ColourIds::backgroundColourId, color::backgroundDarkerColor);
+
+            setColour(juce::ScrollBar::ColourIds::thumbColourId, color::bluePropsScrollbar);
         }
 
         // we don't want our resizer in the overlay to have a fugly border
@@ -57,7 +59,7 @@ namespace melatonin
         // more friendly scrolling
         int getDefaultScrollbarWidth() override
         {
-            return 10;
+            return 22;
         }
 
         // don't use the target app's font
@@ -123,8 +125,25 @@ namespace melatonin
                 }
             }
         }
+
+        void drawScrollbar (juce::Graphics& g, juce::ScrollBar& scrollbar, int x, int y, int width, int height, bool isScrollbarVertical, int thumbStartPosition, int thumbSize, bool isMouseOver, bool isMouseDown) override
+        {
+
+            //fill bg in black
+            g.fillAll(color::blackColor);
+
+            juce::Rectangle<int> thumbBounds;
+            if (isScrollbarVertical)
+                thumbBounds = juce::Rectangle<int> (x, thumbStartPosition, width, thumbSize);
+            else
+                thumbBounds = juce::Rectangle<int> (thumbStartPosition, y, thumbSize, height);
+
+            g.setColour (findColour(juce::ScrollBar::ColourIds::thumbColourId));
+            g.fillRoundedRectangle(thumbBounds.reduced(5).toFloat(), 2);
+        }
+
     private:
-        const int cornerRadius = 4;
+        const float cornerRadius = 4.f;
     };
 
 }
