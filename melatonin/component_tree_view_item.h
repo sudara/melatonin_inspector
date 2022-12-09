@@ -83,7 +83,7 @@ namespace melatonin
                 g.fillRect (3, 0, w - 30, h);
             }
 
-            g.setColour (color::blueLabelTextColor);
+            g.setColour (color::titleTextColor);
             if (!component->isVisible())
                 g.setColour (juce::Colours::grey);
 
@@ -93,6 +93,7 @@ namespace melatonin
 
             if (wantKeyboardFocus)
                 g.setColour (isSelected() ? color::redLineColor.darker (0.7f) : color::redLineColor);
+
             g.setFont (juce::Font ("Verdana", 14, juce::Font::FontStyleFlags::plain));
             g.drawText (componentString (component) + keyboard, textIndent, 0, w - textIndent, h, juce::Justification::left, true);
         }
@@ -100,7 +101,7 @@ namespace melatonin
         // must override to set the disclosure triangle color
         void paintOpenCloseButton (juce::Graphics& g, const juce::Rectangle<float>& area, juce::Colour /*backgroundColour*/, bool isMouseOver) override
         {
-            getOwnerView()->getLookAndFeel().drawTreeviewPlusMinusBox (g, area, color::blueLabelBackgroundColor, isOpen(), isMouseOver);
+            getOwnerView()->getLookAndFeel().drawTreeviewPlusMinusBox (g, area, color::treeViewMinusPlusColor, isOpen(), isMouseOver);
         }
 
         void itemClicked (const juce::MouseEvent&) override
@@ -177,6 +178,11 @@ namespace melatonin
                 return type (*component);
             }
             return res;
+        }
+
+        int getItemHeight() const override
+        {
+            return 26;
         }
 
         std::function<void (juce::Component* c)> outlineComponentCallback;

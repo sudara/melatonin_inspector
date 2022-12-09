@@ -4,30 +4,27 @@
 
 namespace melatonin
 {
-    class PropertiesModel : public juce::Component, public juce::ComponentListener
+    class PropertiesModel : public CollapsablePanel, public juce::ComponentListener
     {
     public:
-        PropertiesModel(ComponentModel& _model): model(_model)
+        explicit PropertiesModel(ComponentModel& _model): CollapsablePanel("PROPERTIES"), model(_model)
         {
             reset();
 
-            //panel.setLookAndFeel(&propsLookAndFeel);
-            addChildComponent(panel);
+            setContent(&panel);
         }
 
         void paint (juce::Graphics& g) override
         {
-            //just super simple separator line
-            if(displayedComponent && panel.isVisible())
-            {
-                g.setColour (color::greyLineColor);
-                g.drawHorizontalLine (0, padding, getRight() - padding);
-            }
+            g.setColour (color::panelLineSeparatorColor);
+            g.drawHorizontalLine(0, 0, getWidth()); //draw line at top
         }
 
         void resized() override
         {
             panel.setBounds(propsRectangle());
+            paddingHor = 8;
+            CollapsablePanel::resized();
         }
 
         void displayComponent (Component* componentToDisplay)
@@ -55,7 +52,6 @@ namespace melatonin
         void reset()
         {
             panel.clear();
-            panel.setVisible(false);
 
             resized();
         }
@@ -63,34 +59,32 @@ namespace melatonin
     private:
         ComponentModel& model;
 
-        juce::ToggleButton toggleButton;
-
         Component::SafePointer<Component> displayedComponent;
 
         juce::PropertyPanel panel{"Properties"};
 
-        int padding = 30;
-        int paddingToParent = 4;
-
-        juce::Rectangle<int> parentComponentRectangle()
-        {
-            return getLocalBounds().reduced (padding, 0);
-        }
+        int padding = 5;
+        int propsSize = 0;
 
         juce::Rectangle<int> propsRectangle()
         {
-            return parentComponentRectangle().reduced(0, paddingToParent).withTrimmedTop (5);
+
+            //from juce::PropertyPanel
+            int preferredHeight = 25;
+            return { getWidth(), propsSize + 1  * padding + propsSize * preferredHeight };
         }
 
         void updateProperties()
         {
-            panel.setVisible(true);
             panel.clear();
             auto props = createTextEditors();
             for(auto* p: props){
                 p->setLookAndFeel(&getLookAndFeel());
             }
-            panel.addProperties(props, 5);
+            panel.addProperties(props, padding);
+
+            //don't see any method to get num of properties inside PropertyPanel
+            propsSize = props.size();
 
             resized();
         }

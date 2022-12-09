@@ -127,7 +127,8 @@ namespace melatonin
         const juce::Colour backgroundDarkerColor = juce::Colour::fromString("FF1C1526");
         const juce::Colour blackColor = juce::Colour::fromString("FF000000");
 
-        const juce::Colour bluePropsScrollbar = juce::Colour::fromString("FF5C678D");
+        const juce::Colour bluePropsScrollbarColor = juce::Colour::fromString("FF5C678D");
+        const juce::Colour treeViewMinusPlusColor = juce::Colour::fromString("FF776F81");
     }
 
 
@@ -169,9 +170,6 @@ namespace melatonin
             juce::Rectangle<int> r (8, 8, getWidth(), 32);
             auto buttonHeight = 32;
 
-            auto paddingHor = 32;
-            auto paddingVer = 8;
-
             if (content && content->isVisible())
             {
                 //content->resized();
@@ -186,6 +184,9 @@ namespace melatonin
 
             setSize (r.getWidth(), r.getHeight());
         }
+
+        int paddingHor = 32;
+        int paddingVer = 8;
 
     private:
         struct ToggleBtnLoonkAndFeel : juce::LookAndFeel_V4

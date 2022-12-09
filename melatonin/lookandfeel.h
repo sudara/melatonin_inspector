@@ -37,8 +37,10 @@ namespace melatonin
             setColour(juce::TreeView::ColourIds::selectedItemBackgroundColourId, color::blackColor);
             setColour(juce::TreeView::ColourIds::backgroundColourId, color::backgroundDarkerColor);
 
-            setColour(juce::ScrollBar::ColourIds::thumbColourId, color::bluePropsScrollbar);
+            setColour(juce::ScrollBar::ColourIds::thumbColourId, color::bluePropsScrollbarColor);
         }
+
+
 
         // we don't want our resizer in the overlay to have a fugly border
         void drawResizableFrame (juce::Graphics& g, int w, int h, const juce::BorderSize<int>& border) override
@@ -50,10 +52,28 @@ namespace melatonin
         // But we want to adjust the color and size of triangles anyway
         void drawTreeviewPlusMinusBox (juce::Graphics& g, const juce::Rectangle<float>& area, juce::Colour backgroundColour, bool isOpen, bool /*isMouseOver*/) override
         {
-            juce::Path p;
-            p.addTriangle (0.0f, 0.0f, 1.0f, isOpen ? 0.0f : 0.5f, isOpen ? 0.5f : 0.0f, 1.0f);
+            using namespace juce;
+
+            auto tickBounds = area;
+            tickBounds.reduce(0, 2);
+            auto boxSize = jmin(tickBounds.getHeight(), tickBounds.getWidth());
+
+            Path p;
+            p.addTriangle (tickBounds.getX() + 1, tickBounds.getY() + boxSize * 0.5f,
+                tickBounds.getX() + boxSize + 1, tickBounds.getY() + boxSize * 0.5f,
+                tickBounds.getX() + boxSize * 0.5f + 1, tickBounds.getY() + boxSize + boxSize * 0.25f);
+
             g.setColour (backgroundColour);
-            g.fillPath (p, p.getTransformToScaleToFit (area.reduced (0, area.getHeight() / 4).translated (1, 0), true));
+
+            auto transform = AffineTransform::rotation (!isOpen ? degreesToRadians(270.0f)
+                                                                : 0,
+                tickBounds.getCentreX(),
+                tickBounds.getCentreY());
+
+            if(!isOpen)
+                transform = transform.translated(0, 0);
+
+            g.fillPath (p, transform);
         }
 
         // more friendly scrolling

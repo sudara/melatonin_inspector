@@ -1,9 +1,9 @@
 #pragma once
 #include "box_model.h"
 #include "color_model.h"
-#include "component_preview.h"
 #include "component_tree_view_item.h"
 #include "lookandfeel.h"
+#include "preview_model.h"
 #include "properties_model.h"
 
 namespace melatonin
@@ -103,6 +103,8 @@ namespace melatonin
                                             .withX (mainCol.getX()).withWidth (mainCol.getWidth()));
 
             colorModel.setBounds (mainCol.removeFromTop (static_cast<int> (jmin (180.0, mainCol.getHeight() * 0.25))).withTrimmedBottom (4));
+
+            propertiesModel.resized();
             propertiesModel.setBounds (mainCol);
 
             //using btn toggle state (better to switch to using class variable
