@@ -34,6 +34,8 @@ namespace melatonin
                 addItemsForChildComponents();
             }
 
+            setDrawsInLeftMargin(true);
+
             // Make our tree self-aware
             component->addComponentListener (this);
         }
@@ -47,7 +49,7 @@ namespace melatonin
 
         bool mightContainSubItems() override
         {
-            return component ? (component->getNumChildComponents() > 0) : false;
+            return component != nullptr && (component->getNumChildComponents() > 0);
         }
 
         // naive but functional...
@@ -77,7 +79,7 @@ namespace melatonin
                 return;
             if (isSelected())
             {
-                g.setColour (color::blueLabelBackgroundColor);
+                g.setColour (color::blackColor);
                 g.fillRect (3, 0, w - 30, h);
             }
 
