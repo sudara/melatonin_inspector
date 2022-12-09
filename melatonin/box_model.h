@@ -1,12 +1,13 @@
 #pragma once
 #include "helpers.h"
+#include "model.h"
 
 namespace melatonin
 {
     class BoxModel : public juce::Component, public juce::Label::Listener, public juce::ComponentListener
     {
     public:
-        BoxModel()
+        explicit BoxModel(ComponentModel& componentModel): model(componentModel)
         {
             addAndMakeVisible (componentLabel);
             componentLabel.setColour (juce::Label::textColourId, color::blueLabelBackgroundColor);
@@ -206,6 +207,7 @@ namespace melatonin
         }
 
     private:
+        ComponentModel& model;
         Component::SafePointer<Component> displayedComponent;
 
         juce::Label componentLabel;

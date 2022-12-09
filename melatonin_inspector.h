@@ -14,6 +14,7 @@ END_JUCE_MODULE_DECLARATION
 #pragma once
 #include "melatonin/inspector_panel.h"
 #include "melatonin/overlay.h"
+#include "melatonin/lookandfeel.h"
 
 namespace melatonin
 {

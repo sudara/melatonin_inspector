@@ -1,9 +1,10 @@
 #pragma once
 #include "box_model.h"
 #include "color_model.h"
+#include "component_preview.h"
 #include "component_tree_view_item.h"
-#include "properties_model.h"
 #include "lookandfeel.h"
+#include "properties_model.h"
 
 namespace melatonin
 {
@@ -15,9 +16,9 @@ namespace melatonin
             addChildComponent (tree);
             addChildComponent (emptySearchLabel);
 
-            searchBox.setLookAndFeel(&melatoninLookAndFeel);
-            clearBtn.setLookAndFeel(&melatoninLookAndFeel);
-            emptySelectionPrompt.setLookAndFeel(&melatoninLookAndFeel);
+            //searchBox.setLookAndFeel(&melatoninLookAndFeel);
+            //clearBtn.setLookAndFeel(&melatoninLookAndFeel);
+            //emptySelectionPrompt.setLookAndFeel(&melatoninLookAndFeel);
 
             emptySelectionPrompt.setJustificationType (juce::Justification::centredTop);
             emptySearchLabel.setJustificationType (juce::Justification::topLeft);
@@ -25,6 +26,7 @@ namespace melatonin
             addAndMakeVisible (boxModel);
             addAndMakeVisible (colorModel);
             addAndMakeVisible (propertiesModel);
+            addAndMakeVisible (previewComponent);
 
             toggleButton.setButtonText ("Enabled");
             toggleButton.setToggleState (enabledAtStart, juce::dontSendNotification);
@@ -93,8 +95,13 @@ namespace melatonin
             area.removeFromTop (20);
 
             auto mainCol = area.removeFromLeft (columnMinWidth);
-            toggleButton.setBounds (mainCol.removeFromTop (20).withTrimmedLeft (27));
+            toggleButton.setBounds (mainCol.removeFromTop (20).withTrimmedLeft (8));
             boxModel.setBounds (mainCol.removeFromTop (250));
+
+            previewComponent.resized();
+            previewComponent.setBounds (mainCol.removeFromTop (static_cast<int> (previewComponent.getHeight()))
+                                            .withX (mainCol.getX()).withWidth (mainCol.getWidth()));
+
             colorModel.setBounds (mainCol.removeFromTop (static_cast<int> (jmin (180.0, mainCol.getHeight() * 0.25))).withTrimmedBottom (4));
             propertiesModel.setBounds (mainCol);
 
@@ -206,11 +213,10 @@ namespace melatonin
         Component& root;
         juce::ToggleButton toggleButton;
         ComponentModel model;
-        BoxModel boxModel;
+        BoxModel boxModel{ model };
         ColorModel colorModel;
+        ComponentPreviewChild previewComponent{ model};
         PropertiesModel propertiesModel { model };
-
-        MelatoninLookAndFeel melatoninLookAndFeel;
 
         //todo move to it's own component
         juce::TreeView tree;

@@ -113,57 +113,142 @@ namespace melatonin
     namespace color
     {
         const juce::Colour white = juce::Colours::white; // consistency
-        const juce::Colour background = juce::Colour::fromString ("FF0F0F0F");
+        const juce::Colour background = juce::Colour::fromString ("FF2B1D32");
         const juce::Colour blueLineColor = juce::Colour::fromString ("FF429DE2");
         const juce::Colour blueLabelBackgroundColor = juce::Colour::fromString ("FF149DF9");
         const juce::Colour blueLabelTextColor = juce::Colour::fromString ("FFF4FDFF");
         const juce::Colour redLineColor = juce::Colour::fromString ("FFD4563F");
         const juce::Colour redLabelBackgroundColor = juce::Colour::fromString ("FFF54514");
         const juce::Colour greyLineColor = juce::Colours::lightgrey;
+
+        const juce::Colour panelLineSeparatorColor = juce::Colour::fromString("FF0C0713");
+        const juce::Colour titleTextColor = juce::Colour::fromString("FF768FBE");
+        const juce::Colour yellowColor = juce::Colour::fromString("FFFFE58A");
+        const juce::Colour backgroundDarkerColor = juce::Colour::fromString("FF1C1526");
+        const juce::Colour blackColor = juce::Colour::fromString("FF000000");
     }
 
-    class InspectorLookAndFeel : public juce::LookAndFeel_V4
+
+    //create component with toggle button to show/hide content below including component size change
+    class CollapsablePanel : public juce::Component
     {
     public:
-        InspectorLookAndFeel()
+        explicit CollapsablePanel (const juce::String& name)
         {
-            // often the app overrides this
-            setColour (juce::Label::outlineWhenEditingColourId, color::redLineColor);
+            toggleButton.setLookAndFeel (&toggleButtonLookAndFeel);
+            addAndMakeVisible (toggleButton);
+            toggleButton.setButtonText (name);
+
+            toggleButton.onClick = [this] {
+                if (content)
+                    content->setVisible (toggleButton.getToggleState());
+
+                getParentComponent()->resized();
+            };
         }
 
-        // we don't want our resizer in the overlay to have a fugly border
-        void drawResizableFrame (juce::Graphics& g, int w, int h, const juce::BorderSize<int>& border) override
+        void setContent (juce::Component* _content)
         {
-            ignoreUnused (g, w, h, border);
+            content = _content;
+            addAndMakeVisible (content);
+
+            toggleButton.setToggleState (content != nullptr, juce::dontSendNotification);
         }
 
-        // For some reason this is actually *needed* which is strange.
-        // But we want to adjust the color and size of triangles anyway
-        void drawTreeviewPlusMinusBox (juce::Graphics& g, const juce::Rectangle<float>& area, juce::Colour backgroundColour, bool isOpen, bool /*isMouseOver*/) override
+        void paint (juce::Graphics& g) override
         {
-            juce::Path p;
-            p.addTriangle (0.0f, 0.0f, 1.0f, isOpen ? 0.0f : 0.5f, isOpen ? 0.5f : 0.0f, 1.0f);
-            g.setColour (backgroundColour);
-            g.fillPath (p, p.getTransformToScaleToFit (area.reduced (0, area.getHeight() / 4).translated (1, 0), true));
+            g.setColour (color::background);
+            g.drawRect (getLocalBounds(), 1);
         }
 
-        // more friendly scrolling
-        int getDefaultScrollbarWidth() override
+        //important to call parent (this) resized() from child resized() after content size is set
+        void resized() override
         {
-            return 10;
+            juce::Rectangle<int> r (8, 8, getWidth(), 32);
+            auto buttonHeight = 32;
+
+            auto paddingHor = 32;
+            auto paddingVer = 8;
+
+            if (content && content->isVisible())
+            {
+                //content->resized();
+                r = r.withHeight (content->getHeight() + buttonHeight);
+
+                auto r1 = r;
+                content->setBounds (r1.removeFromBottom (content->getHeight())
+                                        .reduced (paddingHor, paddingVer));
+            }
+            auto tbBounds = r;
+            toggleButton.setBounds (tbBounds.removeFromTop (buttonHeight));
+
+            setSize (r.getWidth(), r.getHeight());
         }
 
-        // don't use the target app's font
-        juce::Font getLabelFont (juce::Label& label) override
+    private:
+        struct ToggleBtnLoonkAndFeel : juce::LookAndFeel_V4
         {
-            return juce::Font ("Verdana", label.getFont().getHeight(), juce::Font::FontStyleFlags::plain);
-        }
+            ToggleBtnLoonkAndFeel()
+            {
+                setColour(juce::ToggleButton::textColourId, color::titleTextColor);
+                setColour(juce::ToggleButton::tickColourId, color::titleTextColor);
+            }
 
-        // oh i dream of css resets...
-        juce::BorderSize<int> getLabelBorderSize (juce::Label&) override
-        {
-            return juce::BorderSize<int> (0);
-        }
+            //override function for drawing toggle btn
+            void drawToggleButton (juce::Graphics& g, juce::ToggleButton& button, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override
+            {
+                using namespace juce;
+
+                auto fontSize = jmin (15.0f, (float) button.getHeight() * 0.75f);
+                auto tickWidth = fontSize;
+
+                drawTickBox (g, button, 4.0f, ((float) button.getHeight() - tickWidth) * 0.5f, tickWidth, tickWidth, button.getToggleState(), button.isEnabled(), shouldDrawButtonAsHighlighted, shouldDrawButtonAsDown);
+
+                g.setColour (button.findColour (ToggleButton::textColourId));
+                g.setFont (fontSize);
+
+                if (!button.isEnabled())
+                    g.setOpacity (0.5f);
+
+                g.drawFittedText (button.getButtonText(),
+                    button.getLocalBounds().withTrimmedLeft (roundToInt (tickWidth) + 10).withTrimmedRight (2),
+                    Justification::centredLeft,
+                    10);
+            }
+
+            //override function for drawing tick box
+            void drawTickBox (juce::Graphics& g, juce::Component& component, float x, float y, float w, float h, const bool ticked, const bool isEnabled, const bool shouldDrawButtonAsHighlighted, const bool shouldDrawButtonAsDown) override
+            {
+                using namespace juce;
+
+                Rectangle<float> tickBounds (x, y, w, h);
+
+                tickBounds.reduce (0, 2);
+                auto boxSize = tickBounds.getHeight();
+
+                Path p;
+                p.addTriangle (tickBounds.getX(), tickBounds.getY(), tickBounds.getX() + boxSize + 2, tickBounds.getY(), tickBounds.getX() + boxSize * 0.5f + 1, tickBounds.getY() + boxSize);
+
+                auto tickColour = findColour (ToggleButton::tickColourId);
+                g.setColour (isEnabled ? tickColour : tickColour.darker());
+
+                auto transform = AffineTransform::rotation (!ticked ? degreesToRadians(270.0f)
+                                                                    : 0,
+                    tickBounds.getCentreX(),
+                    tickBounds.getCentreY());
+
+                if(!ticked)
+                    transform = transform.translated(0, -boxSize * 0.25f + 1);
+
+                g.fillPath (p, transform);
+            }
+        };
+
+        ToggleBtnLoonkAndFeel toggleButtonLookAndFeel;
+
+        juce::ToggleButton toggleButton;
+        juce::Component* content = nullptr;
     };
+
 
 }

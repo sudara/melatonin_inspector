@@ -4,18 +4,6 @@
 
 namespace melatonin
 {
-    struct PropsLookAndFeel: juce::LookAndFeel_V4{
-        PropsLookAndFeel(){
-            setColour(juce::PropertyComponent::backgroundColourId, juce::Colours::transparentBlack);
-            setColour(juce::TextEditor::outlineColourId, juce::Colours::transparentBlack);
-            setColour(juce::TextPropertyComponent::backgroundColourId, juce::Colours::transparentBlack);
-            setColour(juce::TextPropertyComponent::outlineColourId, juce::Colours::transparentBlack);
-            setColour(juce::BooleanPropertyComponent::backgroundColourId, juce::Colours::transparentBlack);
-            setColour(juce::BooleanPropertyComponent::outlineColourId, juce::Colours::transparentBlack);
-        }
-    };
-
-
     class PropertiesModel : public juce::Component, public juce::ComponentListener
     {
     public:
@@ -23,7 +11,7 @@ namespace melatonin
         {
             reset();
 
-            panel.setLookAndFeel(&propsLookAndFeel);
+            //panel.setLookAndFeel(&propsLookAndFeel);
             addChildComponent(panel);
         }
 
@@ -75,9 +63,10 @@ namespace melatonin
     private:
         ComponentModel& model;
 
+        juce::ToggleButton toggleButton;
+
         Component::SafePointer<Component> displayedComponent;
 
-        PropsLookAndFeel propsLookAndFeel;
         juce::PropertyPanel panel{"Properties"};
 
         int padding = 30;
@@ -99,7 +88,7 @@ namespace melatonin
             panel.clear();
             auto props = createTextEditors();
             for(auto* p: props){
-                p->setLookAndFeel(&propsLookAndFeel);
+                p->setLookAndFeel(&getLookAndFeel());
             }
             panel.addProperties(props, 5);
 
