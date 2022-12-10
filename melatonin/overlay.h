@@ -134,6 +134,12 @@ namespace melatonin
             repaint();
         }
 
+        void mouseUp (const MouseEvent& event) override
+        {
+            Component::mouseUp (event);
+            isDragging = false;
+        }
+
         void mouseEnter (const MouseEvent& event) override
         {
             if (!selectedComponent)
@@ -156,20 +162,27 @@ namespace melatonin
             if(selectedComponent && selectedComponent->getLocalBounds().contains(e.getEventRelativeTo(selectedComponent).getPosition()))
             {
                 componentDragger.startDraggingComponent(selectedComponent, e);
+                isDragging = true;
             }
         }
 
         void dragSelectedComponent (const MouseEvent& e)
         {
             //only allow dragging if the mouse is inside the selected component
-            if(selectedComponent &&  selectedComponent->getLocalBounds().contains(e.getEventRelativeTo(selectedComponent).getPosition()))
+            bool isInside = selectedComponent && selectedComponent->getLocalBounds().contains(e.getEventRelativeTo(selectedComponent).getPosition());
+
+            if(isInside || (selectedComponent && isDragging))
+            {
+                isDragging = true;
                 componentDragger.dragComponent (selectedComponent, e, &constrainer);
+            }
         }
 
     private:
         Component::SafePointer<Component> outlinedComponent;
         Rectangle<int> outlinedBounds;
 
+        bool isDragging = false;
         ComponentDragger componentDragger;
         ComponentBoundsConstrainer boundsConstrainer;
 

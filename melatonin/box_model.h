@@ -4,30 +4,32 @@
 
 namespace melatonin
 {
-    class BoxModel : public juce::Component, public juce::Label::Listener, public juce::ComponentListener
+    class BoxModel : public CollapsablePanel, public juce::Label::Listener, public juce::ComponentListener, public ComponentModel::Listener
     {
     public:
-        explicit BoxModel(ComponentModel& componentModel): model(componentModel)
+        explicit BoxModel (ComponentModel& componentModel) : CollapsablePanel ("BOX MODEL"), model (componentModel)
         {
-            addAndMakeVisible (componentLabel);
+            content = std::make_unique<juce::Component>();
+
+            content->addAndMakeVisible (componentLabel);
             componentLabel.setColour (juce::Label::textColourId, color::blueLabelBackgroundColor);
             componentLabel.setJustificationType (juce::Justification::centredLeft);
 
-            addAndMakeVisible (parentComponentLabel);
+            content->addAndMakeVisible (parentComponentLabel);
             parentComponentLabel.setColour (juce::Label::textColourId, color::redLineColor);
             parentComponentLabel.setJustificationType (juce::Justification::centredLeft);
 
-            addAndMakeVisible (widthLabel);
+            content->addAndMakeVisible (widthLabel);
             widthLabel.addListener (this);
             widthLabel.setFont (20.0f);
             widthLabel.setJustificationType (juce::Justification::centredRight);
 
-            addAndMakeVisible (byLabel);
+            content->addAndMakeVisible (byLabel);
             byLabel.setText (L" × ", juce::dontSendNotification);
             byLabel.setFont (20.f);
             byLabel.setJustificationType (juce::Justification::centred);
 
-            addAndMakeVisible (heightLabel);
+            content->addAndMakeVisible (heightLabel);
             heightLabel.addListener (this);
             heightLabel.setFont (20.0f);
             heightLabel.setJustificationType (juce::Justification::centredLeft);
@@ -37,11 +39,11 @@ namespace melatonin
 
             for (auto parentLabel : parentLabels)
             {
-                addAndMakeVisible (parentLabel);
+                content->addAndMakeVisible (parentLabel);
                 parentLabel->setText ("-", juce::dontSendNotification);
                 parentLabel->setJustificationType (juce::Justification::centred);
                 parentLabel->setColour (juce::Label::textColourId, color::redLineColor);
-                parentLabel->addListener(this);
+                parentLabel->addListener (this);
 
                 //centers juce::TextEditor (hack since juce::Label is not doing it by default)
                 parentLabel->onEditorShow = [parentLabel] {
@@ -58,7 +60,7 @@ namespace melatonin
 
             for (auto l : paddingLabels)
             {
-                addChildComponent(l);
+                content->addChildComponent (l);
                 l->setText ("-", juce::dontSendNotification);
                 l->setJustificationType (juce::Justification::centred);
                 l->setColour (juce::Label::textColourId, color::white);
@@ -83,11 +85,14 @@ namespace melatonin
                         l->setText ("0", juce::dontSendNotification);
                 };
             }
+
+            model.addListener (*this);
+            setContent (content.get());
         }
 
-        ~BoxModel() override{
-            if(displayedComponent)
-                displayedComponent->getTopLevelComponent()->removeComponentListener(this);
+        ~BoxModel() override
+        {
+            model.removeListener (*this);
         }
 
         void paint (juce::Graphics& g) override
@@ -107,11 +112,17 @@ namespace melatonin
 
         void resized() override
         {
-            auto center = getLocalBounds().getCentre();
+            content->setSize (getWidth(), 250);
+
+            CollapsablePanel::resized();
+
+
+            auto bounds = content->getLocalBounds();
+            auto center = bounds.getCentre();
             auto labelWidth = 60;
             auto labelHeight = 30;
 
-            parentComponentLabel.setBounds (parentComponentRectangle().getX(), parentComponentRectangle().getY() - labelHeight + 5, parentComponentRectangle().getWidth(), labelHeight);
+            parentComponentLabel.setBounds (bounds.getX(), bounds.getY() - labelHeight + 5, bounds.getWidth(), labelHeight);
             componentLabel.setBounds (componentRectangle().getX(), componentRectangle().getY() - labelHeight + 5, componentRectangle().getWidth(), labelHeight);
 
             widthLabel.setBounds (center.getX() - 70, center.getY() - 15, labelWidth, labelHeight);
@@ -123,40 +134,24 @@ namespace melatonin
             bottomToParentLabel.setBounds (center.getX() - labelWidth / 2, getHeight() - padding - paddingToParent / 2 - labelHeight / 2, labelWidth, labelHeight);
             leftToParentLabel.setBounds (padding + paddingToParent / 2 - labelWidth / 2, center.getY() - labelHeight / 2, labelWidth, labelHeight);
 
-            auto area1 = componentRectangle().removeFromTop (labelHeight);
+            auto area1 = bounds.reduced(paddingToParent).removeFromTop (labelHeight);
             paddingTopLabel.setBounds (area1);
 
-            auto area2 = componentRectangle().removeFromBottom (labelHeight);
+            auto area2 = bounds.reduced(paddingToParent).removeFromBottom (labelHeight);
             paddingBottomLabel.setBounds (area2);
 
-            auto area3 = componentRectangle().removeFromLeft (labelHeight).withTrimmedTop (labelHeight).withTrimmedBottom (labelHeight);
+            auto area3 = bounds.reduced(paddingToParent).removeFromLeft (labelHeight).withTrimmedTop (labelHeight).withTrimmedBottom (labelHeight);
             paddingLeftLabel.setBounds (area3);
 
-            auto area4 = componentRectangle().removeFromRight (labelHeight).withTrimmedTop (labelHeight).withTrimmedBottom (labelHeight);
+            auto area4 = bounds.reduced(paddingToParent).removeFromRight (labelHeight).withTrimmedTop (labelHeight).withTrimmedBottom (labelHeight);
             paddingRightLabel.setBounds (area4);
-        }
-
-        void displayComponent (Component* componentToDisplay)
-        {
-            if (displayedComponent)
-            {
-                displayedComponent->removeComponentListener (this);
-            }
-
-            displayedComponent = componentToDisplay;
-            displayedComponent->addComponentListener (this);
-
-            displayedComponent->getTopLevelComponent()->addComponentListener(this);
-
-            updateLabels();
-            updatePaddingLabelsIfNeeded();
         }
 
         void labelTextChanged (juce::Label* changedLabel) override
         {
             if (changedLabel == &widthLabel || changedLabel == &heightLabel)
             {
-                displayedComponent->setSize (widthLabel.getText().getIntValue(), heightLabel.getText().getIntValue());
+                model.getSelectedComponent()->setSize (widthLabel.getText().getIntValue(), heightLabel.getText().getIntValue());
             }
             if (changedLabel == &paddingRightLabel || changedLabel == &paddingLeftLabel
                 || changedLabel == &paddingTopLabel || changedLabel == &paddingBottomLabel)
@@ -170,19 +165,9 @@ namespace melatonin
                 auto leftVal = leftToParentLabel.getText().getIntValue();
                 auto bottomVal = bottomToParentLabel.getText().getIntValue();
                 auto rightVal = rightToParentLabel.getText().getIntValue();
-                displayedComponent->setTopLeftPosition(leftVal, topVal);
-                displayedComponent->setSize(displayedComponent->getParentWidth() - rightVal - leftVal,
-                    displayedComponent->getParentHeight() - bottomVal - topVal);
-            }
-        }
-
-        // A selected component has been dragged or resized and this is our callback
-        void componentMovedOrResized (Component& /*component*/, bool wasMoved, bool wasResized) override
-        {
-            if (wasResized || wasMoved)
-            {
-                updateLabels();
-                updatePaddingLabelsIfNeeded();
+                model.getSelectedComponent()->setTopLeftPosition (leftVal, topVal);
+                model.getSelectedComponent()->setSize (model.getSelectedComponent()->getParentWidth() - rightVal - leftVal,
+                    model.getSelectedComponent()->getParentHeight() - bottomVal - topVal);
             }
         }
 
@@ -199,16 +184,22 @@ namespace melatonin
             juce::Label* paddingLabels[4] = { &paddingTopLabel, &paddingRightLabel, &paddingLeftLabel, &paddingBottomLabel };
             for (auto label : paddingLabels)
             {
-                label->setVisible(false);
+                label->setVisible (false);
             }
 
             componentLabel.setText ("", juce::dontSendNotification);
             parentComponentLabel.setText ("", juce::dontSendNotification);
         }
 
+        void componentChanged (ComponentModel& model) override
+        {
+            updateLabels();
+            updatePaddingLabelsIfNeeded();
+        }
+
     private:
         ComponentModel& model;
-        Component::SafePointer<Component> displayedComponent;
+        std::unique_ptr<juce::Component> content;
 
         juce::Label componentLabel;
         juce::Label parentComponentLabel;
@@ -227,44 +218,48 @@ namespace melatonin
             paddingBottomLabel,
             paddingLeftLabel;
 
-        int padding = 30;
+        int padding = 8;
         int paddingToParent = 44;
         juce::Path parentRectanglePath; // complicated b/c it's dashed
 
         juce::Rectangle<int> parentComponentRectangle()
         {
-            return getLocalBounds().reduced (padding);
+            return content->getBounds().reduced (padding);
         }
 
         juce::Rectangle<int> componentRectangle()
         {
-            return parentComponentRectangle().reduced (paddingToParent).withTrimmedTop (5);
+            return parentComponentRectangle().reduced (paddingToParent);
         }
 
         void updateLabels()
         {
-            auto boundsInParent = displayedComponent->getBoundsInParent();
+            if(!model.getSelectedComponent()){
+                reset();
+                return;
+            }
+            auto boundsInParent = model.getSelectedComponent()->getBoundsInParent();
 
-            parentComponentLabel.setText (componentString (displayedComponent->getParentComponent()), juce::dontSendNotification);
-            componentLabel.setText (componentString (displayedComponent), juce::dontSendNotification);
+            parentComponentLabel.setText (componentString (model.getSelectedComponent()->getParentComponent()), juce::dontSendNotification);
+            componentLabel.setText (componentString (model.getSelectedComponent()), juce::dontSendNotification);
 
-            widthLabel.setText (juce::String (displayedComponent->getWidth()), juce::dontSendNotification);
-            heightLabel.setText (juce::String (displayedComponent->getHeight()), juce::dontSendNotification);
+            widthLabel.setText (juce::String (model.getSelectedComponent()->getWidth()), juce::dontSendNotification);
+            heightLabel.setText (juce::String (model.getSelectedComponent()->getHeight()), juce::dontSendNotification);
 
-            widthLabel.setEditable(true);
-            heightLabel.setEditable(true);
+            widthLabel.setEditable (true);
+            heightLabel.setEditable (true);
 
             topToParentLabel.setText (juce::String (boundsInParent.getY()), juce::dontSendNotification);
-            topToParentLabel.setEditable(true);
+            topToParentLabel.setEditable (true);
 
-            rightToParentLabel.setText (juce::String (displayedComponent->getParentWidth() - displayedComponent->getWidth() - boundsInParent.getX()), juce::dontSendNotification);
-            rightToParentLabel.setEditable(true);
+            rightToParentLabel.setText (juce::String (model.getSelectedComponent()->getParentWidth() - model.getSelectedComponent()->getWidth() - boundsInParent.getX()), juce::dontSendNotification);
+            rightToParentLabel.setEditable (true);
 
-            bottomToParentLabel.setText (juce::String (displayedComponent->getParentHeight() - displayedComponent->getHeight() - boundsInParent.getY()), juce::dontSendNotification);
-            bottomToParentLabel.setEditable(true);
+            bottomToParentLabel.setText (juce::String (model.getSelectedComponent()->getParentHeight() - model.getSelectedComponent()->getHeight() - boundsInParent.getY()), juce::dontSendNotification);
+            bottomToParentLabel.setEditable (true);
 
             leftToParentLabel.setText (juce::String (boundsInParent.getX()), juce::dontSendNotification);
-            leftToParentLabel.setEditable(true);
+            leftToParentLabel.setEditable (true);
 
             repaint();
         }
@@ -272,21 +267,21 @@ namespace melatonin
         // See Melatonin's PaddedComponent or store this info in your component's getProperties
         void updatePaddingLabelsIfNeeded()
         {
-            if (!displayedComponent)
+            if (!model.getSelectedComponent())
             {
-                //if displayedComponent is null, getting props will fail
+                //if model.getSelectedComponent() is null, getting props will fail
                 juce::Label* paddingLabels[4] = { &paddingTopLabel, &paddingRightLabel, &paddingLeftLabel, &paddingBottomLabel };
 
                 for (auto pl : paddingLabels)
                 {
                     pl->setText ("-", juce::dontSendNotification);
-                    pl->setEditable(false);
+                    pl->setEditable (false);
                     pl->removeListener (this);
                 }
 
                 return;
             }
-            auto component = displayedComponent.getComponent();
+            auto component = model.getSelectedComponent();
             auto props = component->getProperties();
             auto hasTopPadding = props.contains ("paddingTop");
             auto hasBottomPadding = props.contains ("paddingBottom");
@@ -299,10 +294,10 @@ namespace melatonin
             int paddingRight = props["paddingRight"];
 
             bool isPaddingComponent = hasBottomPadding || hasTopPadding || hasLeftPadding || hasRightPadding;
-            paddingTopLabel.setVisible(isPaddingComponent);
-            paddingBottomLabel.setVisible(isPaddingComponent);
-            paddingLeftLabel.setVisible(isPaddingComponent);
-            paddingRightLabel.setVisible(isPaddingComponent);
+            paddingTopLabel.setVisible (isPaddingComponent);
+            paddingBottomLabel.setVisible (isPaddingComponent);
+            paddingLeftLabel.setVisible (isPaddingComponent);
+            paddingRightLabel.setVisible (isPaddingComponent);
 
             paddingTopLabel.setText (hasTopPadding ? juce::String (paddingTop) : "-", juce::dontSendNotification);
             paddingTopLabel.setEditable (hasTopPadding);
@@ -323,15 +318,15 @@ namespace melatonin
 
         void updateDispayedCompPaddingProperties (double paddingRight, double paddingLeft, double paddingTop, double paddingBottom)
         {
-            if (displayedComponent)
+            if (model.getSelectedComponent())
             {
-                auto& props = displayedComponent->getProperties();
+                auto& props = model.getSelectedComponent()->getProperties();
                 props.set ("paddingLeft", paddingLeft);
                 props.set ("paddingTop", paddingTop);
                 props.set ("paddingRight", paddingRight);
                 props.set ("paddingBottom", paddingBottom);
-                displayedComponent->resized();
-                displayedComponent->repaint();
+                model.getSelectedComponent()->resized();
+                model.getSelectedComponent()->repaint();
             }
         }
     };

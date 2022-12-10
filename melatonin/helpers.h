@@ -182,7 +182,7 @@ namespace melatonin
             auto tbBounds = r;
             toggleButton.setBounds (tbBounds.removeFromTop (buttonHeight));
 
-            setSize (r.getWidth(), r.getHeight());
+            setSize (r.getWidth(), r.getHeight() + 8);
         }
 
         int paddingHor = 32;

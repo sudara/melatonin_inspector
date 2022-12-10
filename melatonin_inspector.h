@@ -124,7 +124,9 @@ namespace melatonin
         void componentMovedOrResized (Component& rootComponent, bool wasMoved, bool wasResized) override
         {
             if (wasResized || wasMoved)
+            {
                 overlay.setBounds (rootComponent.getBounds());
+            }
         }
 
         void setupCallbacks()

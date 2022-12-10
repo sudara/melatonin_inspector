@@ -1,8 +1,12 @@
-//
-// Created by home on 12/9/22.
-//
+#pragma once
 
-#ifndef GUI_APP_EXAMPLE_TREE_MODEL_H
-#define GUI_APP_EXAMPLE_TREE_MODEL_H
+#include "helpers.h"
 
-#endif //GUI_APP_EXAMPLE_TREE_MODEL_H
+namespace melatonin
+{
+    class TreeComponent : public juce::Component
+    {
+    public:
+    private:
+    };
+}

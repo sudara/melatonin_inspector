@@ -4,7 +4,7 @@
 
 namespace melatonin
 {
-    class PropertiesModel : public CollapsablePanel, public juce::ComponentListener
+    class PropertiesModel : public CollapsablePanel, public juce::ComponentListener, public ComponentModel::Listener
     {
     public:
         explicit PropertiesModel(ComponentModel& _model): CollapsablePanel("PROPERTIES"), model(_model)
@@ -12,6 +12,11 @@ namespace melatonin
             reset();
 
             setContent(&panel);
+            model.addListener(*this);
+        }
+
+        ~PropertiesModel(){
+            model.removeListener(*this);
         }
 
         void paint (juce::Graphics& g) override
@@ -27,16 +32,13 @@ namespace melatonin
             CollapsablePanel::resized();
         }
 
+        void componentChanged (ComponentModel& componentModel) override
+        {
+            displayComponent(componentModel.getSelectedComponent());
+        }
+
         void displayComponent (Component* componentToDisplay)
         {
-            if (displayedComponent)
-            {
-                displayedComponent->removeComponentListener (this);
-            }
-
-            displayedComponent = componentToDisplay;
-            displayedComponent->addComponentListener (this);
-
             updateProperties();
         }
 
@@ -58,9 +60,6 @@ namespace melatonin
 
     private:
         ComponentModel& model;
-
-        Component::SafePointer<Component> displayedComponent;
-
         juce::PropertyPanel panel{"Properties"};
 
         int padding = 5;

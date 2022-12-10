@@ -36,7 +36,7 @@ namespace melatonin
             tree.setIndentSize (12);
 
             searchBox.setHelpText ("search");
-            searchBox.setTextToShowWhenEmpty("search", juce::Colours::white);
+            searchBox.setTextToShowWhenEmpty ("search", juce::Colours::white);
             addAndMakeVisible (searchBox);
             addAndMakeVisible (clearBtn);
 
@@ -45,41 +45,41 @@ namespace melatonin
                 reconstructRoot();
 
                 //try to find the first item that matches the search string
-                if(searchText.isNotEmpty()){
+                if (searchText.isNotEmpty())
+                {
                     getRoot()->filterNodesRecursively (searchText);
                 }
 
                 //display empty label
-                if(getRoot()->getNumSubItems() == 0
-                    && !searchText.containsIgnoreCase(getRoot()->getComponentName())
+                if (getRoot()->getNumSubItems() == 0
+                    && !searchText.containsIgnoreCase (getRoot()->getComponentName())
                     && tree.getNumSelectedItems() == 0)
                 {
-                    DBG(getRoot()->getComponentName());
-                    tree.setVisible(false);
-                    emptySearchLabel.setVisible(true);
+                    DBG (getRoot()->getComponentName());
+                    tree.setVisible (false);
+                    emptySearchLabel.setVisible (true);
 
                     resized();
                 }
 
-                clearBtn.setVisible(searchBox.getText().isNotEmpty());
-                tree.setVisible(searchBox.getText().isNotEmpty());
+                clearBtn.setVisible (searchBox.getText().isNotEmpty());
+                tree.setVisible (searchBox.getText().isNotEmpty());
             };
-            clearBtn.onClick = [this]{
-                searchBox.setText("");
+            clearBtn.onClick = [this] {
+                searchBox.setText ("");
             };
-
         }
 
         void reconstructRoot()
         {
             jassert (selectComponentCallback);
             if (rootItem)
-                tree.setRootItem(nullptr);
+                tree.setRootItem (nullptr);
             rootItem = std::make_unique<ComponentTreeViewItem> (&root, outlineComponentCallback, selectComponentCallback);
             tree.setRootItem (rootItem.get());
             getRoot()->setOpenness (ComponentTreeViewItem::Openness::opennessOpen);
 
-            tree.setVisible(true);
+            tree.setVisible (true);
 
             resized();
         }
@@ -96,12 +96,18 @@ namespace melatonin
 
             auto mainCol = area.removeFromLeft (columnMinWidth);
             toggleButton.setBounds (mainCol.removeFromTop (20).withTrimmedLeft (8));
-            boxModel.setBounds (mainCol.removeFromTop (250));
+
+            boxModel.resized();
+            boxModel.setBounds (mainCol.removeFromTop (boxModel.getHeight())
+                                    .withX (mainCol.getX())
+                                    .withWidth (mainCol.getWidth()));
 
             previewComponent.resized();
             previewComponent.setBounds (mainCol.removeFromTop (static_cast<int> (previewComponent.getHeight()))
-                                            .withX (mainCol.getX()).withWidth (mainCol.getWidth()));
+                                            .withX (mainCol.getX())
+                                            .withWidth (mainCol.getWidth()));
 
+            colorModel.resized();
             colorModel.setBounds (mainCol.removeFromTop (static_cast<int> (jmin (180.0, mainCol.getHeight() * 0.25))).withTrimmedBottom (4));
 
             propertiesModel.resized();
@@ -112,13 +118,13 @@ namespace melatonin
 
             if (tree.isVisible())
             {
-                auto searchRow = area.removeFromTop (30).reduced(4, 4);
-                clearBtn.setBounds (searchRow.removeFromRight(56));
-                searchRow.removeFromRight(8);
+                auto searchRow = area.removeFromTop (30).reduced (4, 4);
+                clearBtn.setBounds (searchRow.removeFromRight (56));
+                searchRow.removeFromRight (8);
                 searchBox.setBounds (searchRow);
 
                 tree.setBounds (area); // padding in these default components are a mess
-                emptySearchLabel.setBounds(area.reduced(4));
+                emptySearchLabel.setBounds (area.reduced (4));
             }
             else
                 emptySelectionPrompt.setBounds (area);
@@ -132,11 +138,7 @@ namespace melatonin
             // only show on hover if there isn't something selected
             if (!selectedComponent || selectedComponent == component)
             {
-                boxModel.displayComponent (component);
-                propertiesModel.displayComponent (component);
-                colorModel.displayComponent (component);
-
-                tree.setVisible (true);
+                model.displayComponent (component);
 
                 repaint();
                 resized();
@@ -214,10 +216,12 @@ namespace melatonin
         Component::SafePointer<Component> selectedComponent;
         Component& root;
         juce::ToggleButton toggleButton;
+
         ComponentModel model;
-        BoxModel boxModel{ model };
+
+        BoxModel boxModel { model };
         ColorModel colorModel;
-        ComponentPreviewChild previewComponent{ model};
+        ComponentPreviewChild previewComponent { model };
         PropertiesModel propertiesModel { model };
 
         //todo move to it's own component
@@ -225,7 +229,7 @@ namespace melatonin
         juce::Label emptySelectionPrompt { "SelectionPrompt", "Select any component to see components tree" };
         juce::Label emptySearchLabel { "EmptySearchResultsPrompt", "No component found" };
         juce::TextEditor searchBox { "Search box" };
-        juce::TextButton clearBtn { "clear"};
+        juce::TextButton clearBtn { "clear" };
         std::unique_ptr<ComponentTreeViewItem> rootItem;
 
         ComponentTreeViewItem* getRoot()
@@ -242,7 +246,7 @@ namespace melatonin
             colorModel.reset();
 
             model.deselectComponent();
-            tree.setRootItem(getRoot());
+            tree.setRootItem (getRoot());
 
             resized();
         }

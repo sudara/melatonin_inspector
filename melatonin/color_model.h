@@ -6,16 +6,12 @@
 namespace melatonin
 {
 
-    class ColorModel : public juce::Component, public juce::ComponentListener
+    class ColorModel : public CollapsablePanel, public juce::ComponentListener
     {
     public:
-        ColorModel()
+        ColorModel(): CollapsablePanel("COLOR")
         {
-            colorField.setColour (juce::Label::ColourIds::textColourId, juce::Colours::white);
-            colorValField.setColour (juce::Label::ColourIds::textColourId, juce::Colours::white);
-
-            addChildComponent (colorField);
-            addChildComponent (colorValField);
+            //setContent (&contentPanel);
         }
 
         void paint (juce::Graphics& g) override
@@ -122,6 +118,8 @@ namespace melatonin
 
     private:
         Component::SafePointer<Component> displayedComponent;
+
+        std::unique_ptr<juce::Component> contentPanel;
 
         juce::Label colorField { "Color label", "Color:" };
         juce::Label colorValField { "Color value", "-" };
