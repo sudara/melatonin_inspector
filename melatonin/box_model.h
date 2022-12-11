@@ -12,27 +12,29 @@ namespace melatonin
             content = std::make_unique<juce::Component>();
 
             content->addAndMakeVisible (componentLabel);
-            componentLabel.setColour (juce::Label::textColourId, color::blueLabelBackgroundColor);
+            componentLabel.setColour (juce::Label::textColourId, color::blueLineColor);
             componentLabel.setJustificationType (juce::Justification::centredLeft);
 
             content->addAndMakeVisible (parentComponentLabel);
-            parentComponentLabel.setColour (juce::Label::textColourId, color::redLineColor);
             parentComponentLabel.setJustificationType (juce::Justification::centredLeft);
 
             content->addAndMakeVisible (widthLabel);
             widthLabel.addListener (this);
             widthLabel.setFont (20.0f);
             widthLabel.setJustificationType (juce::Justification::centredRight);
+            widthLabel.setColour (juce::Label::textColourId, color::white);
 
             content->addAndMakeVisible (byLabel);
             byLabel.setText (L" × ", juce::dontSendNotification);
             byLabel.setFont (20.f);
             byLabel.setJustificationType (juce::Justification::centred);
+            byLabel.setColour (juce::Label::textColourId, color::white);
 
             content->addAndMakeVisible (heightLabel);
             heightLabel.addListener (this);
             heightLabel.setFont (20.0f);
             heightLabel.setJustificationType (juce::Justification::centredLeft);
+            heightLabel.setColour (juce::Label::textColourId, color::white);
 
             juce::Label* parentLabels[4] = { &topToParentLabel, &rightToParentLabel, &bottomToParentLabel, &leftToParentLabel };
             juce::Label* paddingLabels[4] = { &paddingTopLabel, &paddingRightLabel, &paddingLeftLabel, &paddingBottomLabel };
@@ -42,7 +44,6 @@ namespace melatonin
                 content->addAndMakeVisible (parentLabel);
                 parentLabel->setText ("-", juce::dontSendNotification);
                 parentLabel->setJustificationType (juce::Justification::centred);
-                parentLabel->setColour (juce::Label::textColourId, color::redLineColor);
                 parentLabel->addListener (this);
 
                 //centers juce::TextEditor (hack since juce::Label is not doing it by default)
@@ -63,8 +64,6 @@ namespace melatonin
                 content->addChildComponent (l);
                 l->setText ("-", juce::dontSendNotification);
                 l->setJustificationType (juce::Justification::centred);
-                l->setColour (juce::Label::textColourId, color::white);
-                l->setColour (juce::Label::backgroundColourId, color::blueLineColor);
                 l->setColour (juce::TextEditor::ColourIds::highlightColourId, color::blueLineColor.darker());
 
                 //centers juce::TextEditor (hack since juce::Label is not doing it by default)
@@ -98,52 +97,68 @@ namespace melatonin
         void paint (juce::Graphics& g) override
         {
             // dashed line rectangles be hard, yo!
-            g.setColour (color::redLineColor);
-            float dashLengths[2] = { 3.f, 3.f };
+            g.setColour (color::blueTextLabelColor.darker (0.6f));
+            float dashLengths[2] = { 2.f, 2.f };
             parentRectanglePath.clear();
-            parentRectanglePath.addRectangle (parentComponentRectangle());
+            parentRectanglePath.addRectangle (parentComponentRectangleForDrawing());
             auto parentStroke = juce::PathStrokeType (0.5);
             parentStroke.createDashedStroke (parentRectanglePath, parentRectanglePath, dashLengths, 2);
             g.strokePath (parentRectanglePath, parentStroke);
 
             g.setColour (color::blueLineColor);
-            g.drawRect (componentRectangle(), 2.0);
+            g.drawRect (componentRectangleForDrawing(), 1.0);
+            if (isPaddingComponent)
+            {
+                g.setColour (color::blueLineColor.withAlpha (0.2f));
+                g.drawRect (componentRectangleForDrawing(), (int) padding);
+            }
         }
 
         void resized() override
         {
-            content->setSize (getWidth(), 250);
+            paddingVer = 0;
+            paddingHor = 0;
+
+            content->setSize (getWidth(), 300);
 
             CollapsablePanel::resized();
 
-
-            auto bounds = content->getLocalBounds();
+            auto bounds = parentComponentRectangle();
             auto center = bounds.getCentre();
-            auto labelWidth = 60;
             auto labelHeight = 30;
 
             parentComponentLabel.setBounds (bounds.getX(), bounds.getY() - labelHeight + 5, bounds.getWidth(), labelHeight);
             componentLabel.setBounds (componentRectangle().getX(), componentRectangle().getY() - labelHeight + 5, componentRectangle().getWidth(), labelHeight);
 
-            widthLabel.setBounds (center.getX() - 70, center.getY() - 15, labelWidth, labelHeight);
+            widthLabel.setBounds (center.getX() - 10 - paddingToParent, center.getY() - 15, paddingToParent, labelHeight);
             byLabel.setBounds (center.getX() - 10, center.getY() - 15, 20, labelHeight);
-            heightLabel.setBounds (center.getX() + 10, center.getY() - 15, labelWidth, labelHeight);
+            heightLabel.setBounds (center.getX() + 10, center.getY() - 15, paddingToParent, labelHeight);
 
-            topToParentLabel.setBounds (center.getX() - labelWidth / 2, padding + paddingToParent / 2 - labelHeight / 2, labelWidth, labelHeight);
-            rightToParentLabel.setBounds (getWidth() - padding - paddingToParent / 2 - labelWidth / 2, center.getY() - labelHeight / 2, labelWidth, labelHeight);
-            bottomToParentLabel.setBounds (center.getX() - labelWidth / 2, getHeight() - padding - paddingToParent / 2 - labelHeight / 2, labelWidth, labelHeight);
-            leftToParentLabel.setBounds (padding + paddingToParent / 2 - labelWidth / 2, center.getY() - labelHeight / 2, labelWidth, labelHeight);
+            topToParentLabel.setBounds (center.getX() - paddingToParent / 2, padding + paddingToParent / 2 - labelHeight / 2, paddingToParent, labelHeight);
+            rightToParentLabel.setBounds (content->getWidth() - padding - paddingToParent / 2 - paddingToParent / 2, center.getY() - labelHeight / 2, paddingToParent, labelHeight);
+            bottomToParentLabel.setBounds (center.getX() - paddingToParent / 2, content->getHeight() - padding - paddingToParent / 2 - labelHeight / 2, paddingToParent, labelHeight);
+            leftToParentLabel.setBounds (padding + paddingToParent / 2 - paddingToParent / 2, center.getY() - labelHeight / 2, paddingToParent, labelHeight);
 
-            auto area1 = bounds.reduced(paddingToParent).removeFromTop (labelHeight);
+            auto area1 = bounds.reduced (paddingToParent)
+                             .removeFromTop (padding)
+                             .withSizeKeepingCentre (padding, padding);
             paddingTopLabel.setBounds (area1);
 
-            auto area2 = bounds.reduced(paddingToParent).removeFromBottom (labelHeight);
+            auto area2 = bounds.reduced (paddingToParent)
+                             .removeFromBottom (padding)
+                             .withSizeKeepingCentre (padding, padding);
             paddingBottomLabel.setBounds (area2);
 
-            auto area3 = bounds.reduced(paddingToParent).removeFromLeft (labelHeight).withTrimmedTop (labelHeight).withTrimmedBottom (labelHeight);
+            auto area3 = bounds.reduced (paddingToParent)
+                             .removeFromLeft (padding)
+                             .withSizeKeepingCentre (padding, padding);
             paddingLeftLabel.setBounds (area3);
 
-            auto area4 = bounds.reduced(paddingToParent).removeFromRight (labelHeight).withTrimmedTop (labelHeight).withTrimmedBottom (labelHeight);
+            auto area4 = bounds.reduced (paddingToParent)
+                             .removeFromRight (padding)
+                             .withTrimmedTop (padding)
+                             .withTrimmedBottom (padding)
+                             .withSizeKeepingCentre (padding, padding);
             paddingRightLabel.setBounds (area4);
         }
 
@@ -218,13 +233,14 @@ namespace melatonin
             paddingBottomLabel,
             paddingLeftLabel;
 
-        int padding = 8;
+        int padding = 32;
         int paddingToParent = 44;
         juce::Path parentRectanglePath; // complicated b/c it's dashed
+        bool isPaddingComponent { false };
 
         juce::Rectangle<int> parentComponentRectangle()
         {
-            return content->getBounds().reduced (padding);
+            return content->getLocalBounds().reduced (padding);
         }
 
         juce::Rectangle<int> componentRectangle()
@@ -232,9 +248,20 @@ namespace melatonin
             return parentComponentRectangle().reduced (paddingToParent);
         }
 
+        juce::Rectangle<int> parentComponentRectangleForDrawing()
+        {
+            return content->getBounds().reduced (padding);
+        }
+
+        juce::Rectangle<int> componentRectangleForDrawing()
+        {
+            return parentComponentRectangleForDrawing().reduced (paddingToParent);
+        }
+
         void updateLabels()
         {
-            if(!model.getSelectedComponent()){
+            if (!model.getSelectedComponent())
+            {
                 reset();
                 return;
             }
@@ -293,7 +320,7 @@ namespace melatonin
             int paddingLeft = props["paddingLeft"];
             int paddingRight = props["paddingRight"];
 
-            bool isPaddingComponent = hasBottomPadding || hasTopPadding || hasLeftPadding || hasRightPadding;
+            isPaddingComponent = hasBottomPadding || hasTopPadding || hasLeftPadding || hasRightPadding;
             paddingTopLabel.setVisible (isPaddingComponent);
             paddingBottomLabel.setVisible (isPaddingComponent);
             paddingLeftLabel.setVisible (isPaddingComponent);

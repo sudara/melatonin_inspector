@@ -11,17 +11,17 @@ namespace melatonin
         InspectorLookAndFeel()
         {
             // often the app overrides this
-            setColour (juce::Label::outlineWhenEditingColourId, color::redLineColor);
+            setColour (juce::Label::outlineWhenEditingColourId, color::yellowColor);
             setColour (juce::ToggleButton::ColourIds::tickDisabledColourId, color::yellowColor);
             setColour (juce::ToggleButton::ColourIds::textColourId, color::titleTextColor);
             setColour (juce::ToggleButton::ColourIds::tickColourId, color::background);
 
-            setColour (juce::Label::textColourId, color::white);
+            setColour (juce::Label::textColourId, color::blueTextLabelColor);
 
-            setColour (juce::TextEditor::textColourId, color::white);
+            setColour (juce::TextEditor::textColourId, color::blueTextLabelColor);
             setColour (juce::TextEditor::backgroundColourId, juce::Colours::transparentBlack);
-            setColour (juce::TextEditor::highlightColourId, color::redLineColor.withAlpha(0.8f));
-            setColour (juce::CaretComponent::caretColourId, color::redLineColor);
+            setColour (juce::TextEditor::highlightColourId, color::yellowColor.withAlpha(0.1f));
+            setColour (juce::CaretComponent::caretColourId, color::blueLineColor);
 
             setColour (juce::TextButton::buttonColourId, juce::Colours::transparentBlack);
             setColour (juce::ComboBox::outlineColourId, juce::Colours::transparentBlack);
@@ -39,8 +39,6 @@ namespace melatonin
 
             setColour(juce::ScrollBar::ColourIds::thumbColourId, color::bluePropsScrollbarColor);
         }
-
-
 
         // we don't want our resizer in the overlay to have a fugly border
         void drawResizableFrame (juce::Graphics& g, int w, int h, const juce::BorderSize<int>& border) override

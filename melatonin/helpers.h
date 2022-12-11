@@ -129,6 +129,7 @@ namespace melatonin
 
         const juce::Colour bluePropsScrollbarColor = juce::Colour::fromString("FF5C678D");
         const juce::Colour treeViewMinusPlusColor = juce::Colour::fromString("FF776F81");
+        const juce::Colour blueTextLabelColor = juce::Colour::fromString("FF8392AF");
     }
 
 
@@ -167,7 +168,7 @@ namespace melatonin
         //important to call parent (this) resized() from child resized() after content size is set
         void resized() override
         {
-            juce::Rectangle<int> r (8, 8, getWidth(), 32);
+            juce::Rectangle<int> r (0, 8, getWidth(), 32);
             auto buttonHeight = 32;
 
             if (content && content->isVisible())
@@ -180,7 +181,13 @@ namespace melatonin
                                         .reduced (paddingHor, paddingVer));
             }
             auto tbBounds = r;
-            toggleButton.setBounds (tbBounds.removeFromTop (buttonHeight));
+
+            auto font = juce::Font ("Verdana", buttonHeight, juce::Font::FontStyleFlags::plain);
+            auto btnWidth = font.getStringWidth(toggleButton.getButtonText());
+            toggleButton.setBounds (tbBounds
+                                        .withX(8)
+                                        .removeFromTop (buttonHeight)
+                                        .withWidth(btnWidth));
 
             setSize (r.getWidth(), r.getHeight() + 8);
         }
@@ -202,13 +209,13 @@ namespace melatonin
             {
                 using namespace juce;
 
-                auto fontSize = jmin (15.0f, (float) button.getHeight() * 0.75f);
-                auto tickWidth = fontSize;
+                auto font = juce::Font ("Verdana", jmin (15.0f, (float) button.getHeight() * 0.75f), juce::Font::FontStyleFlags::plain);
+                auto tickWidth = font.getHeight();
 
                 drawTickBox (g, button, 4.0f, ((float) button.getHeight() - tickWidth) * 0.5f, tickWidth, tickWidth, button.getToggleState(), button.isEnabled(), shouldDrawButtonAsHighlighted, shouldDrawButtonAsDown);
 
                 g.setColour (button.findColour (ToggleButton::textColourId));
-                g.setFont (fontSize);
+                g.setFont (font);
 
                 if (!button.isEnabled())
                     g.setOpacity (0.5f);
