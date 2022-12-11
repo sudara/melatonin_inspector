@@ -18,7 +18,7 @@ namespace melatonin
 
             dimensions.setFont (13.f);
             dimensions.setJustificationType (Justification::centred);
-            dimensions.setColour (1, color::blueLabelTextColor);
+            dimensions.setColour (juce::Label::textColourId, color::white);
         }
         void paint (Graphics& g) override
         {
