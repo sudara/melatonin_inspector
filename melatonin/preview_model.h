@@ -61,6 +61,8 @@ namespace melatonin
         {
             if(auto component = model.getSelectedComponent())
                 content.setImage (component->createComponentSnapshot ({ component->getWidth(), component->getHeight() }, false, 1.0f));
+            else
+                content.setImage (juce::Image());
         }
     };
 }

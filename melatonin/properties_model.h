@@ -4,7 +4,8 @@
 
 namespace melatonin
 {
-    class PropertiesModel : public CollapsablePanel, public juce::ComponentListener, public ComponentModel::Listener
+    class PropertiesModel : public CollapsablePanel,
+                            private ComponentModel::Listener
     {
     public:
         explicit PropertiesModel(ComponentModel& _model): CollapsablePanel("PROPERTIES"), model(_model)
@@ -32,32 +33,6 @@ namespace melatonin
             CollapsablePanel::resized();
         }
 
-        void componentChanged (ComponentModel& componentModel) override
-        {
-            displayComponent(componentModel.getSelectedComponent());
-        }
-
-        void displayComponent (Component* componentToDisplay)
-        {
-            updateProperties();
-        }
-
-        // A selected component has been dragged or resized and this is our callback
-        void componentMovedOrResized (Component& /*component*/, bool wasMoved, bool wasResized) override
-        {
-            if (wasResized || wasMoved)
-            {
-                updateProperties();
-            }
-        }
-
-        void reset()
-        {
-            panel.clear();
-
-            resized();
-        }
-
     private:
         ComponentModel& model;
         juce::PropertyPanel panel{"Properties"};
@@ -71,6 +46,18 @@ namespace melatonin
             //from juce::PropertyPanel
             int preferredHeight = 25;
             return { getWidth(), propsSize + 1  * padding + propsSize * preferredHeight };
+        }
+
+        void componentChanged (ComponentModel& componentModel) override
+        {
+            updateProperties();
+        }
+
+        void reset()
+        {
+            panel.clear();
+
+            resized();
         }
 
         void updateProperties()
