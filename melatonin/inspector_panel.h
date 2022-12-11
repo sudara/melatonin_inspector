@@ -107,8 +107,8 @@ namespace melatonin
                                             .withX (mainCol.getX())
                                             .withWidth (mainCol.getWidth()));
 
-            colorModel.resized();
-            colorModel.setBounds (mainCol.removeFromTop (static_cast<int> (jmin (180.0, mainCol.getHeight() * 0.25))).withTrimmedBottom (4));
+            //colorModel.resized();
+            //colorModel.setBounds (mainCol.removeFromTop (static_cast<int> (jmin (180.0, mainCol.getHeight() * 0.25))).withTrimmedBottom (4));
 
             propertiesModel.resized();
             propertiesModel.setBounds (mainCol);
