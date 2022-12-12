@@ -31,8 +31,8 @@ namespace melatonin
             setColour(juce::TextEditor::outlineColourId, juce::Colours::transparentBlack);
             setColour(juce::TextPropertyComponent::backgroundColourId, juce::Colours::transparentBlack);
             setColour(juce::TextPropertyComponent::outlineColourId, juce::Colours::transparentBlack);
-            setColour(juce::TextPropertyComponent::textColourId, color::titleTextColor);
-            setColour(juce::PropertyComponent::ColourIds::labelTextColourId, color::titleTextColor.darker());
+            setColour(juce::TextPropertyComponent::textColourId, color::white);
+            setColour(juce::PropertyComponent::ColourIds::labelTextColourId, color::titleTextColor);
             setColour(juce::BooleanPropertyComponent::backgroundColourId, juce::Colours::transparentBlack);
             setColour(juce::BooleanPropertyComponent::outlineColourId, juce::Colours::transparentBlack);
 

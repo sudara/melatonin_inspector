@@ -13,8 +13,13 @@ namespace melatonin
     public:
         explicit InspectorPanel (juce::Component& rootComponent, bool enabledAtStart = true) : root (rootComponent)
         {
+
+            //why I cannot just setRootItem to rootComponent?
+            //tree.setRootItem(getRoot());
             addChildComponent (tree);
             addChildComponent (emptySearchLabel);
+
+            colorModel.setRootComponent(&root);
 
             emptySelectionPrompt.setJustificationType (juce::Justification::centredTop);
             emptySearchLabel.setJustificationType (juce::Justification::centredTop);

@@ -127,7 +127,7 @@ namespace melatonin
         const juce::Colour backgroundDarkerColor = juce::Colours::black.withAlpha(0.38f);
         const juce::Colour blackColor = juce::Colour::fromString("FF000000");
 
-        const juce::Colour bluePropsScrollbarColor = juce::Colour::fromString("FF5C678D");
+        const juce::Colour bluePropsScrollbarColor = juce::Colour::fromString("FF9ABEFF");
         const juce::Colour treeViewMinusPlusColor = juce::Colour::fromString("FF776F81");
         const juce::Colour blueTextLabelColor = juce::Colour::fromString("FF8392AF");
         const juce::Colour searchTextLabelColor = juce::Colour::fromString("FF5F526F");
