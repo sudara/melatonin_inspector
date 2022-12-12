@@ -122,14 +122,17 @@ namespace melatonin
         const juce::Colour greyLineColor = juce::Colours::lightgrey;
 
         const juce::Colour panelLineSeparatorColor = juce::Colour::fromString("FF0C0713");
-        const juce::Colour titleTextColor = juce::Colour::fromString("FF768FBE");
+        const juce::Colour titleTextColor = juce::Colour::fromString("FF9ABEFF");
         const juce::Colour yellowColor = juce::Colour::fromString("FFFFE58A");
-        const juce::Colour backgroundDarkerColor = juce::Colour::fromString("FF1C1526");
+        const juce::Colour backgroundDarkerColor = juce::Colours::black.withAlpha(0.38f);
         const juce::Colour blackColor = juce::Colour::fromString("FF000000");
 
         const juce::Colour bluePropsScrollbarColor = juce::Colour::fromString("FF5C678D");
         const juce::Colour treeViewMinusPlusColor = juce::Colour::fromString("FF776F81");
         const juce::Colour blueTextLabelColor = juce::Colour::fromString("FF8392AF");
+        const juce::Colour searchTextLabelColor = juce::Colour::fromString("FF5F526F");
+
+
     }
 
 
@@ -259,6 +262,22 @@ namespace melatonin
         juce::ToggleButton toggleButton;
         juce::Component* content = nullptr;
     };
+/*
+    class GradientBgTreeView: public juce::TreeView
+    {
+    public:
 
+        explicit GradientBgTreeView (const juce::String& componentName = {}){
 
+        }
+
+        void paint (juce::Graphics& g) override
+        {
+
+        }
+
+    private:
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(GradientBgTreeView)
+    };*/
 }

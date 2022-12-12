@@ -16,19 +16,18 @@ namespace melatonin
             addChildComponent (tree);
             addChildComponent (emptySearchLabel);
 
-            //searchBox.setLookAndFeel(&melatoninLookAndFeel);
-            //clearBtn.setLookAndFeel(&melatoninLookAndFeel);
-            //emptySelectionPrompt.setLookAndFeel(&melatoninLookAndFeel);
-
             emptySelectionPrompt.setJustificationType (juce::Justification::centredTop);
-            emptySearchLabel.setJustificationType (juce::Justification::topLeft);
+            emptySearchLabel.setJustificationType (juce::Justification::centredTop);
 
             addAndMakeVisible (boxModel);
             addAndMakeVisible (colorModel);
             addAndMakeVisible (propertiesModel);
             addAndMakeVisible (previewComponent);
 
-            toggleButton.setButtonText ("Enabled");
+            toggleButton.setButtonText ("Enabled inspector");
+            toggleButton.setColour (juce::TextButton::textColourOffId, color::titleTextColor);
+            toggleButton.setColour (juce::TextButton::textColourOnId, color::yellowColor);
+            toggleButton.setLookAndFeel (&toggleBtnLookAndFeel);
             toggleButton.setToggleState (enabledAtStart, juce::dontSendNotification);
 
             addAndMakeVisible (toggleButton);
@@ -36,9 +35,16 @@ namespace melatonin
             tree.setIndentSize (12);
 
             searchBox.setHelpText ("search");
-            searchBox.setTextToShowWhenEmpty ("search", juce::Colours::white);
+            searchBox.setColour (juce::Label::backgroundColourId, juce::Colours::transparentBlack);
+            searchBox.setColour (juce::Label::textColourId, color::searchTextLabelColor);
+            searchBox.setColour (juce::TextEditor::outlineColourId, juce::Colours::transparentBlack);
+            searchBox.setColour (juce::TextEditor::focusedOutlineColourId, juce::Colours::transparentBlack);
+            searchBox.setTextToShowWhenEmpty ("Search for component...", color::treeViewMinusPlusColor);
+            searchBox.setJustification (juce::Justification::centredLeft);
+
             addAndMakeVisible (searchBox);
-            addAndMakeVisible (clearBtn);
+            addAndMakeVisible (searchIcon);
+            addChildComponent (clearBtn);
 
             searchBox.onTextChange = [this] {
                 auto searchText = searchBox.getText();
@@ -61,13 +67,36 @@ namespace melatonin
 
                     resized();
                 }
+                else
+                {
+                    tree.setVisible (true);
+                    emptySearchLabel.setVisible (false);
+                }
 
                 clearBtn.setVisible (searchBox.getText().isNotEmpty());
-                tree.setVisible (searchBox.getText().isNotEmpty());
             };
             clearBtn.onClick = [this] {
                 searchBox.setText ("");
             };
+        }
+
+        void paint (juce::Graphics& g) override
+        {
+            g.setColour (color::blackColor.withAlpha (0.38f));
+            g.fillRect (topArea);
+
+            g.setColour (color::blackColor);
+            g.fillRect (searchBoxBounds);
+
+            using namespace juce;
+            // Define the colors for the gradient
+            Colour startColor (0xFF22112E);
+            Colour endColor (0xFF180A23);
+
+            // Fill the background with a gradient from top left to bottom right
+            g.setGradientFill (ColourGradient (
+                startColor, treeViewBounds.getX(), treeViewBounds.getY(), endColor, treeViewBounds.getWidth(), treeViewBounds.getHeight(), false));
+            g.fillRect (treeViewBounds);
         }
 
         void reconstructRoot()
@@ -92,10 +121,18 @@ namespace melatonin
             auto inspectorEnabled = toggleButton.getToggleState();
             auto columnMinWidth = inspectorEnabled ? juce::jmax (380, area.getWidth() / 2)
                                                    : getWidth();
-            area.removeFromTop (20);
 
             auto mainCol = area.removeFromLeft (columnMinWidth);
-            toggleButton.setBounds (mainCol.removeFromTop (20).withTrimmedLeft (8));
+
+            auto toggleBtnHeight = 48;
+            auto logoSide = 48;
+            //used for toggle btn overlay and logo
+            topArea = juce::Rectangle<int> (mainCol).removeFromTop (toggleBtnHeight);
+
+            toggleButton.setBounds (mainCol
+                                        .removeFromTop (toggleBtnHeight)
+                                        .withSize (mainCol.getWidth() - logoSide, toggleBtnHeight)
+                                        .withX (8));
 
             boxModel.resized();
             boxModel.setBounds (mainCol.removeFromTop (boxModel.getHeight())
@@ -107,8 +144,10 @@ namespace melatonin
                                             .withX (mainCol.getX())
                                             .withWidth (mainCol.getWidth()));
 
-            //colorModel.resized();
-            //colorModel.setBounds (mainCol.removeFromTop (static_cast<int> (jmin (180.0, mainCol.getHeight() * 0.25))).withTrimmedBottom (4));
+            colorModel.resized();
+            colorModel.setBounds (mainCol.removeFromTop (static_cast<int> (colorModel.getHeight()))
+                                      .withX (mainCol.getX())
+                                      .withWidth (mainCol.getWidth()));
 
             propertiesModel.resized();
             propertiesModel.setBounds (mainCol);
@@ -116,15 +155,20 @@ namespace melatonin
             //using btn toggle state (better to switch to using class variable
             //or inspectors prop)
 
+            searchBoxBounds = area.removeFromTop (toggleBtnHeight);
+            auto b = searchBoxBounds;
+
+            clearBtn.setBounds (b.removeFromRight (48));
+            searchIcon.setBounds (b.removeFromLeft (48));
+            searchBox.setBounds (b);
+
+            emptySearchLabel.setBounds (area.reduced (4));
+
+            treeViewBounds = area;
+
             if (tree.isVisible())
             {
-                auto searchRow = area.removeFromTop (30).reduced (4, 4);
-                clearBtn.setBounds (searchRow.removeFromRight (56));
-                searchRow.removeFromRight (8);
-                searchBox.setBounds (searchRow);
-
                 tree.setBounds (area); // padding in these default components are a mess
-                emptySearchLabel.setBounds (area.reduced (4));
             }
             else
                 emptySelectionPrompt.setBounds (area);
@@ -195,8 +239,6 @@ namespace melatonin
 
                 auto hasSelected = selectedComponent != nullptr;
 
-                boxModel.reset();
-                propertiesModel.reset();
                 colorModel.reset();
 
                 resized();
@@ -213,15 +255,50 @@ namespace melatonin
         std::function<void (bool enabled)> toggleCallback;
 
     private:
+        struct ToggleBtnLookAndFeel : InspectorLookAndFeel
+        {
+        public:
+            void drawToggleButton (juce::Graphics& g, juce::ToggleButton& button, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override
+            {
+                using namespace juce;
+
+                auto fontSize = jmin (15.0f, (float) button.getHeight() * 0.75f);
+                auto tickWidth = fontSize * 1.1f;
+
+                drawTickBox (g, button, 4.0f, ((float) button.getHeight() - tickWidth) * 0.5f, tickWidth, tickWidth, button.getToggleState(), button.isEnabled(), shouldDrawButtonAsHighlighted, shouldDrawButtonAsDown);
+
+                //flip between text textColourOnId and textColourOffId
+                if (button.getToggleState())
+                {
+                    g.setColour (button.findColour (juce::TextButton::textColourOnId));
+                }
+                else
+                    g.setColour (button.findColour (juce::TextButton::textColourOffId));
+                g.setFont (fontSize);
+
+                if (!button.isEnabled())
+                    g.setOpacity (0.5f);
+
+                g.drawFittedText (button.getButtonText(),
+                    button.getLocalBounds().withTrimmedLeft (roundToInt (tickWidth) + 10).withTrimmedRight (2),
+                    Justification::centredLeft,
+                    10);
+            }
+        };
+
         Component::SafePointer<Component> selectedComponent;
         Component& root;
+
+        ToggleBtnLookAndFeel toggleBtnLookAndFeel;
         juce::ToggleButton toggleButton;
 
         ComponentModel model;
 
+        juce::Rectangle<int> topArea, searchBoxBounds, treeViewBounds;
+
         BoxModel boxModel { model };
         ColorModel colorModel;
-        ComponentPreviewChild previewComponent { model };
+        ComponentPreviewModel previewComponent { model };
         PropertiesModel propertiesModel { model };
 
         //todo move to it's own component
@@ -229,7 +306,8 @@ namespace melatonin
         juce::Label emptySelectionPrompt { "SelectionPrompt", "Select any component to see components tree" };
         juce::Label emptySearchLabel { "EmptySearchResultsPrompt", "No component found" };
         juce::TextEditor searchBox { "Search box" };
-        juce::TextButton clearBtn { "clear" };
+        juce::TextButton clearBtn { "CL", "CL" };
+        juce::TextButton searchIcon { "S", "S" };
         std::unique_ptr<ComponentTreeViewItem> rootItem;
 
         ComponentTreeViewItem* getRoot()
@@ -241,8 +319,7 @@ namespace melatonin
         {
             selectedComponent = nullptr;
             tree.clearSelectedItems();
-            boxModel.reset();
-            propertiesModel.reset();
+
             colorModel.reset();
 
             model.deselectComponent();
@@ -250,5 +327,7 @@ namespace melatonin
 
             resized();
         }
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InspectorPanel)
     };
 }

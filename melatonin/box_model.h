@@ -358,5 +358,7 @@ namespace melatonin
             componentLabel.setText ("", juce::dontSendNotification);
             parentComponentLabel.setText ("", juce::dontSendNotification);
         }
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BoxModel)
     };
 }

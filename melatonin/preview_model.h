@@ -6,40 +6,25 @@
 namespace melatonin
 {
 
-    //create child component of ComponentPreview
-    class ComponentPreviewChild : public CollapsablePanel, public ComponentModel::Listener
+    class ComponentPreviewModel : public CollapsablePanel, public ComponentModel::Listener
     {
     public:
-        ComponentPreviewChild (ComponentModel& _model) : CollapsablePanel ("PREVIEW"), model (_model)
+        ComponentPreviewModel (ComponentModel& _model) : CollapsablePanel ("PREVIEW"), model (_model)
         {
             setContent (&content);
 
             model.addListener (*this);
         }
 
-        ~ComponentPreviewChild() override
+        ~ComponentPreviewModel() override
         {
             model.removeListener (*this);
         }
 
         void paint (juce::Graphics& g) override
         {
-            g.setColour (color::panelLineSeparatorColor);
-            g.drawHorizontalLine(0, 0, getWidth()); //draw line at top
-
-            auto bounds = content.getBounds().expanded(2);
-            g.setColour (color::blackColor);
-            g.fillRect (bounds);
-
-
-            g.setColour (color::blueLineColor);
-
-            float dashLengths[2] = { 2.f, 2.f };
-            parentRectanglePath.clear();
-            parentRectanglePath.addRectangle (bounds);
-            auto parentStroke = juce::PathStrokeType (0.5);
-            parentStroke.createDashedStroke (parentRectanglePath, parentRectanglePath, dashLengths, 2);
-            g.strokePath (parentRectanglePath, parentStroke);
+            if(content.isVisible())
+                g.fillAll(color::blackColor);
         }
 
         void resized() override
@@ -64,5 +49,7 @@ namespace melatonin
             else
                 content.setImage (juce::Image());
         }
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ComponentPreviewModel)
     };
 }
