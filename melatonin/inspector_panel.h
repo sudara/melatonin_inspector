@@ -253,6 +253,12 @@ namespace melatonin
         void toggle (bool enabled)
         {
             toggleButton.setToggleState (enabled, juce::dontSendNotification);
+
+            previewComponent.setVisible(enabled);
+            colorModel.setVisible(enabled);
+            propertiesModel.setVisible(enabled);
+
+            if(!enabled) model.deselectComponent();
         }
 
         std::function<void (Component* c)> selectComponentCallback;

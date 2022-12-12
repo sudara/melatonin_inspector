@@ -23,21 +23,27 @@ namespace melatonin
 
         void paint (juce::Graphics& g) override
         {
-            auto bounds = contentPanel.getBounds().removeFromLeft(22).withSizeKeepingCentre(22, 22).toFloat();
+            auto bounds = contentPanel.getBounds().removeFromLeft(18).withSizeKeepingCentre(18, 18).toFloat();
 
             g.setColour (selectedColor);
             g.fillRoundedRectangle (bounds, 2.f);
+
+            if(selectedColor.isTransparent()){
+                g.setColour(color::titleTextColor);
+                g.drawRoundedRectangle(bounds, 2.f, 1.f);
+            }
         }
 
         void resized() override
         {
+            paddingHor = 16;
             contentPanel.setSize(getWidth(), 38);
 
             CollapsablePanel::resized();
 
             auto r = contentPanel.getLocalBounds();
 
-            auto fieldBounds = r.removeFromTop(22);
+            auto fieldBounds = r.removeFromTop(18);
             //r.removeFromBottom(4);
 
             //account for color selector

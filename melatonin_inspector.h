@@ -46,7 +46,7 @@ namespace melatonin
         void updateWindowSizeOnToggle()
         {
             auto width = enabled ? jmax(700, getWidth()) : 380;
-            auto height = jmax(getHeight(), 800);
+            auto height = enabled ? jmax(getHeight(), 800) : 400;
             setResizeLimits (width, height, 1200, 1200);
             setSize (width, height);
             panel.setSize (width, height);
