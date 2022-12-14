@@ -202,7 +202,7 @@ namespace melatonin
                 //Selects and highlights
                 if (component != nullptr)
                 {
-                    getRoot()->recursivelyCloseSubItems();
+                    //getRoot()->recursivelyCloseSubItems();
 
                     getRoot()->openTreeAndSelect (component);
                     tree.scrollToKeepItemVisible (tree.getSelectedItem (0));
