@@ -15,7 +15,6 @@ namespace melatonin
         {
 
             //why I cannot just setRootItem to rootComponent?
-            //tree.setRootItem(getRoot());
             addChildComponent (tree);
             addChildComponent (emptySearchLabel);
 
@@ -25,9 +24,13 @@ namespace melatonin
             emptySearchLabel.setJustificationType (juce::Justification::centredTop);
 
             addAndMakeVisible (boxModel);
-            addAndMakeVisible (colorModel);
-            addAndMakeVisible (propertiesModel);
-            addAndMakeVisible (previewComponent);
+            addChildComponent (colorModel);
+            addChildComponent (propertiesModel);
+            addChildComponent (previewComponent);
+
+            colorModel.setVisible(enabledAtStart);
+            propertiesModel.setVisible(enabledAtStart);
+            previewComponent.setVisible(enabledAtStart);
 
             toggleButton.setButtonText ("Enabled inspector");
             toggleButton.setColour (juce::TextButton::textColourOffId, color::titleTextColor);
@@ -83,6 +86,10 @@ namespace melatonin
             clearBtn.onClick = [this] {
                 searchBox.setText ("");
             };
+
+            //treeview is empty even if inspector is enabled
+            //since at the moment when this panel getting initialized, the root component most likely doesn't have any children YET
+            //we can either wait and launch asynupdate or add empty label
         }
 
         void paint (juce::Graphics& g) override

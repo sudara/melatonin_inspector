@@ -71,19 +71,19 @@ namespace melatonin
                 g.drawRect (selectedBounds.reduced (1.0f));
 
                 const float dashes[] { 2.0f, 2.0f };
-                g.drawDashedLine (lineToTopHoveredComponent, dashes, 2, 2.0f);
-                g.drawDashedLine (lineToLeftHoveredComponent, dashes, 2, 2.0f);
-                g.drawDashedLine (lineToBottomHoveredComponent, dashes, 2, 2.0f);
-                g.drawDashedLine (lineToRightHoveredComponent, dashes, 2, 2.0f);
+                g.drawLine(lineToTopHoveredComponent, 2);
+                g.drawLine(lineToLeftHoveredComponent, 2);
+                g.drawLine(lineToRightHoveredComponent, 2);
+                g.drawLine(lineToBottomHoveredComponent, 2);
+
+                g.drawDashedLine (horConnectingLineToComponent, dashes, 2, 2.0f);
+                g.drawDashedLine (vertConnectingLineToComponent, dashes, 2, 2.0f);
 
                 // text doesn't vertically center very nicely without manual offset
                 if(distanceToTopHoveredLabel.isVisible()) g.fillRoundedRectangle (distanceToTopLabelBounds.toFloat().withBottom (distanceToTopLabelBounds.getBottom()), 2.0f);
                 if(distanceToBottomHoveredLabel.isVisible()) g.fillRoundedRectangle (distanceToBottomLabelBounds.toFloat().withBottom (distanceToBottomLabelBounds.getBottom()), 2.0f);
                 if(distanceToLeftHoveredLabel.isVisible()) g.fillRoundedRectangle (distanceToLeftLabelBounds.toFloat().withBottom (distanceToLeftLabelBounds.getBottom()), 2.0f);
                 if(distanceToRightHoveredLabel.isVisible()) g.fillRoundedRectangle (distanceToRightLabelBounds.toFloat().withBottom (distanceToRightLabelBounds.getBottom()), 2.0f);
-
-                auto center = lineToLeftHoveredComponent.getPointAlongLineProportionally (0.5f);
-                g.fillEllipse (center.x, center.y, 4, 4);
             }
         }
 
@@ -115,6 +115,9 @@ namespace melatonin
             lineToLeftHoveredComponent = Line<float>();
             lineToRightHoveredComponent = Line<float>();
             lineToBottomHoveredComponent = Line<float>();
+
+            horConnectingLineToComponent = Line<float>();
+            vertConnectingLineToComponent = Line<float>();
 
             distanceToTopHoveredLabel.setVisible(false);
             distanceToBottomHoveredLabel.setVisible(false);
@@ -261,7 +264,10 @@ namespace melatonin
         juce::Line<float> lineToTopHoveredComponent,
             lineToLeftHoveredComponent,
             lineToRightHoveredComponent,
-            lineToBottomHoveredComponent;
+            lineToBottomHoveredComponent,
+            horConnectingLineToComponent,
+            vertConnectingLineToComponent;
+
         Label distanceToTopHoveredLabel,
             distanceToBottomHoveredLabel,
             distanceToLeftHoveredLabel,
@@ -337,6 +343,7 @@ namespace melatonin
 
         void drawDistanceLabel()
         {
+            //todo avoid overlapping of labels with dimensions label
             if (selectedComponent && hoveredComponent)
             {
                 int labelHeight = 15;
@@ -406,7 +413,6 @@ namespace melatonin
             distanceToBottomHoveredLabel.setVisible (lineToBottomHoveredComponent.getLength() > 0);
             distanceToLeftHoveredLabel.setVisible (lineToLeftHoveredComponent.getLength() > 0);
             distanceToRightHoveredLabel.setVisible (lineToRightHoveredComponent.getLength() > 0);
-
         }
         void calculateDistanceLinesToHovered()
         {
@@ -414,6 +420,9 @@ namespace melatonin
             lineToLeftHoveredComponent = Line<float>();
             lineToRightHoveredComponent = Line<float>();
             lineToBottomHoveredComponent = Line<float>();
+
+            horConnectingLineToComponent = Line<float>();
+            vertConnectingLineToComponent = Line<float>();
 
             if (hoveredComponent && selectedComponent)
             {
@@ -427,13 +436,13 @@ namespace melatonin
                     if (hovOnLeft)
                     {
                         auto p1 = selectedBounds.getTopLeft().translated (0, selectedBounds.getHeight() / 2);
-                        lineToLeftHoveredComponent = Line<int> (p1, p1.withX (hoveredBounds.getRight())).toFloat();
+                        lineToRightHoveredComponent = Line<int> (p1, p1.withX (hoveredBounds.getRight())).toFloat();
                     }
                     //if the hovered component is right of the selected component
                     else
                     {
                         auto p1 = selectedBounds.getTopRight().translated (0, selectedBounds.getHeight() / 2);
-                        lineToRightHoveredComponent = Line<int> (p1, p1.withX(hoveredBounds.getX())).toFloat();
+                        lineToLeftHoveredComponent = Line<int> (p1, p1.withX(hoveredBounds.getX())).toFloat();
                     }
 
                     auto p1 = selectedBounds.getTopLeft().translated (selectedBounds.getWidth() / 2, 0);
@@ -446,12 +455,11 @@ namespace melatonin
                     if (lineToBottomHoveredComponent.isHorizontal() || lineToBottomHoveredComponent.getStartY() < lineToBottomHoveredComponent.getEndY())
                         lineToBottomHoveredComponent = Line<float>();
                     //avoid drawing stricly vertical line lineToLeftHoveredComponent
-                    if (lineToLeftHoveredComponent.isVertical() || lineToLeftHoveredComponent.getStartX() < lineToLeftHoveredComponent.getEndX())
+                    if (lineToLeftHoveredComponent.isVertical() || lineToLeftHoveredComponent.getStartX() > lineToLeftHoveredComponent.getEndX())
                         lineToLeftHoveredComponent = Line<float>();
                     //avoid drawing stricly vertical line lineToRightHoveredComponent
-                    if (lineToRightHoveredComponent.isVertical() || lineToRightHoveredComponent.getStartX() > lineToRightHoveredComponent.getEndX())
+                    if (lineToRightHoveredComponent.isVertical() || lineToRightHoveredComponent.getStartX() < lineToRightHoveredComponent.getEndX())
                         lineToRightHoveredComponent = Line<float>();
-
                 }
                 else
                 {
@@ -459,12 +467,12 @@ namespace melatonin
                     if (hovOnLeft)
                     {
                         auto p1 = selectedBounds.getBottomLeft().translated (0, -selectedBounds.getHeight() / 2);
-                        lineToLeftHoveredComponent = Line<int> (p1, p1.withX (hoveredBounds.getRight())).toFloat();
+                        lineToRightHoveredComponent = Line<int> (p1, p1.withX (hoveredBounds.getRight())).toFloat();
                     }
                     else
                     {
                         auto p1 = selectedBounds.getBottomRight().translated (0, -selectedBounds.getHeight() / 2);
-                        lineToRightHoveredComponent = Line<int> (p1, p1.withX (hoveredBounds.getX())).toFloat();
+                        lineToLeftHoveredComponent = Line<int> (p1, p1.withX (hoveredBounds.getX())).toFloat();
                     }
 
                     auto p1 = selectedBounds.getBottomLeft().translated (selectedBounds.getWidth() / 2, 0);
@@ -475,11 +483,40 @@ namespace melatonin
                         lineToTopHoveredComponent = Line<float>();
 
                     //avoid drawing stricly vertical line lineToLeftHoveredComponent
-                    if (lineToLeftHoveredComponent.isVertical() || lineToLeftHoveredComponent.getStartX() < lineToLeftHoveredComponent.getEndX())
+                    if (lineToLeftHoveredComponent.isVertical() || lineToLeftHoveredComponent.getStartX() > lineToLeftHoveredComponent.getEndX())
                         lineToLeftHoveredComponent = Line<float>();
                     //avoid drawing stricly vertical line lineToRightHoveredComponent
-                    if (lineToRightHoveredComponent.isVertical() || lineToRightHoveredComponent.getStartX() > lineToRightHoveredComponent.getEndX())
+                    if (lineToRightHoveredComponent.isVertical() || lineToRightHoveredComponent.getStartX() < lineToRightHoveredComponent.getEndX())
                         lineToRightHoveredComponent = Line<float>();
+                }
+
+                //adding missing lines to connect to hovered component
+                if(!hoveredBounds.contains(lineToRightHoveredComponent.getEnd().toInt().translated(-2, 0)) && lineToRightHoveredComponent.getLength() > 0){
+                    juce::Point<int> hoveredPoint;
+                    if(hovOnTop){
+                        hoveredPoint = hovOnLeft ?  hoveredBounds.getBottomRight() : hoveredBounds.getBottomLeft();
+                    }
+                    else
+                        hoveredPoint = hovOnLeft ?  hoveredBounds.getTopRight() : hoveredBounds.getTopLeft();
+                    vertConnectingLineToComponent = Line<float>(lineToRightHoveredComponent.getEnd().toFloat(), hoveredPoint.toFloat());
+                }
+                if(!hoveredBounds.contains(lineToLeftHoveredComponent.getEnd().translated(2, 0).toInt()) && lineToLeftHoveredComponent.getLength() > 0){
+                    juce::Point<int> hoveredPoint;
+                    if(hovOnTop){
+                        hoveredPoint = hovOnLeft ?  hoveredBounds.getBottomRight() : hoveredBounds.getBottomLeft();
+                    }
+                    else
+                        hoveredPoint = hovOnLeft ?  hoveredBounds.getTopRight() : hoveredBounds.getTopLeft();
+                    vertConnectingLineToComponent = Line<float>(lineToLeftHoveredComponent.getEnd().toFloat(), hoveredPoint.toFloat());
+                }
+
+                if(!hoveredBounds.contains(lineToTopHoveredComponent.getEnd().toInt()) && lineToTopHoveredComponent.getLength() > 0){
+                    juce::Point<int> hoveredPoint = hovOnLeft ?  hoveredBounds.getTopRight() : hoveredBounds.getTopLeft();
+                    horConnectingLineToComponent = Line<float>(lineToTopHoveredComponent.getEnd().toFloat(), hoveredPoint.toFloat());
+                }
+                if(!hoveredBounds.contains(lineToBottomHoveredComponent.getEnd().toInt()) && lineToBottomHoveredComponent.getLength() > 0){
+                    auto hoveredPoint = hovOnLeft ?  hoveredBounds.getBottomRight() : hoveredBounds.getBottomLeft();
+                    horConnectingLineToComponent = Line<float>(lineToBottomHoveredComponent.getEnd().toFloat(), hoveredPoint.toFloat());
                 }
             }
         }
