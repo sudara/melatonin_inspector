@@ -510,11 +510,11 @@ namespace melatonin
                     vertConnectingLineToComponent = Line<float>(lineToLeftHoveredComponent.getEnd().toFloat(), hoveredPoint.toFloat());
                 }
 
-                if(!hoveredBounds.contains(lineToTopHoveredComponent.getEnd().toInt()) && lineToTopHoveredComponent.getLength() > 0){
+                if(!hoveredBounds.contains(lineToTopHoveredComponent.getEnd().toInt().translated(0, 2)) && lineToTopHoveredComponent.getLength() > 0){
                     juce::Point<int> hoveredPoint = hovOnLeft ?  hoveredBounds.getTopRight() : hoveredBounds.getTopLeft();
                     horConnectingLineToComponent = Line<float>(lineToTopHoveredComponent.getEnd().toFloat(), hoveredPoint.toFloat());
                 }
-                if(!hoveredBounds.contains(lineToBottomHoveredComponent.getEnd().toInt()) && lineToBottomHoveredComponent.getLength() > 0){
+                if(!hoveredBounds.contains(lineToBottomHoveredComponent.getEnd().toInt().translated(0, -2)) && lineToBottomHoveredComponent.getLength() > 0){
                     auto hoveredPoint = hovOnLeft ?  hoveredBounds.getBottomRight() : hoveredBounds.getBottomLeft();
                     horConnectingLineToComponent = Line<float>(lineToBottomHoveredComponent.getEnd().toFloat(), hoveredPoint.toFloat());
                 }
