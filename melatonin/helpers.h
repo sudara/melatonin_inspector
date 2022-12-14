@@ -113,7 +113,8 @@ namespace melatonin
     static inline juce::String distanceString (juce::Line<float> line)
     {
         //account for outline border drawing (1 on each side)
-        return juce::String (line.getLength());
+        auto v = line.getLength() + 3;
+        return juce::String (v);
     }
 
     namespace color
