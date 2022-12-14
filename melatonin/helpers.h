@@ -110,6 +110,12 @@ namespace melatonin
         return juce::String (bounds.getWidth() - 2) + L" × " + juce::String (bounds.getHeight() - 2);
     }
 
+    static inline juce::String distanceString (juce::Line<float> line)
+    {
+        //account for outline border drawing (1 on each side)
+        return juce::String (line.getLength());
+    }
+
     namespace color
     {
         const juce::Colour white = juce::Colours::white; // consistency

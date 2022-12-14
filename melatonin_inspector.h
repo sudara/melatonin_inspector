@@ -68,6 +68,14 @@ namespace melatonin
             panel.displayComponentInfo (c);
         }
 
+        void outlineDistanceCallback (Component* c)
+        {
+            if (!enabled || overlay.isParentOf (c))
+                return;
+
+            overlay.outlineDistanceCallback (c);
+        }
+
         void selectComponent (Component* c, bool collapseTree = true)
         {
             if (!enabled || overlay.isParentOf (c))
@@ -132,6 +140,7 @@ namespace melatonin
         void setupCallbacks()
         {
             mouseInspector.outlineComponentCallback = [this] (Component* c) { this->outlineComponent (c); };
+            mouseInspector.outlineDistanceCallback = [this] (Component* c) { this->outlineDistanceCallback (c); };
             mouseInspector.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, true); };
             mouseInspector.componentStartDraggingCallback = [this] (Component* c, const MouseEvent& e) { this->startDragComponent (c, e); };
             mouseInspector.componentDraggedCallback = [this] (Component* c, const MouseEvent& e) { this->dragComponent (c, e); };
