@@ -42,7 +42,7 @@ namespace melatonin
         juce::ImageComponent content;
         juce::Path parentRectanglePath;
 
-        void componentChanged (ComponentModel& model) override
+        void componentChanged (ComponentModel&) override
         {
             if(auto component = model.getSelectedComponent())
                 content.setImage (component->createComponentSnapshot ({ component->getWidth(), component->getHeight() }, false, 1.0f));

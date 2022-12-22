@@ -16,7 +16,7 @@ namespace melatonin
             model.addListener(*this);
         }
 
-        ~PropertiesModel(){
+        ~PropertiesModel() override{
             model.removeListener(*this);
         }
 
@@ -48,7 +48,7 @@ namespace melatonin
             return { getWidth(), propsSize + 1  * padding + propsSize * preferredHeight };
         }
 
-        void componentChanged (ComponentModel& componentModel) override
+        void componentChanged (ComponentModel&) override
         {
             updateProperties();
         }

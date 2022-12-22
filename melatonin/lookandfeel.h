@@ -85,7 +85,7 @@ namespace melatonin
         // don't use the target app's font
         juce::Font getLabelFont (juce::Label& label) override
         {
-            return juce::Font ("Verdana", label.getFont().getHeight(), juce::Font::FontStyleFlags::plain);
+            return { "Verdana", label.getFont().getHeight(), juce::Font::FontStyleFlags::plain };
         }
 
         // oh i dream of css resets...
@@ -94,7 +94,7 @@ namespace melatonin
             return juce::BorderSize<int> (0);
         }
 
-        void drawTickBox (juce::Graphics& g, juce::Component& c, float x, float y, float w, float h, bool isTicked, bool isEnabled, bool isMouseOverButton, bool isButtonDown) override
+        void drawTickBox (juce::Graphics& g, juce::Component&, float x, float y, float w, float h, bool isTicked, bool, bool, bool) override
         {
 
             juce::Rectangle<float> bounds(x + 2.f, y + 2.f, w - 4.f, h - 4.f);
@@ -146,7 +146,7 @@ namespace melatonin
             }
         }
 
-        void drawScrollbar (juce::Graphics& g, juce::ScrollBar& scrollbar, int x, int y, int width, int height, bool isScrollbarVertical, int thumbStartPosition, int thumbSize, bool isMouseOver, bool isMouseDown) override
+        void drawScrollbar (juce::Graphics& g, juce::ScrollBar&, int x, int y, int width, int height, bool isScrollbarVertical, int thumbStartPosition, int thumbSize, bool, bool) override
         {
 
             //fill bg in black

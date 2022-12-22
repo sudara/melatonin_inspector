@@ -207,7 +207,7 @@ namespace melatonin
             isDragging = false;
         }
 
-        void mouseEnter (const MouseEvent& event) override
+        void mouseEnter (const MouseEvent&) override
         {
             if (!selectedComponent)
                 return;
@@ -216,7 +216,7 @@ namespace melatonin
             repaint();
         }
 
-        void mouseMove (const MouseEvent& event) override
+        void mouseMove (const MouseEvent&) override
         {
             if (!selectedComponent)
                 return;

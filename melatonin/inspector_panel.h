@@ -249,8 +249,6 @@ namespace melatonin
                 toggle (enabled);
                 toggleCallback (enabled);
 
-                auto hasSelected = selectedComponent != nullptr;
-
                 colorModel.reset();
 
                 resized();

@@ -47,7 +47,7 @@ namespace melatonin
         bool opaqueValue, hasCachedImageValue, accessibilityHandled, focused;
         juce::String lookAndFeel { "" }, fontValue, alphaValue;
 
-        void displayComponent (juce::Component* component)
+        void displayComponent (juce::Component*)
         {
             updateModel();
         }
@@ -145,7 +145,7 @@ namespace melatonin
                 jassertfalse;
         }
 
-        void componentMovedOrResized (juce::Component& component, bool wasMoved, bool wasResized) override
+        void componentMovedOrResized (juce::Component&, bool wasMoved, bool wasResized) override
         {
             if (wasResized || wasMoved)
             {
