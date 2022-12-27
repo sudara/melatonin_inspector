@@ -5,7 +5,7 @@ namespace melatonin
 {
     using namespace juce;
 
-    class Overlay : public Component, public ComponentListener
+    class Overlay : public juce::Component, public ComponentListener
     {
     public:
         Overlay()
@@ -540,7 +540,7 @@ namespace melatonin
     class MouseInspector : public MouseListener
     {
     public:
-        MouseInspector (Component& c) : root (c)
+        MouseInspector (juce::Component& c) : root (c)
         {
             // Listen to all mouse movements for all children of the root
             root.addMouseListener (this, true);
@@ -599,15 +599,15 @@ namespace melatonin
             }
         }
 
-        std::function<void (Component* c)> outlineComponentCallback;
-        std::function<void (Component* c)> outlineDistanceCallback;
-        std::function<void (Component* c)> selectComponentCallback;
-        std::function<void (Component* c, const MouseEvent& e)> componentStartDraggingCallback;
-        std::function<void (Component* c, const MouseEvent& e)> componentDraggedCallback;
+        std::function<void (juce::Component* c)> outlineComponentCallback;
+        std::function<void (juce::Component* c)> outlineDistanceCallback;
+        std::function<void (juce::Component* c)> selectComponentCallback;
+        std::function<void (juce::Component* c, const MouseEvent& e)> componentStartDraggingCallback;
+        std::function<void (juce::Component* c, const MouseEvent& e)> componentDraggedCallback;
         std::function<void()> mouseExitCallback;
 
     private:
-        Component& root;
+        juce::Component& root;
 
         bool isDragging { false };
     };
