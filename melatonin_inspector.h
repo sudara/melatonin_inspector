@@ -7,22 +7,22 @@ BEGIN_JUCE_MODULE_DECLARATION
  name:             Melatonin Inspector
  description:      A component inspector for JUCE, inspired by Figma, web inspector and Jim Credland's Component Debugger
  license:          MIT
- dependencies:     juce_gui_basics 
+ dependencies:     juce_gui_basics
 
 END_JUCE_MODULE_DECLARATION
 */
 #pragma once
-#include "melatonin/inspector_panel.h"
-#include "melatonin/overlay.h"
 #include "melatonin/lookandfeel.h"
+#include "melatonin_inspector/melatonin/components/inspector_panel.h"
+#include "melatonin_inspector/melatonin/components/overlay.h"
 
 namespace melatonin
 {
     class Inspector : public juce::ComponentListener, public juce::DocumentWindow
     {
     public:
-        Inspector (juce::Component& rootComponent, bool enabledAtStart = true)
-            : juce::DocumentWindow ("Melatonin Inspector", melatonin::color::background, 7, true),
+        explicit Inspector (juce::Component& rootComponent, bool enabledAtStart = true)
+            : juce::DocumentWindow ("Melatonin Inspector", colors::background, 7, true),
               panel (rootComponent, enabledAtStart),
               root (rootComponent),
               enabled (enabledAtStart)
@@ -45,8 +45,8 @@ namespace melatonin
         }
         void updateWindowSizeOnToggle()
         {
-            auto width = enabled ? jmax(700, getWidth()) : 380;
-            auto height = enabled ? jmax(getHeight(), 800) : 400;
+            auto width = enabled ? juce::jmax(700, getWidth()) : 380;
+            auto height = enabled ? juce::jmax(getHeight(), 800) : 400;
             setResizeLimits (width, height, 1200, 1200);
             setSize (width, height);
             panel.setSize (width, height);
@@ -85,7 +85,7 @@ namespace melatonin
             panel.selectComponent (c, collapseTree);
         }
 
-        void dragComponent (Component* c, const MouseEvent& e)
+        void dragComponent (Component* c, const juce::MouseEvent& e)
         {
             if (!enabled || overlay.isParentOf (c))
                 return;
@@ -94,7 +94,7 @@ namespace melatonin
             panel.displayComponentInfo (c);
         }
 
-        void startDragComponent (Component* c, const MouseEvent& e)
+        void startDragComponent (Component* c, const juce::MouseEvent& e)
         {
             if (!enabled || overlay.isParentOf (c))
                 return;
@@ -142,8 +142,8 @@ namespace melatonin
             mouseInspector.outlineComponentCallback = [this] (Component* c) { this->outlineComponent (c); };
             mouseInspector.outlineDistanceCallback = [this] (Component* c) { this->outlineDistanceCallback (c); };
             mouseInspector.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, true); };
-            mouseInspector.componentStartDraggingCallback = [this] (Component* c, const MouseEvent& e) { this->startDragComponent (c, e); };
-            mouseInspector.componentDraggedCallback = [this] (Component* c, const MouseEvent& e) { this->dragComponent (c, e); };
+            mouseInspector.componentStartDraggingCallback = [this] (Component* c, const juce::MouseEvent& e) { this->startDragComponent (c, e); };
+            mouseInspector.componentDraggedCallback = [this] (Component* c, const juce::MouseEvent& e) { this->dragComponent (c, e); };
             mouseInspector.mouseExitCallback = [this]() { if (this->enabled) panel.redisplaySelectedComponent(); };
 
             panel.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, true); };

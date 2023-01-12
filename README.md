@@ -8,18 +8,34 @@ https://user-images.githubusercontent.com/472/115873623-6f2e4700-a443-11eb-9ba1-
 
 ## How to install
 
-### 1. Download
+You have several options. In all cases, the exported target you should link against is: `Melatonin::Inspector`.
 
-Assuming 
+### Option #1: `FetchContent`
 
-1. you use git and 
-2. you have modules in a `modules` subfolder of your project
+Example usage:
+```cmake
+include (FetchContent)
 
-this will set you up with a git submodule tracking the `main` branch:
+FetchContent_Declare (melatonin_inspector
+  GIT_REPOSITORY https://github.com/sudara/melatonin_inspector.git
+  GIT_TAG origin/main)
 
-```git
-git submodule add -b main https://github.com/sudara/melatonin_inspector modules/melatonin_inspector
-git commit -m "Added melatonin_inspector submodule."
+FetchContent_MakeAvailable (melatonin_inspector)
+
+target_link_libraries (yourTarget PRIVATE Melatonin::Inspector)
+```
+
+### Option #2 git submodules and `add_subdirectory`
+
+If you are a git submodule aficionado, add this repository as a git submodule to your project:
+```sh
+git submodule add -b main https://github.com/sudara/melatonin_inspector.git modules/melatonin_inspector
+```
+and then simply call `add_subdirectory` in your CMakeLists.txt:
+```cmake
+add_subdirectory (modules/melatonin_inspector)
+
+target_link_libraries (yourTarget PRIVATE Melatonin::Inspector)
 ```
 
 To update melatonin_inspector down the road (gasp! maintained dependencies!?) you can:
@@ -27,22 +43,9 @@ To update melatonin_inspector down the road (gasp! maintained dependencies!?) yo
 git submodule update --remote --merge modules/melatonin_inspector
 ```
 
-### 2. Tell JUCE about the module
 
-If you use CMake, inform JUCE about the module in your `CMakeLists.txt`. Important: Do this *before* your call to `juce_add_module`!!
-```
-juce_add_module("modules/melatonin_inspector")
-```
-
-In addition, you'll need to link the module to your plugin, for example:
-
-```
-target_link_libraries("YourProject" PRIVATE melatonin_inspector)
-```
-
-If you use projucer, add the module manually.
  
-### 3. Add an include to your Editor
+## 3. Add an include to your Plugin Editor
 
 Include the module header:
 
@@ -50,7 +53,7 @@ Include the module header:
 #include "melatonin_inspector/melatonin_inspector.h"
 ```
 
-### 4. Add the inspector as a private member to your Editor
+## 4. Add the inspector as a private member to your Editor
 
 Pass a reference to the root component of your UI (typically the  Editor itself, but you could also inspect another window, etc).
 
@@ -64,11 +67,18 @@ If you'd like the inspector to be disabled by default, pass false as the second 
 melatonin::Inspector inspector { *this, false };
 ```
 
-### 5. Set it visible
+This is what I do. I have a GUI toggle to enable it when necessary which calls 
 
-Out of the box, the window won't popup until you call `setVisible(true)` on the inspector!
+```cpp
+inspector.setVisible(true); 
+inspector.toggle(true);
+```
 
-## Features
+## 5. Set it visible
+
+Speaking of, out of the box, the additional window won't popup until you call `inspector.setVisible(true)` somewhere on the inspector!
+
+## Usage & Features
 
 ### Hover over Component to view size and bounds to parent
 

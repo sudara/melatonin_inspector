@@ -1,6 +1,6 @@
 #pragma once
 
-#include "helpers.h"
+#include "helpers/colors.h"
 
 namespace melatonin
 {
@@ -11,35 +11,34 @@ namespace melatonin
         InspectorLookAndFeel()
         {
             // often the app overrides this
-            setColour (juce::Label::outlineWhenEditingColourId, color::yellowColor);
-            setColour (juce::ToggleButton::ColourIds::tickDisabledColourId, color::yellowColor);
-            setColour (juce::ToggleButton::ColourIds::textColourId, color::titleTextColor);
-            setColour (juce::ToggleButton::ColourIds::tickColourId, color::background);
+            setColour (juce::Label::outlineWhenEditingColourId, colors::yellowColor);
+            setColour (juce::ToggleButton::ColourIds::tickDisabledColourId, colors::yellowColor);
+            setColour (juce::ToggleButton::ColourIds::textColourId, colors::titleTextColor);
+            setColour (juce::ToggleButton::ColourIds::tickColourId, colors::background);
 
-            setColour (juce::Label::textColourId, color::blueTextLabelColor);
+            setColour (juce::Label::textColourId, colors::blueTextLabelColor);
 
-            setColour (juce::TextEditor::textColourId, color::blueTextLabelColor);
+            setColour (juce::TextEditor::textColourId, colors::blueTextLabelColor);
             setColour (juce::TextEditor::backgroundColourId, juce::Colours::transparentBlack);
-            setColour (juce::TextEditor::highlightColourId, color::yellowColor.withAlpha(0.1f));
-            setColour (juce::CaretComponent::caretColourId, color::blueLineColor);
+            setColour (juce::TextEditor::highlightColourId, colors::yellowColor.withAlpha (0.1f));
+            setColour (juce::CaretComponent::caretColourId, colors::blueLineColor);
 
             setColour (juce::TextButton::buttonColourId, juce::Colours::transparentBlack);
             setColour (juce::ComboBox::outlineColourId, juce::Colours::transparentBlack);
 
+            setColour (juce::PropertyComponent::backgroundColourId, juce::Colours::transparentBlack);
+            setColour (juce::TextEditor::outlineColourId, juce::Colours::transparentBlack);
+            setColour (juce::TextPropertyComponent::backgroundColourId, juce::Colours::transparentBlack);
+            setColour (juce::TextPropertyComponent::outlineColourId, juce::Colours::transparentBlack);
+            setColour (juce::TextPropertyComponent::textColourId, colors::white);
+            setColour (juce::PropertyComponent::ColourIds::labelTextColourId, colors::titleTextColor);
+            setColour (juce::BooleanPropertyComponent::backgroundColourId, juce::Colours::transparentBlack);
+            setColour (juce::BooleanPropertyComponent::outlineColourId, juce::Colours::transparentBlack);
 
-            setColour(juce::PropertyComponent::backgroundColourId, juce::Colours::transparentBlack);
-            setColour(juce::TextEditor::outlineColourId, juce::Colours::transparentBlack);
-            setColour(juce::TextPropertyComponent::backgroundColourId, juce::Colours::transparentBlack);
-            setColour(juce::TextPropertyComponent::outlineColourId, juce::Colours::transparentBlack);
-            setColour(juce::TextPropertyComponent::textColourId, color::white);
-            setColour(juce::PropertyComponent::ColourIds::labelTextColourId, color::titleTextColor);
-            setColour(juce::BooleanPropertyComponent::backgroundColourId, juce::Colours::transparentBlack);
-            setColour(juce::BooleanPropertyComponent::outlineColourId, juce::Colours::transparentBlack);
+            setColour (juce::TreeView::ColourIds::selectedItemBackgroundColourId, colors::blackColor);
+            setColour (juce::TreeView::ColourIds::backgroundColourId, juce::Colours::transparentBlack);
 
-            setColour(juce::TreeView::ColourIds::selectedItemBackgroundColourId, color::blackColor);
-            setColour(juce::TreeView::ColourIds::backgroundColourId, juce::Colours::transparentBlack);
-
-            setColour(juce::ScrollBar::ColourIds::thumbColourId, color::bluePropsScrollbarColor);
+            setColour (juce::ScrollBar::ColourIds::thumbColourId, colors::bluePropsScrollbarColor);
         }
 
         // we don't want our resizer in the overlay to have a fugly border
@@ -52,26 +51,21 @@ namespace melatonin
         // But we want to adjust the color and size of triangles anyway
         void drawTreeviewPlusMinusBox (juce::Graphics& g, const juce::Rectangle<float>& area, juce::Colour backgroundColour, bool isOpen, bool /*isMouseOver*/) override
         {
-            using namespace juce;
-
             auto tickBounds = area;
-            tickBounds.reduce(0, 2);
-            auto boxSize = jmin(tickBounds.getHeight(), tickBounds.getWidth());
+            tickBounds.reduce (0, 2);
+            auto boxSize = juce::jmin (tickBounds.getHeight(), tickBounds.getWidth());
 
-            Path p;
-            p.addTriangle (tickBounds.getX() + 1, tickBounds.getY() + boxSize * 0.5f,
-                tickBounds.getX() + boxSize + 1, tickBounds.getY() + boxSize * 0.5f,
-                tickBounds.getX() + boxSize * 0.5f + 1, tickBounds.getY() + boxSize + boxSize * 0.25f);
+            juce::Path p;
+            p.addTriangle (tickBounds.getX() + 1, tickBounds.getY() + boxSize * 0.5f, tickBounds.getX() + boxSize + 1, tickBounds.getY() + boxSize * 0.5f, tickBounds.getX() + boxSize * 0.5f + 1, tickBounds.getY() + boxSize + boxSize * 0.25f);
 
             g.setColour (backgroundColour);
 
-            auto transform = AffineTransform::rotation (!isOpen ? degreesToRadians(270.0f)
-                                                                : 0,
+            auto transform = juce::AffineTransform::rotation (!isOpen ? juce::degreesToRadians (270.0f) : 0,
                 tickBounds.getCentreX(),
                 tickBounds.getCentreY());
 
-            if(!isOpen)
-                transform = transform.translated(0, 0);
+            if (!isOpen)
+                transform = transform.translated (0, 0);
 
             g.fillPath (p, transform);
         }
@@ -96,19 +90,18 @@ namespace melatonin
 
         void drawTickBox (juce::Graphics& g, juce::Component&, float x, float y, float w, float h, bool isTicked, bool, bool, bool) override
         {
-
-            juce::Rectangle<float> bounds(x + 2.f, y + 2.f, w - 4.f, h - 4.f);
-            if(!isTicked){
-                g.setColour(findColour(juce::ToggleButton::ColourIds::textColourId));
-                g.drawRoundedRectangle(bounds, 2, 1);
+            juce::Rectangle<float> bounds (x + 2.f, y + 2.f, w - 4.f, h - 4.f);
+            if (!isTicked)
+            {
+                g.setColour (findColour (juce::ToggleButton::ColourIds::textColourId));
+                g.drawRoundedRectangle (bounds, 2, 1);
             }
             else
             {
                 // Fill the background of the tick box with the specified color
-                g.setColour(findColour(juce::ToggleButton::ColourIds::tickDisabledColourId));
-                g.fillRoundedRectangle(bounds, 2);
+                g.setColour (findColour (juce::ToggleButton::ColourIds::tickDisabledColourId));
+                g.fillRoundedRectangle (bounds, 2);
             }
-
 
             auto tickBoxSize = juce::jmin (bounds.getWidth(), bounds.getHeight());
 
@@ -131,16 +124,16 @@ namespace melatonin
             {
                 if (textEditor.isEnabled())
                 {
-                    juce::Rectangle<int> b{0, 0, width, height};
-                    if (textEditor.hasKeyboardFocus (true) && ! textEditor.isReadOnly())
+                    juce::Rectangle<int> b { 0, 0, width, height };
+                    if (textEditor.hasKeyboardFocus (true) && !textEditor.isReadOnly())
                     {
                         g.setColour (textEditor.findColour (juce::TextEditor::focusedOutlineColourId));
-                        g.drawRoundedRectangle (b.reduced(1).toFloat(), cornerRadius, 2);
+                        g.drawRoundedRectangle (b.reduced (1).toFloat(), cornerRadius, 2);
                     }
                     else
                     {
                         g.setColour (textEditor.findColour (juce::TextEditor::outlineColourId));
-                        g.drawRoundedRectangle(b.reduced(1).toFloat(), cornerRadius, 1);
+                        g.drawRoundedRectangle (b.reduced (1).toFloat(), cornerRadius, 1);
                     }
                 }
             }
@@ -148,9 +141,8 @@ namespace melatonin
 
         void drawScrollbar (juce::Graphics& g, juce::ScrollBar&, int x, int y, int width, int height, bool isScrollbarVertical, int thumbStartPosition, int thumbSize, bool, bool) override
         {
-
             //fill bg in black
-            g.fillAll(color::blackColor);
+            g.fillAll (colors::blackColor);
 
             juce::Rectangle<int> thumbBounds;
             if (isScrollbarVertical)
@@ -158,8 +150,8 @@ namespace melatonin
             else
                 thumbBounds = juce::Rectangle<int> (thumbStartPosition, y, thumbSize, height);
 
-            g.setColour (findColour(juce::ScrollBar::ColourIds::thumbColourId));
-            g.fillRoundedRectangle(thumbBounds.reduced(5).toFloat(), 2);
+            g.setColour (findColour (juce::ScrollBar::ColourIds::thumbColourId));
+            g.fillRoundedRectangle (thumbBounds.reduced (5).toFloat(), 2);
         }
 
     private:

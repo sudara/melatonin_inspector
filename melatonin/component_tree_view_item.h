@@ -1,5 +1,4 @@
 #pragma once
-#include "helpers.h"
 
 namespace melatonin
 {
@@ -13,7 +12,9 @@ namespace melatonin
     public:
         bool hasTabbedComponent = false;
 
-        explicit ComponentTreeViewItem (juce::Component* c, std::function<void (juce::Component* c)> outline, std::function<void (juce::Component* c)> select)
+        explicit ComponentTreeViewItem (juce::Component* c,
+            std::function<void (juce::Component* c)> outline,
+            std::function<void (juce::Component* c)> select)
             : outlineComponentCallback (outline), selectComponentCallback (select), component (c)
         {
             // A few JUCE component types need massaging to get their child components
@@ -34,7 +35,7 @@ namespace melatonin
                 addItemsForChildComponents();
             }
 
-            setDrawsInLeftMargin(true);
+            setDrawsInLeftMargin (true);
 
             // Make our tree self-aware
             component->addComponentListener (this);
@@ -79,11 +80,11 @@ namespace melatonin
                 return;
             if (isSelected())
             {
-                g.setColour (color::blackColor);
+                g.setColour (colors::blackColor);
                 g.fillRect (3, 0, w - 30, h);
             }
 
-            g.setColour (color::titleTextColor);
+            g.setColour (colors::titleTextColor);
             if (!component->isVisible())
                 g.setColour (juce::Colours::grey);
 
@@ -98,7 +99,7 @@ namespace melatonin
         // must override to set the disclosure triangle color
         void paintOpenCloseButton (juce::Graphics& g, const juce::Rectangle<float>& area, juce::Colour /*backgroundColour*/, bool isMouseOver) override
         {
-            getOwnerView()->getLookAndFeel().drawTreeviewPlusMinusBox (g, area, color::treeViewMinusPlusColor, isOpen(), isMouseOver);
+            getOwnerView()->getLookAndFeel().drawTreeviewPlusMinusBox (g, area, colors::treeViewMinusPlusColor, isOpen(), isMouseOver);
         }
 
         void itemClicked (const juce::MouseEvent&) override
@@ -135,24 +136,25 @@ namespace melatonin
                 }
             }
             // Check if the current node's name does not contain the search string
-            if (!getComponentName().containsIgnoreCase(searchString))
+            if (!getComponentName().containsIgnoreCase (searchString))
             {
                 // Remove the subtree rooted at the current node
-                if(getParentItem() != nullptr && getNumSubItems() == 0)
+                if (getParentItem() != nullptr && getNumSubItems() == 0)
                 {
                     getParentItem()->removeSubItem (getIndexInParent());
-                    DBG("For removal: "<< getComponentName());
+                    DBG ("For removal: " << getComponentName());
                 }
                 else
                     setOpen (true);
             }
-            else if(getComponentName().startsWithIgnoreCase(searchString))
+            else if (getComponentName().startsWithIgnoreCase (searchString))
             {
                 outlineComponentCallback (component);
-                setSelected(true, true);
+                setSelected (true, true);
                 setOpen (true);
             }
-            else {
+            else
+            {
                 setOpen (true);
             }
         }

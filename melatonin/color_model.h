@@ -1,8 +1,7 @@
 #pragma once
 
-#include "helpers.h"
 #include "juce_gui_extra/juce_gui_extra.h"
-#include "overlay.h"
+#include "melatonin_inspector/melatonin/components/overlay.h"
 
 namespace melatonin
 {
@@ -29,7 +28,7 @@ namespace melatonin
             g.fillRoundedRectangle (bounds, 2.f);
 
             if(selectedColor.isTransparent()){
-                g.setColour(color::titleTextColor);
+                g.setColour(colors::titleTextColor);
                 g.drawRoundedRectangle(bounds, 2.f, 1.f);
             }
         }

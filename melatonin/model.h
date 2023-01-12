@@ -1,6 +1,5 @@
 #pragma once
 
-#include "helpers.h"
 #include "juce_gui_basics/juce_gui_basics.h"
 
 namespace melatonin
@@ -15,13 +14,11 @@ namespace melatonin
             virtual void componentChanged (ComponentModel& model) = 0;
         };
 
-        ComponentModel()
-        {
-        }
+        ComponentModel() = default;
 
         void selectComponent (juce::Component* component)
         {
-            //add componentlistener to component and unsubscribe from previous component
+            // add component listener to component and unsubscribe from previous component
             if (selectedComponent)
                 selectedComponent->removeComponentListener (this);
 
@@ -44,7 +41,7 @@ namespace melatonin
         }
 
         juce::Value widthValue, heightValue, xValue, yValue;
-        bool opaqueValue, hasCachedImageValue, accessibilityHandled, focused;
+        bool opaqueValue{}, hasCachedImageValue{}, accessibilityHandled{}, focused{};
         juce::String lookAndFeel { "" }, fontValue, alphaValue;
 
         void displayComponent (juce::Component*)
