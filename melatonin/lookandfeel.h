@@ -88,6 +88,45 @@ namespace melatonin
             return juce::BorderSize<int> (0);
         }
 
+        void drawToggleButton (juce::Graphics& g, juce::ToggleButton& button, bool /*shouldDrawButtonAsHighlighted*/, bool /*shouldDrawButtonAsDown*/) override
+        {
+            float toggleWidth = 14;
+            float leftPadding = 6;
+
+            juce::Rectangle<float> bounds (leftPadding, (float) button.getHeight() / 2 - toggleWidth / 2.f, toggleWidth, toggleWidth);
+
+            if (!button.getToggleState())
+            {
+                g.setColour (findColour (juce::ToggleButton::ColourIds::textColourId));
+                g.drawRoundedRectangle (bounds, 1, 1);
+            }
+            else
+            {
+                g.setColour (findColour (juce::ToggleButton::ColourIds::tickDisabledColourId));
+                g.fillRoundedRectangle (bounds, 1);
+            }
+
+            if (!button.getToggleState())
+            {
+                juce::Path tickPath;
+                tickPath.startNewSubPath (bounds.getX() + 3.0f, bounds.getCentreY());
+                tickPath.lineTo (bounds.getCentreX(), bounds.getBottom() - 3.0f);
+                tickPath.lineTo (bounds.getRight() - 3.0f, bounds.getY() + 3.0f);
+
+                g.setColour (findColour (juce::ToggleButton::ColourIds::tickColourId));
+                g.strokePath (tickPath, juce::PathStrokeType (toggleWidth * 0.2f));
+            }
+
+            g.setColour (button.findColour (button.getToggleState() ? juce::TextButton::textColourOnId : juce::TextButton::textColourOffId));
+
+            g.setFont (g.getCurrentFont().withPointHeight (13));
+
+            g.drawText (button.getButtonText(),
+                button.getLocalBounds().withTrimmedLeft (juce::roundToInt (toggleWidth) + (int) leftPadding + 12).withTrimmedRight (2),
+                juce::Justification::centredLeft,
+                false);
+        }
+
         void drawTickBox (juce::Graphics& g, juce::Component&, float x, float y, float w, float h, bool isTicked, bool, bool, bool) override
         {
             juce::Rectangle<float> bounds (x + 2.f, y + 2.f, w - 4.f, h - 4.f);

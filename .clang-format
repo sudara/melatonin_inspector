@@ -53,7 +53,7 @@ MaxEmptyLinesToKeep: 1
 FixNamespaceComments: false
 NamespaceIndentation: All
 PointerAlignment: Left
-ReflowComments: false
+ReflowComments: true
 SortIncludes: true
 SpaceAfterCStyleCast: true
 SpaceAfterLogicalNot: false
@@ -66,6 +66,8 @@ SpacesInAngles: false
 SpacesInCStyleCastParentheses: false
 SpacesInContainerLiterals: true
 SpacesInParentheses: false
+SpacesInLineCommentPrefix:
+  Minimum: 1
 SpacesInSquareBrackets: false
 Standard: "c++20"
 TabWidth: 4

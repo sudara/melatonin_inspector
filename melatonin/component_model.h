@@ -59,7 +59,7 @@ namespace melatonin
             listenerList.add (&listener);
         }
 
-        //this may return nullptr if no component is selected
+        // this may return nullptr if no component is selected
         juce::Component* getSelectedComponent()
         {
             return selectedComponent;

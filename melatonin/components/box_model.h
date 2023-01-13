@@ -2,7 +2,7 @@
 #include "../helpers/colors.h"
 #include "../helpers/component_helpers.h"
 #include "collapsable_panel.h"
-#include "melatonin_inspector/melatonin/model.h"
+#include "melatonin_inspector/melatonin/component_model.h"
 
 namespace melatonin
 {

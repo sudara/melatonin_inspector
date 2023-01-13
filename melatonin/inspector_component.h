@@ -1,17 +1,22 @@
 #pragma once
-#include "box_model.h"
-#include "melatonin_inspector/melatonin/color_model.h"
-#include "melatonin_inspector/melatonin/component_tree_view_item.h"
+#include "melatonin_inspector/melatonin/components/box_model.h"
+#include "melatonin_inspector/melatonin/components/color_picker_panel.h"
+#include "melatonin_inspector/melatonin/components/component_tree_view_item.h"
+#include "melatonin_inspector/melatonin/components/preview_panel.h"
+#include "melatonin_inspector/melatonin/components/properties_panel.h"
 #include "melatonin_inspector/melatonin/lookandfeel.h"
-#include "preview_model.h"
-#include "properties_model.h"
+
+/*
+ * Right now this unfortunately bundles all inspector components
+ * as well as the tree view and selection logic.
+ */
 
 namespace melatonin
 {
-    class InspectorPanel : public juce::Component, public juce::Button::Listener
+    class InspectorComponent : public juce::Component, public juce::Button::Listener
     {
     public:
-        explicit InspectorPanel (juce::Component& rootComponent, bool enabledAtStart = true) : root (rootComponent)
+        explicit InspectorComponent (juce::Component& rootComponent, bool enabledAtStart = true) : root (rootComponent)
         {
             addChildComponent (tree);
             addChildComponent (emptySearchLabel);
@@ -30,10 +35,9 @@ namespace melatonin
             propertiesModel.setVisible (enabledAtStart);
             previewComponent.setVisible (enabledAtStart);
 
-            toggleButton.setButtonText ("Enabled inspector");
+            toggleButton.setButtonText ("Enable inspector");
             toggleButton.setColour (juce::TextButton::textColourOffId, colors::titleTextColor);
             toggleButton.setColour (juce::TextButton::textColourOnId, colors::yellowColor);
-            toggleButton.setLookAndFeel (&toggleBtnLookAndFeel);
             toggleButton.setToggleState (enabledAtStart, juce::dontSendNotification);
 
             addAndMakeVisible (toggleButton);
@@ -56,18 +60,17 @@ namespace melatonin
                 auto searchText = searchBox.getText();
                 reconstructRoot();
 
-                //try to find the first item that matches the search string
+                // try to find the first item that matches the search string
                 if (searchText.isNotEmpty())
                 {
                     getRoot()->filterNodesRecursively (searchText);
                 }
 
-                //display empty label
+                // display empty label
                 if (getRoot()->getNumSubItems() == 0
                     && !searchText.containsIgnoreCase (getRoot()->getComponentName())
                     && tree.getNumSelectedItems() == 0)
                 {
-                    DBG (getRoot()->getComponentName());
                     tree.setVisible (false);
                     emptySearchLabel.setVisible (true);
 
@@ -99,8 +102,8 @@ namespace melatonin
             g.fillRect (searchBoxBounds);
 
             // Define the colors for the gradient
-            juce::Colour startColor (0xFF22112E);
-            juce::Colour endColor (0xFF180A23);
+            juce::Colour endColor (34, 17, 46);
+            juce::Colour startColor (24, 10, 35);
 
             // Fill the background with a gradient from top left to bottom right
             g.setGradientFill (juce::ColourGradient (
@@ -125,6 +128,7 @@ namespace melatonin
         void resized() override
         {
             auto area = getLocalBounds();
+            int padding = 8;
 
             auto inspectorEnabled = toggleButton.getToggleState();
             auto columnMinWidth = inspectorEnabled ? juce::jmax (380, area.getWidth() / 2)
@@ -133,35 +137,27 @@ namespace melatonin
             auto mainCol = area.removeFromLeft (columnMinWidth);
 
             auto toggleBtnHeight = 48;
-            auto logoSide = 48;
-            //used for toggle btn overlay and logo
-            topArea = juce::Rectangle<int> (mainCol).removeFromTop (toggleBtnHeight);
 
-            toggleButton.setBounds (mainCol
-                                        .removeFromTop (toggleBtnHeight)
-                                        .withSize (mainCol.getWidth() - logoSide, toggleBtnHeight)
-                                        .withX (8));
+            topArea = mainCol.removeFromTop (toggleBtnHeight);
 
-            boxModel.resized();
+            toggleButton.setBounds (topArea.withX(padding));
+
             boxModel.setBounds (mainCol.removeFromTop (boxModel.getHeight())
                                     .withX (mainCol.getX())
                                     .withWidth (mainCol.getWidth()));
 
-            previewComponent.resized();
             previewComponent.setBounds (mainCol.removeFromTop (static_cast<int> (previewComponent.getHeight()))
                                             .withX (mainCol.getX())
                                             .withWidth (mainCol.getWidth()));
 
-            colorModel.resized();
             colorModel.setBounds (mainCol.removeFromTop (static_cast<int> (colorModel.getHeight()))
                                       .withX (mainCol.getX())
                                       .withWidth (mainCol.getWidth()));
 
-            propertiesModel.resized();
             propertiesModel.setBounds (mainCol);
 
-            //using btn toggle state (better to switch to using class variable
-            //or inspectors prop)
+            // using btn toggle state (better to switch to using class variable
+            // or inspectors prop)
 
             searchBoxBounds = area.removeFromTop (toggleBtnHeight);
             auto b = searchBoxBounds;
@@ -195,10 +191,10 @@ namespace melatonin
                 repaint();
                 resized();
 
-                //Selects and highlights
+                // Selects and highlights
                 if (component != nullptr)
                 {
-                    //getRoot()->recursivelyCloseSubItems();
+                    // getRoot()->recursivelyCloseSubItems();
 
                     getRoot()->openTreeAndSelect (component);
                     tree.scrollToKeepItemVisible (tree.getSelectedItem (0));
@@ -224,7 +220,7 @@ namespace melatonin
 
             selectedComponent = component;
 
-            //update value in the model
+            // update value in the model
             model.selectComponent (component);
 
             displayComponentInfo (selectedComponent);
@@ -268,39 +264,9 @@ namespace melatonin
         std::function<void (bool enabled)> toggleCallback;
 
     private:
-        struct ToggleBtnLookAndFeel : InspectorLookAndFeel
-        {
-        public:
-            void drawToggleButton (juce::Graphics& g, juce::ToggleButton& button, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override
-            {
-                auto fontSize = juce::jmin (15.0f, (float) button.getHeight() * 0.75f);
-                auto tickWidth = fontSize * 1.1f;
-
-                drawTickBox (g, button, 4.0f, ((float) button.getHeight() - tickWidth) * 0.5f, tickWidth, tickWidth, button.getToggleState(), button.isEnabled(), shouldDrawButtonAsHighlighted, shouldDrawButtonAsDown);
-
-                //flip between text textColourOnId and textColourOffId
-                if (button.getToggleState())
-                {
-                    g.setColour (button.findColour (juce::TextButton::textColourOnId));
-                }
-                else
-                    g.setColour (button.findColour (juce::TextButton::textColourOffId));
-                g.setFont (fontSize);
-
-                if (!button.isEnabled())
-                    g.setOpacity (0.5f);
-
-                g.drawFittedText (button.getButtonText(),
-                    button.getLocalBounds().withTrimmedLeft (juce::roundToInt (tickWidth) + 10).withTrimmedRight (2),
-                    juce::Justification::centredLeft,
-                    10);
-            }
-        };
-
         Component::SafePointer<Component> selectedComponent;
         Component& root;
 
-        ToggleBtnLookAndFeel toggleBtnLookAndFeel;
         juce::ToggleButton toggleButton;
 
         ComponentModel model;
@@ -308,11 +274,11 @@ namespace melatonin
         juce::Rectangle<int> topArea, searchBoxBounds, treeViewBounds;
 
         BoxModel boxModel { model };
-        ColorModel colorModel;
-        ComponentPreviewModel previewComponent { model };
-        PropertiesModel propertiesModel { model };
+        ColorPickerPanel colorModel;
+        PreviewPanel previewComponent { model };
+        PropertiesPanel propertiesModel { model };
 
-        //todo move to it's own component
+        // todo move to its own component
         juce::TreeView tree;
         juce::Label emptySelectionPrompt { "SelectionPrompt", "Select any component to see components tree" };
         juce::Label emptySearchLabel { "EmptySearchResultsPrompt", "No component found" };
@@ -339,6 +305,6 @@ namespace melatonin
             resized();
         }
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InspectorPanel)
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InspectorComponent)
     };
 }

@@ -42,7 +42,7 @@ public:
 
         if (content && content->isVisible())
         {
-            //content->resized();
+            // content->resized();
             r = r.withHeight (content->getHeight() + buttonHeight);
 
             auto r1 = r;
@@ -73,7 +73,7 @@ private:
             setColour (juce::ToggleButton::tickColourId, colors::titleTextColor);
         }
 
-        //override function for drawing toggle btn
+        // override function for drawing toggle btn
         void drawToggleButton (juce::Graphics& g, juce::ToggleButton& button, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override
         {
             auto font = juce::Font ("Verdana", juce::jmin (15.0f, (float) button.getHeight() * 0.75f), juce::Font::FontStyleFlags::plain);
@@ -93,7 +93,7 @@ private:
                 10);
         }
 
-        //override function for drawing tick box
+        // override function for drawing tick box
         void drawTickBox (juce::Graphics& g, juce::Component& /*component*/, float x, float y, float w, float h, const bool ticked, const bool isEnabled, const bool /*shouldDrawButtonAsHighlighted*/, const bool /*shouldDrawButtonAsDown*/) override
         {
             juce::Rectangle<float> tickBounds (x, y, w, h);

@@ -1,21 +1,21 @@
 #pragma once
 
-#include "melatonin_inspector/melatonin/model.h"
+#include "melatonin_inspector/melatonin/component_model.h"
 
 namespace melatonin
 {
 
-    class ComponentPreviewModel : public CollapsablePanel, public ComponentModel::Listener
+    class PreviewPanel : public CollapsablePanel, public ComponentModel::Listener
     {
     public:
-        explicit ComponentPreviewModel (ComponentModel& _model) : CollapsablePanel ("PREVIEW"), model (_model)
+        explicit PreviewPanel (ComponentModel& _model) : CollapsablePanel ("PREVIEW"), model (_model)
         {
             setContent (&content);
 
             model.addListener (*this);
         }
 
-        ~ComponentPreviewModel() override
+        ~PreviewPanel() override
         {
             model.removeListener (*this);
         }
@@ -49,6 +49,6 @@ namespace melatonin
                 content.setImage (juce::Image());
         }
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ComponentPreviewModel)
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PreviewPanel)
     };
 }

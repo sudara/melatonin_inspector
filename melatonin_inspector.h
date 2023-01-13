@@ -13,8 +13,8 @@ END_JUCE_MODULE_DECLARATION
 */
 #pragma once
 #include "melatonin/lookandfeel.h"
-#include "melatonin_inspector/melatonin/components/inspector_panel.h"
 #include "melatonin_inspector/melatonin/components/overlay.h"
+#include "melatonin_inspector/melatonin/inspector_component.h"
 
 namespace melatonin
 {
@@ -23,33 +23,34 @@ namespace melatonin
     public:
         explicit Inspector (juce::Component& rootComponent, bool enabledAtStart = true)
             : juce::DocumentWindow ("Melatonin Inspector", colors::background, 7, true),
-              panel (rootComponent, enabledAtStart),
+              inspector (rootComponent, enabledAtStart),
               root (rootComponent),
               enabled (enabledAtStart)
         {
             root.addAndMakeVisible (overlay);
             root.addComponentListener (this);
 
-            // don't use the app's lnf for overlay or panel
+            // don't use the app's lnf for overlay or inspector
             setLookAndFeel (&inspectorLookAndFeel);
             overlay.setLookAndFeel (&inspectorLookAndFeel);
-            panel.setLookAndFeel (&inspectorLookAndFeel);
+            inspector.setLookAndFeel (&inspectorLookAndFeel);
 
             setResizable (true, false);
 
-            updateWindowSizeOnToggle();
+            updateWindowSize();
 
             setUsingNativeTitleBar (true);
-            setContentNonOwned (&panel, true);
+            setContentNonOwned (&inspector, true);
             setupCallbacks();
         }
-        void updateWindowSizeOnToggle()
+
+        void updateWindowSize()
         {
-            auto width = enabled ? juce::jmax(700, getWidth()) : 380;
-            auto height = enabled ? juce::jmax(getHeight(), 800) : 400;
+            auto width = enabled ? juce::jmax (700, getWidth()) : 380;
+            auto height = enabled ? juce::jmax (getHeight(), 800) : 400;
             setResizeLimits (width, height, 1200, 1200);
             setSize (width, height);
-            panel.setSize (width, height);
+            inspector.setSize (width, height);
         }
 
         ~Inspector() override
@@ -65,7 +66,7 @@ namespace melatonin
                 return;
 
             overlay.outlineComponent (c);
-            panel.displayComponentInfo (c);
+            inspector.displayComponentInfo (c);
         }
 
         void outlineDistanceCallback (Component* c)
@@ -82,7 +83,7 @@ namespace melatonin
                 return;
 
             overlay.selectComponent (c);
-            panel.selectComponent (c, collapseTree);
+            inspector.selectComponent (c, collapseTree);
         }
 
         void dragComponent (Component* c, const juce::MouseEvent& e)
@@ -90,8 +91,8 @@ namespace melatonin
             if (!enabled || overlay.isParentOf (c))
                 return;
 
-            overlay.dragSelectedComponent(e);
-            panel.displayComponentInfo (c);
+            overlay.dragSelectedComponent (e);
+            inspector.displayComponentInfo (c);
         }
 
         void startDragComponent (Component* c, const juce::MouseEvent& e)
@@ -99,7 +100,7 @@ namespace melatonin
             if (!enabled || overlay.isParentOf (c))
                 return;
 
-            overlay.startDraggingComponent(e);
+            overlay.startDraggingComponent (e);
         }
 
         // closing the window means turning off the inspector
@@ -113,16 +114,16 @@ namespace melatonin
         {
             enabled = newStatus;
             overlay.setVisible (newStatus);
-            panel.toggle (newStatus);
+            inspector.toggle (newStatus);
 
-            updateWindowSizeOnToggle();
+            updateWindowSize();
         }
 
     private:
         // LNF has to be declared before components using it
         melatonin::InspectorLookAndFeel inspectorLookAndFeel;
 
-        melatonin::InspectorPanel panel;
+        melatonin::InspectorComponent inspector;
         juce::Component& root;
         bool enabled;
         melatonin::Overlay overlay;
@@ -144,11 +145,11 @@ namespace melatonin
             mouseInspector.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, true); };
             mouseInspector.componentStartDraggingCallback = [this] (Component* c, const juce::MouseEvent& e) { this->startDragComponent (c, e); };
             mouseInspector.componentDraggedCallback = [this] (Component* c, const juce::MouseEvent& e) { this->dragComponent (c, e); };
-            mouseInspector.mouseExitCallback = [this]() { if (this->enabled) panel.redisplaySelectedComponent(); };
+            mouseInspector.mouseExitCallback = [this]() { if (this->enabled) inspector.redisplaySelectedComponent(); };
 
-            panel.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, true); };
-            panel.outlineComponentCallback = [this] (Component* c) { this->outlineComponent (c); };
-            panel.toggleCallback = [this] (bool enable) { this->toggle (enable); };
+            inspector.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, true); };
+            inspector.outlineComponentCallback = [this] (Component* c) { this->outlineComponent (c); };
+            inspector.toggleCallback = [this] (bool enable) { this->toggle (enable); };
         }
     };
 }

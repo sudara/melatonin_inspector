@@ -1,7 +1,7 @@
 #pragma once
 
-#include "melatonin_inspector/melatonin/component_tree_view_item.h"
-#include "melatonin_inspector/melatonin/model.h"
+#include "component_tree_view_item.h"
+#include "melatonin_inspector/melatonin/component_model.h"
 
 namespace melatonin
 {
