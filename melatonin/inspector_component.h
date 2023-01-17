@@ -1,9 +1,9 @@
 #pragma once
 #include "melatonin_inspector/melatonin/components/box_model.h"
-#include "melatonin_inspector/melatonin/components/color_picker_panel.h"
+#include "melatonin_inspector/melatonin/components/color_picker.h"
 #include "melatonin_inspector/melatonin/components/component_tree_view_item.h"
 #include "melatonin_inspector/melatonin/components/preview_panel.h"
-#include "melatonin_inspector/melatonin/components/properties_panel.h"
+#include "melatonin_inspector/melatonin/components/properties.h"
 #include "melatonin_inspector/melatonin/lookandfeel.h"
 
 /*
@@ -21,19 +21,20 @@ namespace melatonin
             addChildComponent (tree);
             addChildComponent (emptySearchLabel);
 
-            colorModel.setRootComponent (&root);
+            colorPicker.setRootComponent (&root);
 
             emptySelectionPrompt.setJustificationType (juce::Justification::centredTop);
             emptySearchLabel.setJustificationType (juce::Justification::centredTop);
 
-            addAndMakeVisible (boxModel);
-            addChildComponent (colorModel);
-            addChildComponent (propertiesModel);
-            addChildComponent (previewComponent);
+            addAndMakeVisible (colorPickerPanel);
+            addAndMakeVisible (previewComponentPanel);
+            addAndMakeVisible (propertiesPanel);
 
-            colorModel.setVisible (enabledAtStart);
-            propertiesModel.setVisible (enabledAtStart);
-            previewComponent.setVisible (enabledAtStart);
+            // visibility of everything but boxModel is managed by the toggle in the above panels
+            addAndMakeVisible(boxModel);
+            addAndMakeVisible(colorPicker);
+            addAndMakeVisible(previewComponent);
+            addAndMakeVisible(properties);
 
             toggleButton.setButtonText ("Enable inspector");
             toggleButton.setColour (juce::TextButton::textColourOffId, colors::titleTextColor);
@@ -127,6 +128,7 @@ namespace melatonin
 
         void resized() override
         {
+            DBG("InspectorComponent::resized");
             auto area = getLocalBounds();
             int padding = 8;
 
@@ -140,21 +142,25 @@ namespace melatonin
 
             topArea = mainCol.removeFromTop (toggleBtnHeight);
 
-            toggleButton.setBounds (topArea.withX(padding));
+            toggleButton.setBounds (topArea.withX (padding));
 
-            boxModel.setBounds (mainCol.removeFromTop (boxModel.getHeight())
-                                    .withX (mainCol.getX())
-                                    .withWidth (mainCol.getWidth()));
+            boxModel.setBounds(mainCol.removeFromTop (300));
+            D(boxModel.getBounds().toString());
 
-            previewComponent.setBounds (mainCol.removeFromTop (static_cast<int> (previewComponent.getHeight()))
-                                            .withX (mainCol.getX())
-                                            .withWidth (mainCol.getWidth()));
+            previewComponentPanel.setBounds (mainCol.removeFromTop (32));
+            previewComponent.setBounds(mainCol.removeFromTop (previewComponent.isVisible() ? 100 : 0));
 
-            colorModel.setBounds (mainCol.removeFromTop (static_cast<int> (colorModel.getHeight()))
-                                      .withX (mainCol.getX())
-                                      .withWidth (mainCol.getWidth()));
+            auto colorBounds = mainCol.removeFromTop (32 + 40);
+            if (colorPicker.isVisible())
+            {
+                // we have an icon in the panel header, so we overlap it
+                colorPicker.setBounds(colorBounds);
+            }
+            colorPickerPanel.setBounds (colorBounds.removeFromTop (32));
 
-            propertiesModel.setBounds (mainCol);
+
+            propertiesPanel.setBounds (mainCol.removeFromTop(32));
+            properties.setBounds (mainCol);
 
             // using btn toggle state (better to switch to using class variable
             // or inspectors prop)
@@ -168,14 +174,15 @@ namespace melatonin
 
             emptySearchLabel.setBounds (area.reduced (4));
 
+            // used to paint the background
             treeViewBounds = area;
 
             if (tree.isVisible())
             {
-                tree.setBounds (area); // padding in these default components are a mess
+                tree.setBounds (area.withTrimmedLeft(18).withTrimmedTop(24));
             }
             else
-                emptySelectionPrompt.setBounds (area);
+                emptySelectionPrompt.setBounds (area.withTrimmedLeft(18).withTrimmedTop(24));
         }
 
         void displayComponentInfo (Component* component)
@@ -241,7 +248,7 @@ namespace melatonin
                 toggle (enabled);
                 toggleCallback (enabled);
 
-                colorModel.reset();
+                colorPicker.reset();
 
                 resized();
             }
@@ -252,8 +259,8 @@ namespace melatonin
             toggleButton.setToggleState (enabled, juce::dontSendNotification);
 
             previewComponent.setVisible (enabled);
-            colorModel.setVisible (enabled);
-            propertiesModel.setVisible (enabled);
+            colorPicker.setVisible (enabled);
+            properties.setVisible (enabled);
 
             if (!enabled)
                 model.deselectComponent();
@@ -274,9 +281,15 @@ namespace melatonin
         juce::Rectangle<int> topArea, searchBoxBounds, treeViewBounds;
 
         BoxModel boxModel { model };
-        ColorPickerPanel colorModel;
-        PreviewPanel previewComponent { model };
-        PropertiesPanel propertiesModel { model };
+
+        ColorPicker colorPicker;
+        CollapsablePanel colorPickerPanel { "COLOR", &colorPicker };
+
+        Preview previewComponent { model };
+        CollapsablePanel previewComponentPanel { "PREVIEW", &previewComponent };
+
+        Properties properties { model };
+        CollapsablePanel propertiesPanel { "PROPERTIES", &properties };
 
         // todo move to its own component
         juce::TreeView tree;
@@ -297,7 +310,7 @@ namespace melatonin
             selectedComponent = nullptr;
             tree.clearSelectedItems();
 
-            colorModel.reset();
+            colorPicker.reset();
 
             model.deselectComponent();
             tree.setRootItem (getRoot());

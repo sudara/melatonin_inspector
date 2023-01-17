@@ -6,23 +6,21 @@
 namespace melatonin
 {
 
-    class ColorPickerPanel : public CollapsablePanel
+    class ColorPicker : public juce::Component
     {
     public:
-        ColorPickerPanel() : CollapsablePanel ("COLOR")
+        ColorPicker()
         {
-            contentPanel.addAndMakeVisible (colorValField);
+            addAndMakeVisible (colorValField);
             addAndMakeVisible (colorPickerButton);
 
             colorPickerButton.setClickingTogglesState (true);
             selectedColor = juce::Colours::black;
-
-            setContent (&contentPanel);
         }
 
         void paint (juce::Graphics& g) override
         {
-            auto bounds = contentPanel.getBounds().removeFromLeft (18).withSizeKeepingCentre (18, 18).toFloat();
+            auto bounds = getLocalBounds().removeFromLeft (18).withSizeKeepingCentre (18, 18).toFloat();
 
             g.setColour (selectedColor);
             g.fillRoundedRectangle (bounds, 2.f);
@@ -32,29 +30,27 @@ namespace melatonin
                 g.setColour (colors::titleTextColor);
                 g.drawRoundedRectangle (bounds, 2.f, 1.f);
             }
+            g.setColour (colors::panelLineSeparatorColor);
+            g.drawHorizontalLine (getHeight() - 1, 0, (float) getWidth()); // separator
         }
 
         void resized() override
         {
-            paddingHor = 16;
-            contentPanel.setSize (getWidth(), 38);
+            colorPickerButton.setBounds (getLocalBounds()
+                .removeFromRight (32)
+                .removeFromTop (32)
+                .withSizeKeepingCentre (32, 32));
 
-            CollapsablePanel::resized();
-
-            auto r = contentPanel.getLocalBounds();
-
-            auto fieldBounds = r.removeFromTop (18);
-            // r.removeFromBottom(4);
+            auto area = getLocalBounds();
+            area.removeFromTop (32 + 12); // overlap with our header + bit of padding
+            area.reduce (26, 0);
+            auto fieldBounds = area.removeFromTop (18);
 
             // account for color selector
             fieldBounds.removeFromLeft (fieldBounds.getHeight())
                 .toFloat();
 
             colorValField.setBounds (fieldBounds.withTrimmedLeft (8));
-            colorPickerButton.setBounds (getLocalBounds()
-                                             .removeFromRight (48)
-                                             .removeFromTop (48)
-                                             .withSizeKeepingCentre (32, 32));
         }
 
         void mouseEnter (const juce::MouseEvent& event) override
@@ -120,7 +116,6 @@ namespace melatonin
         }
 
     private:
-        juce::Component contentPanel;
         juce::TextButton colorPickerButton {
             "P",
             "Color Picker",
@@ -148,6 +143,6 @@ namespace melatonin
             repaint();
         }
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ColorPickerPanel)
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ColorPicker)
     };
 }

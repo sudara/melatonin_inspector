@@ -20,7 +20,7 @@ namespace melatonin
 
             setColour (juce::TextEditor::textColourId, colors::blueTextLabelColor);
             setColour (juce::TextEditor::backgroundColourId, juce::Colours::transparentBlack);
-            setColour (juce::TextEditor::highlightColourId, colors::yellowColor.withAlpha (0.1f));
+            setColour (juce::TextEditor::highlightColourId, juce::Colour::fromString("FF373737"));
             setColour (juce::CaretComponent::caretColourId, colors::blueLineColor);
 
             setColour (juce::TextButton::buttonColourId, juce::Colours::transparentBlack);
@@ -167,12 +167,12 @@ namespace melatonin
                     if (textEditor.hasKeyboardFocus (true) && !textEditor.isReadOnly())
                     {
                         g.setColour (textEditor.findColour (juce::TextEditor::focusedOutlineColourId));
-                        g.drawRoundedRectangle (b.reduced (1).toFloat(), cornerRadius, 2);
+                        g.drawRoundedRectangle (b.reduced (1).toFloat(), 0, 1);
                     }
                     else
                     {
                         g.setColour (textEditor.findColour (juce::TextEditor::outlineColourId));
-                        g.drawRoundedRectangle (b.reduced (1).toFloat(), cornerRadius, 1);
+                        g.drawRoundedRectangle (b.reduced (1).toFloat(), 0, 1);
                     }
                 }
             }

@@ -6,35 +6,33 @@
 
 namespace melatonin
 {
-    class BoxModel : public CollapsablePanel,
+    class BoxModel : public juce::Component,
                      private juce::Label::Listener,
                      private ComponentModel::Listener
     {
     public:
-        explicit BoxModel (ComponentModel& componentModel) : CollapsablePanel ("BOX MODEL"), model (componentModel)
+        explicit BoxModel (ComponentModel& componentModel) : model (componentModel)
         {
-            content = std::make_unique<juce::Component>();
-
-            content->addAndMakeVisible (componentLabel);
+            addAndMakeVisible (componentLabel);
             componentLabel.setColour (juce::Label::textColourId, colors::blueLineColor);
             componentLabel.setJustificationType (juce::Justification::centredLeft);
 
-            content->addAndMakeVisible (parentComponentLabel);
+            addAndMakeVisible (parentComponentLabel);
             parentComponentLabel.setJustificationType (juce::Justification::centredLeft);
 
-            content->addAndMakeVisible (widthLabel);
+            addAndMakeVisible (widthLabel);
             widthLabel.addListener (this);
             widthLabel.setFont (20.0f);
             widthLabel.setJustificationType (juce::Justification::centredRight);
             widthLabel.setColour (juce::Label::textColourId, colors::white);
 
-            content->addAndMakeVisible (byLabel);
+            addAndMakeVisible (byLabel);
             byLabel.setText (L" × ", juce::dontSendNotification);
             byLabel.setFont (20.f);
             byLabel.setJustificationType (juce::Justification::centred);
             byLabel.setColour (juce::Label::textColourId, colors::white);
 
-            content->addAndMakeVisible (heightLabel);
+            addAndMakeVisible (heightLabel);
             heightLabel.addListener (this);
             heightLabel.setFont (20.0f);
             heightLabel.setJustificationType (juce::Justification::centredLeft);
@@ -45,12 +43,12 @@ namespace melatonin
 
             for (auto parentLabel : parentLabels)
             {
-                content->addAndMakeVisible (parentLabel);
+                addAndMakeVisible (parentLabel);
                 parentLabel->setText ("-", juce::dontSendNotification);
                 parentLabel->setJustificationType (juce::Justification::centred);
                 parentLabel->addListener (this);
 
-                //centers juce::TextEditor (hack since juce::Label is not doing it by default)
+                // centers juce::TextEditor (hack since juce::Label is not doing it by default)
                 parentLabel->onEditorShow = [parentLabel] {
                     if (auto editor = parentLabel->getCurrentTextEditor())
                     {
@@ -65,12 +63,12 @@ namespace melatonin
 
             for (auto l : paddingLabels)
             {
-                content->addChildComponent (l);
+                addChildComponent (l);
                 l->setText ("-", juce::dontSendNotification);
                 l->setJustificationType (juce::Justification::centred);
                 l->setColour (juce::TextEditor::ColourIds::highlightColourId, colors::blueLineColor.darker());
 
-                //centers juce::TextEditor (hack since juce::Label is not doing it by default)
+                // centers juce::TextEditor (hack since juce::Label is not doing it by default)
                 l->onEditorShow = [l] {
                     if (auto editor = l->getCurrentTextEditor())
                     {
@@ -90,7 +88,6 @@ namespace melatonin
             }
 
             model.addListener (*this);
-            setContent (content.get());
         }
 
         ~BoxModel() override
@@ -104,28 +101,23 @@ namespace melatonin
             g.setColour (colors::blueTextLabelColor.darker (0.6f));
             float dashLengths[2] = { 2.f, 2.f };
             parentRectanglePath.clear();
-            parentRectanglePath.addRectangle (parentComponentRectangleForDrawing());
+            parentRectanglePath.addRectangle (parentComponentRectangle());
             auto parentStroke = juce::PathStrokeType (0.5);
             parentStroke.createDashedStroke (parentRectanglePath, parentRectanglePath, dashLengths, 2);
             g.strokePath (parentRectanglePath, parentStroke);
 
             g.setColour (colors::blueLineColor);
-            g.drawRect (componentRectangleForDrawing(), 1.0);
-            //if (isPaddingComponent)
-            //{
-                g.setColour (colors::blueLineColor.withAlpha (0.2f));
-                g.drawRect (componentRectangleForDrawing(), (int) padding);
-            //}
+            g.drawRect (componentRectangle(), 1.0);
+
+            // draw padding
+            g.setColour (colors::blueLineColor.withAlpha (0.2f));
+            g.drawRect (componentRectangle(), (int) padding);
         }
 
         void resized() override
         {
-            paddingVer = 0;
-            paddingHor = 0;
-
-            content->setSize (getWidth(), 300);
-
-            CollapsablePanel::resized();
+            //            paddingVer = 0;
+            //            paddingHor = 0;
 
             auto bounds = parentComponentRectangle();
             auto center = bounds.getCentre();
@@ -139,8 +131,8 @@ namespace melatonin
             heightLabel.setBounds (center.getX() + 10, center.getY() - 15, paddingToParent, labelHeight);
 
             topToParentLabel.setBounds (center.getX() - paddingToParent / 2, padding + paddingToParent / 2 - labelHeight / 2, paddingToParent, labelHeight);
-            rightToParentLabel.setBounds (content->getWidth() - padding - paddingToParent / 2 - paddingToParent / 2, center.getY() - labelHeight / 2, paddingToParent, labelHeight);
-            bottomToParentLabel.setBounds (center.getX() - paddingToParent / 2, content->getHeight() - padding - paddingToParent / 2 - labelHeight / 2, paddingToParent, labelHeight);
+            rightToParentLabel.setBounds (getWidth() - padding - paddingToParent / 2 - paddingToParent / 2, center.getY() - labelHeight / 2, paddingToParent, labelHeight);
+            bottomToParentLabel.setBounds (center.getX() - paddingToParent / 2, getHeight() - padding - paddingToParent / 2 - labelHeight / 2, paddingToParent, labelHeight);
             leftToParentLabel.setBounds (padding + paddingToParent / 2 - paddingToParent / 2, center.getY() - labelHeight / 2, paddingToParent, labelHeight);
 
             auto area1 = bounds.reduced (paddingToParent)
@@ -168,7 +160,6 @@ namespace melatonin
 
     private:
         ComponentModel& model;
-        std::unique_ptr<juce::Component> content;
 
         juce::Label componentLabel;
         juce::Label parentComponentLabel;
@@ -224,22 +215,12 @@ namespace melatonin
 
         juce::Rectangle<int> parentComponentRectangle()
         {
-            return content->getLocalBounds().reduced (padding);
+            return getLocalBounds().reduced (padding);
         }
 
         juce::Rectangle<int> componentRectangle()
         {
             return parentComponentRectangle().reduced (paddingToParent);
-        }
-
-        juce::Rectangle<int> parentComponentRectangleForDrawing()
-        {
-            return content->getBounds().reduced (padding);
-        }
-
-        juce::Rectangle<int> componentRectangleForDrawing()
-        {
-            return parentComponentRectangleForDrawing().reduced (paddingToParent);
         }
 
         void updateLabels()
@@ -280,7 +261,7 @@ namespace melatonin
         {
             if (!model.getSelectedComponent())
             {
-                //if model.getSelectedComponent() is null, getting props will fail
+                // if model.getSelectedComponent() is null, getting props will fail
                 juce::Label* paddingLabels[4] = { &paddingTopLabel, &paddingRightLabel, &paddingLeftLabel, &paddingBottomLabel };
 
                 for (auto pl : paddingLabels)
@@ -361,6 +342,6 @@ namespace melatonin
             parentComponentLabel.setText ("", juce::dontSendNotification);
         }
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BoxModel)
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BoxModel)
     };
 }

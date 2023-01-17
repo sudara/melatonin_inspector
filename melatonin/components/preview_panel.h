@@ -5,50 +5,45 @@
 namespace melatonin
 {
 
-    class PreviewPanel : public CollapsablePanel, public ComponentModel::Listener
+    class Preview : public juce::Component, public ComponentModel::Listener
     {
     public:
-        explicit PreviewPanel (ComponentModel& _model) : CollapsablePanel ("PREVIEW"), model (_model)
+        explicit Preview (ComponentModel& _model) : model (_model)
         {
-            setContent (&content);
+            addAndMakeVisible (previewImage);
 
             model.addListener (*this);
         }
 
-        ~PreviewPanel() override
+        ~Preview() override
         {
             model.removeListener (*this);
         }
 
         void paint (juce::Graphics& g) override
         {
-            if(content.isVisible())
-                g.fillAll(colors::blackColor);
+            g.fillAll (colors::blackColor);
         }
 
         void resized() override
         {
-            paddingHor = 32;
-            paddingVer = 16;
-
-            content.setSize (getWidth(), 100);
-            CollapsablePanel::resized();
+            previewImage.setBounds(getLocalBounds().reduced(32, 16));
         }
 
         ComponentModel& model;
 
     private:
-        juce::ImageComponent content;
+        juce::ImageComponent previewImage;
         juce::Path parentRectanglePath;
 
         void componentChanged (ComponentModel&) override
         {
-            if(auto component = model.getSelectedComponent())
-                content.setImage (component->createComponentSnapshot ({ component->getWidth(), component->getHeight() }, false, 1.0f));
+            if (auto component = model.getSelectedComponent())
+                previewImage.setImage (component->createComponentSnapshot ({ component->getWidth(), component->getHeight() }, false, 2.0f));
             else
-                content.setImage (juce::Image());
+                previewImage.setImage (juce::Image());
         }
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PreviewPanel)
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Preview)
     };
 }

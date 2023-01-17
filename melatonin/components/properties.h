@@ -3,34 +3,27 @@
 
 namespace melatonin
 {
-    class PropertiesPanel : public CollapsablePanel,
+    class Properties : public juce::Component,
                             private ComponentModel::Listener
     {
     public:
-        explicit PropertiesPanel (ComponentModel& _model) : CollapsablePanel ("PROPERTIES"), model (_model)
+        explicit Properties (ComponentModel& _model) : model (_model)
         {
             reset();
 
-            setContent (&panel);
+            addAndMakeVisible (&panel);
             model.addListener (*this);
         }
 
-        ~PropertiesPanel() override
+        ~Properties() override
         {
             model.removeListener (*this);
-        }
-
-        void paint (juce::Graphics& g) override
-        {
-            g.setColour (colors::panelLineSeparatorColor);
-            g.drawHorizontalLine (0, 0, (float) getWidth()); // draw line at top
         }
 
         void resized() override
         {
             panel.setBounds (propsRectangle());
-            paddingHor = 8;
-            CollapsablePanel::resized();
+            // paddingHor = 8;
         }
 
     private:
@@ -104,6 +97,6 @@ namespace melatonin
             };
         }
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PropertiesPanel)
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Properties)
     };
 }
