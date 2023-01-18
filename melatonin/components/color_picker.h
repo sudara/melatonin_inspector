@@ -16,6 +16,9 @@ namespace melatonin
 
             colorPickerButton.setClickingTogglesState (true);
             selectedColor = juce::Colours::black;
+
+            // we overlap the header, so let people click that as usual
+            setInterceptsMouseClicks(false, true);
         }
 
         void paint (juce::Graphics& g) override
@@ -52,6 +55,7 @@ namespace melatonin
 
             colorValField.setBounds (fieldBounds.withTrimmedLeft (8));
         }
+
 
         void mouseEnter (const juce::MouseEvent& event) override
         {

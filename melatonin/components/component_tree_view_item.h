@@ -88,7 +88,8 @@ namespace melatonin
             if (!component->isVisible())
                 g.setColour (juce::Colours::grey);
 
-            auto textIndent = mightContainSubItems() ? 7 : 5;
+            auto padding = 18;
+            auto textIndent = mightContainSubItems() ? padding + 7 : padding + 5;
             auto wantKeyboardFocus = component->getWantsKeyboardFocus();
             juce::String keyboard = wantKeyboardFocus ? " (wantsKeyboard)" : "";
 

@@ -179,10 +179,10 @@ namespace melatonin
 
             if (tree.isVisible())
             {
-                tree.setBounds (area.withTrimmedLeft(18).withTrimmedTop(24));
+                tree.setBounds (area.withTrimmedTop(24));
             }
             else
-                emptySelectionPrompt.setBounds (area.withTrimmedLeft(18).withTrimmedTop(24));
+                emptySelectionPrompt.setBounds (area.withTrimmedTop(24));
         }
 
         void displayComponentInfo (Component* component)
