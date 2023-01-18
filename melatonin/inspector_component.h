@@ -1,4 +1,7 @@
 #pragma once
+
+#include "components/image_button.h"
+#include "helpers/misc.h"
 #include "melatonin_inspector/melatonin/components/box_model.h"
 #include "melatonin_inspector/melatonin/components/color_picker.h"
 #include "melatonin_inspector/melatonin/components/component_tree_view_item.h"
@@ -13,35 +16,42 @@
 
 namespace melatonin
 {
+#include "BinaryData.h"
     class InspectorComponent : public juce::Component, public juce::Button::Listener
     {
     public:
         explicit InspectorComponent (juce::Component& rootComponent, bool enabledAtStart = true) : root (rootComponent)
         {
+            addAndMakeVisible (toggleButton);
+            addAndMakeVisible (logo);
+
             addChildComponent (tree);
             addChildComponent (emptySearchLabel);
-
-            colorPicker.setRootComponent (&root);
-
-            emptySelectionPrompt.setJustificationType (juce::Justification::centredTop);
-            emptySearchLabel.setJustificationType (juce::Justification::centredTop);
 
             addAndMakeVisible (colorPickerPanel);
             addAndMakeVisible (previewComponentPanel);
             addAndMakeVisible (propertiesPanel);
 
             // visibility of everything but boxModel is managed by the toggle in the above panels
-            addAndMakeVisible(boxModel);
-            addAndMakeVisible(colorPicker);
-            addAndMakeVisible(previewComponent);
-            addAndMakeVisible(properties);
+            addAndMakeVisible (boxModel);
+            addAndMakeVisible (colorPicker);
+            addAndMakeVisible (previewComponent);
+            addAndMakeVisible (properties);
+
+            addAndMakeVisible (searchBox);
+            addAndMakeVisible (searchIcon);
+            addChildComponent (clearBtn);
+
+            colorPicker.setRootComponent (&root);
+
+            emptySelectionPrompt.setJustificationType (juce::Justification::centredTop);
+            emptySearchLabel.setJustificationType (juce::Justification::centredTop);
 
             toggleButton.setButtonText ("Enable inspector");
             toggleButton.setColour (juce::TextButton::textColourOffId, colors::titleTextColor);
             toggleButton.setColour (juce::TextButton::textColourOnId, colors::yellowColor);
             toggleButton.setToggleState (enabledAtStart, juce::dontSendNotification);
 
-            addAndMakeVisible (toggleButton);
             toggleButton.addListener (this);
             tree.setIndentSize (12);
 
@@ -53,10 +63,8 @@ namespace melatonin
             searchBox.setTextToShowWhenEmpty ("Search for component...", colors::treeViewMinusPlusColor);
             searchBox.setJustification (juce::Justification::centredLeft);
 
-            addAndMakeVisible (searchBox);
-            addAndMakeVisible (searchIcon);
-            addChildComponent (clearBtn);
-
+            auto logoIcon = getIcon ("Logo");
+            logo.onClick = [this] { juce::URL ("https://github.com/sudara/melatonin_inspector/").launchInDefaultBrowser(); };
             searchBox.onTextChange = [this] {
                 auto searchText = searchBox.getText();
                 reconstructRoot();
@@ -85,6 +93,7 @@ namespace melatonin
 
                 clearBtn.setVisible (searchBox.getText().isNotEmpty());
             };
+
             clearBtn.onClick = [this] {
                 searchBox.setText ("");
             };
@@ -96,19 +105,16 @@ namespace melatonin
 
         void paint (juce::Graphics& g) override
         {
-            g.setColour (colors::blackColor.withAlpha (0.38f));
+            g.setGradientFill ({ colors::panelBackgroundLighter, 0, 0, colors::panelBackgroundDarker, (float) getWidth(), 0, false });
+            g.fillRect (mainColumnBounds);
+
+            g.setColour (colors::headerBackground);
             g.fillRect (topArea);
 
             g.setColour (colors::blackColor);
             g.fillRect (searchBoxBounds);
 
-            // Define the colors for the gradient
-            juce::Colour endColor (34, 17, 46);
-            juce::Colour startColor (24, 10, 35);
-
-            // Fill the background with a gradient from top left to bottom right
-            g.setGradientFill (juce::ColourGradient (
-                startColor, (float) treeViewBounds.getX(), (float) treeViewBounds.getY(), endColor, (float) treeViewBounds.getWidth(), (float) treeViewBounds.getHeight(), false));
+            g.setGradientFill ({ colors::treeBackgroundLighter, (float) treeViewBounds.getX(), (float) treeViewBounds.getY(), colors::treeBackgroundDarker, (float) treeViewBounds.getWidth(), 0, false });
             g.fillRect (treeViewBounds);
         }
 
@@ -128,44 +134,43 @@ namespace melatonin
 
         void resized() override
         {
-            DBG("InspectorComponent::resized");
             auto area = getLocalBounds();
             int padding = 8;
 
             auto inspectorEnabled = toggleButton.getToggleState();
-            auto columnMinWidth = inspectorEnabled ? juce::jmax (380, area.getWidth() / 2)
-                                                   : getWidth();
+            mainColumnBounds = area.removeFromLeft(inspectorEnabled ? juce::jmax (380, area.getWidth() / 2)
+                                                   : getWidth());
 
-            auto mainCol = area.removeFromLeft (columnMinWidth);
+            auto mainCol = mainColumnBounds;
 
-            auto toggleBtnHeight = 48;
+            auto headerHeight = 48;
 
-            topArea = mainCol.removeFromTop (toggleBtnHeight);
+            topArea = mainCol.removeFromTop (headerHeight);
+            logo.setBounds (topArea.withWidth (56).withRightX (topArea.getWidth()));
 
             toggleButton.setBounds (topArea.withX (padding));
 
-            boxModel.setBounds(mainCol.removeFromTop (300));
-            D(boxModel.getBounds().toString());
+            boxModel.setBounds (mainCol.removeFromTop (300));
+            D (boxModel.getBounds().toString());
 
             previewComponentPanel.setBounds (mainCol.removeFromTop (32));
-            previewComponent.setBounds(mainCol.removeFromTop (previewComponent.isVisible() ? 100 : 0));
+            previewComponent.setBounds (mainCol.removeFromTop (previewComponent.isVisible() ? 100 : 0));
 
             auto colorBounds = mainCol.removeFromTop (32 + 40);
             if (colorPicker.isVisible())
             {
                 // we have an icon in the panel header, so we overlap it
-                colorPicker.setBounds(colorBounds);
+                colorPicker.setBounds (colorBounds);
             }
             colorPickerPanel.setBounds (colorBounds.removeFromTop (32));
 
-
-            propertiesPanel.setBounds (mainCol.removeFromTop(32));
+            propertiesPanel.setBounds (mainCol.removeFromTop (32));
             properties.setBounds (mainCol);
 
             // using btn toggle state (better to switch to using class variable
             // or inspectors prop)
 
-            searchBoxBounds = area.removeFromTop (toggleBtnHeight);
+            searchBoxBounds = area.removeFromTop (headerHeight);
             auto b = searchBoxBounds;
 
             clearBtn.setBounds (b.removeFromRight (48));
@@ -179,10 +184,10 @@ namespace melatonin
 
             if (tree.isVisible())
             {
-                tree.setBounds (area.withTrimmedTop(24));
+                tree.setBounds (area.withTrimmedTop (24).withTrimmedLeft (18));
             }
             else
-                emptySelectionPrompt.setBounds (area.withTrimmedTop(24));
+                emptySelectionPrompt.setBounds (area.withTrimmedTop (24).withTrimmedLeft (18));
         }
 
         void displayComponentInfo (Component* component)
@@ -258,8 +263,11 @@ namespace melatonin
         {
             toggleButton.setToggleState (enabled, juce::dontSendNotification);
 
+            previewComponentPanel.setVisible (enabled);
             previewComponent.setVisible (enabled);
+            colorPickerPanel.setVisible (enabled);
             colorPicker.setVisible (enabled);
+            propertiesPanel.setVisible (enabled);
             properties.setVisible (enabled);
 
             if (!enabled)
@@ -278,7 +286,8 @@ namespace melatonin
 
         ComponentModel model;
 
-        juce::Rectangle<int> topArea, searchBoxBounds, treeViewBounds;
+        juce::Rectangle<int> mainColumnBounds, topArea, searchBoxBounds, treeViewBounds;
+        InspectorImageButton logo { "Logo" };
 
         BoxModel boxModel { model };
 
@@ -291,7 +300,7 @@ namespace melatonin
         Properties properties { model };
         CollapsablePanel propertiesPanel { "PROPERTIES", &properties };
 
-        // todo move to its own component
+        // TODO: move to its own component
         juce::TreeView tree;
         juce::Label emptySelectionPrompt { "SelectionPrompt", "Select any component to see components tree" };
         juce::Label emptySearchLabel { "EmptySearchResultsPrompt", "No component found" };

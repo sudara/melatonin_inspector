@@ -1,5 +1,5 @@
 #pragma once
-#include "BinaryData.h"
+#include "InspectorBinaryData.h"
 
 #include <juce_audio_processors/juce_audio_processors.h>
 
@@ -18,17 +18,14 @@ namespace melatonin
         return juce::String (v);
     }
 
-    static inline void drawIcon (juce::Graphics& g, juce::String& iconName)
+    static inline juce::Image getIcon (juce::String iconName)
     {
         int size = 0;
         auto filename = iconName.replace (" ", "") + "_png";
-        auto data = BinaryData::getNamedResource (filename.getCharPointer(), size);
+        auto data = InspectorBinaryData::getNamedResource (filename.getCharPointer(), size);
         if (size > 0)
         {
-            auto icon = juce::ImageCache::getFromMemory (data, size);
-
-            // icons are retina @2x
-            g.drawImageTransformed (icon, juce::AffineTransform::scale (0.5f, 0.5f), false);
+            return juce::ImageCache::getFromMemory (data, size);
         }
         else
         {

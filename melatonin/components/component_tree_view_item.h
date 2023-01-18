@@ -78,22 +78,25 @@ namespace melatonin
         {
             if (!component)
                 return;
+
+            auto textIndent = mightContainSubItems() ? 7 : 5;
+
+            g.setColour (colors::treeItemText);
+
             if (isSelected())
             {
                 g.setColour (colors::blackColor);
-                g.fillRect (3, 0, w - 30, h);
+                g.fillRect (-18 - textIndent, 0, w, h);
+                g.setColour(colors::treeItemTextSelected);
             }
 
-            g.setColour (colors::titleTextColor);
             if (!component->isVisible())
-                g.setColour (juce::Colours::grey);
+                g.setColour (colors::treeItemTextDisabled);
 
-            auto padding = 18;
-            auto textIndent = mightContainSubItems() ? padding + 7 : padding + 5;
             auto wantKeyboardFocus = component->getWantsKeyboardFocus();
             juce::String keyboard = wantKeyboardFocus ? " (wantsKeyboard)" : "";
 
-            g.setFont (juce::Font ("Verdana", 14, juce::Font::FontStyleFlags::plain));
+            g.setFont (juce::Font ("Verdana", 15, juce::Font::FontStyleFlags::plain));
             g.drawText (componentString (component) + keyboard, textIndent, 0, w - textIndent, h, juce::Justification::left, true);
         }
 
@@ -182,7 +185,7 @@ namespace melatonin
 
         int getItemHeight() const override
         {
-            return 26;
+            return 29;
         }
 
         std::function<void (juce::Component* c)> outlineComponentCallback;

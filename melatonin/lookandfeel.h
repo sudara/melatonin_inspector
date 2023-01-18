@@ -65,8 +65,7 @@ namespace melatonin
                 tickBounds.getCentreY());
 
             // nothing in JUCE's widget library is properly aligned...
-            // also we need left padding...
-            transform = transform.translated (18, 1.5f);
+            transform = transform.translated (0, 1.5f);
 
             g.fillPath (p, transform);
         }
