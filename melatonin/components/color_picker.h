@@ -23,8 +23,8 @@ namespace melatonin
 
         void paint (juce::Graphics& g) override
         {
-            auto bounds = getLocalBounds().removeFromLeft (18).withSizeKeepingCentre (18, 18).toFloat();
 
+            auto bounds = getLocalBounds().withTrimmedLeft(36).removeFromLeft (18).withSizeKeepingCentre (18, 18).toFloat();
             g.setColour (selectedColor);
             g.fillRoundedRectangle (bounds, 2.f);
 
@@ -45,7 +45,7 @@ namespace melatonin
                 .withSizeKeepingCentre (32, 32));
 
             auto area = getLocalBounds();
-            area.removeFromTop (32 + 12); // overlap with our header + bit of padding
+            area.removeFromTop (32); // overlap with our header + bit of padding
             area.reduce (26, 0);
             auto fieldBounds = area.removeFromTop (18);
 

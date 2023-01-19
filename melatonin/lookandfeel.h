@@ -11,16 +11,17 @@ namespace melatonin
         InspectorLookAndFeel()
         {
             // often the app overrides this
-            setColour (juce::Label::outlineWhenEditingColourId, colors::yellowColor);
-            setColour (juce::ToggleButton::ColourIds::tickDisabledColourId, colors::yellowColor);
-            setColour (juce::ToggleButton::ColourIds::textColourId, colors::titleTextColor);
-            setColour (juce::ToggleButton::ColourIds::tickColourId, colors::background);
+            setColour (juce::Label::outlineWhenEditingColourId, colors::highlightColor);
 
             setColour (juce::Label::textColourId, colors::blueTextLabelColor);
 
+            setColour (juce::ToggleButton::ColourIds::textColourId, colors::mainTextColor);
+            setColour (juce::ToggleButton::ColourIds::tickDisabledColourId, colors::mainTextColor);
+            setColour (juce::ToggleButton::ColourIds::tickColourId, colors::highlightColor);
+
             setColour (juce::TextEditor::textColourId, colors::blueTextLabelColor);
             setColour (juce::TextEditor::backgroundColourId, juce::Colours::transparentBlack);
-            setColour (juce::TextEditor::highlightColourId, juce::Colour::fromString("FF373737"));
+            setColour (juce::TextEditor::highlightColourId, juce::Colour::fromString ("FF373737"));
             setColour (juce::CaretComponent::caretColourId, colors::blueLineColor);
 
             setColour (juce::TextButton::buttonColourId, juce::Colours::transparentBlack);
@@ -28,17 +29,17 @@ namespace melatonin
 
             setColour (juce::PropertyComponent::backgroundColourId, juce::Colours::transparentBlack);
             setColour (juce::TextEditor::outlineColourId, juce::Colours::transparentBlack);
+
             setColour (juce::TextPropertyComponent::backgroundColourId, juce::Colours::transparentBlack);
             setColour (juce::TextPropertyComponent::outlineColourId, juce::Colours::transparentBlack);
-            setColour (juce::TextPropertyComponent::textColourId, colors::white);
-            setColour (juce::PropertyComponent::ColourIds::labelTextColourId, colors::titleTextColor);
+            setColour (juce::TextPropertyComponent::textColourId, colors::propertyValue);
+            setColour (juce::PropertyComponent::ColourIds::labelTextColourId, colors::propertyName);
+
             setColour (juce::BooleanPropertyComponent::backgroundColourId, juce::Colours::transparentBlack);
             setColour (juce::BooleanPropertyComponent::outlineColourId, juce::Colours::transparentBlack);
 
             setColour (juce::TreeView::ColourIds::selectedItemBackgroundColourId, colors::blackColor);
             setColour (juce::TreeView::ColourIds::backgroundColourId, juce::Colours::transparentBlack);
-
-            setColour (juce::ScrollBar::ColourIds::thumbColourId, colors::bluePropsScrollbarColor);
         }
 
         // we don't want our resizer in the overlay to have a fugly border
@@ -88,6 +89,7 @@ namespace melatonin
             return juce::BorderSize<int> (0);
         }
 
+        // the main "enable inspector" checkbox
         void drawToggleButton (juce::Graphics& g, juce::ToggleButton& button, bool /*shouldDrawButtonAsHighlighted*/, bool /*shouldDrawButtonAsDown*/) override
         {
             float toggleWidth = 14;
@@ -95,26 +97,26 @@ namespace melatonin
 
             juce::Rectangle<float> bounds (leftPadding, (float) button.getHeight() / 2 - toggleWidth / 2.f, toggleWidth, toggleWidth);
 
-            if (!button.getToggleState())
+            if (button.getToggleState())
             {
-                g.setColour (findColour (juce::ToggleButton::ColourIds::textColourId));
-                g.drawRoundedRectangle (bounds, 1, 1);
+                g.setColour (colors::highlightColor);
+                g.fillRoundedRectangle (bounds, 1.5f);
             }
             else
             {
-                g.setColour (findColour (juce::ToggleButton::ColourIds::tickDisabledColourId));
-                g.fillRoundedRectangle (bounds, 1);
+                g.setColour (colors::mainTextColor);
+                g.drawRoundedRectangle (bounds, 1, 1.5f);
             }
 
-            if (!button.getToggleState())
+            if (button.getToggleState())
             {
                 juce::Path tickPath;
-                tickPath.startNewSubPath (bounds.getX() + 3.0f, bounds.getCentreY());
-                tickPath.lineTo (bounds.getCentreX(), bounds.getBottom() - 3.0f);
-                tickPath.lineTo (bounds.getRight() - 3.0f, bounds.getY() + 3.0f);
+                tickPath.startNewSubPath (bounds.getX() + 3.5f, bounds.getCentreY() + 1.0f);
+                tickPath.lineTo (bounds.getCentreX() - 1.0f, bounds.getBottom() - 4.0f);
+                tickPath.lineTo (bounds.getRight() - 3.5f, bounds.getY() + 4.0f);
 
-                g.setColour (findColour (juce::ToggleButton::ColourIds::tickColourId));
-                g.strokePath (tickPath, juce::PathStrokeType (toggleWidth * 0.2f));
+                g.setColour (colors::checkboxCheck);
+                g.strokePath (tickPath, juce::PathStrokeType (2.0f, juce::PathStrokeType::mitered, juce::PathStrokeType::rounded));
             }
 
             g.setColour (button.findColour (button.getToggleState() ? juce::TextButton::textColourOnId : juce::TextButton::textColourOffId));
@@ -125,36 +127,6 @@ namespace melatonin
                 button.getLocalBounds().withTrimmedLeft (juce::roundToInt (toggleWidth) + (int) leftPadding + 12).withTrimmedRight (2),
                 juce::Justification::centredLeft,
                 false);
-        }
-
-        void drawTickBox (juce::Graphics& g, juce::Component&, float x, float y, float w, float h, bool isTicked, bool, bool, bool) override
-        {
-            juce::Rectangle<float> bounds (x + 2.f, y + 2.f, w - 4.f, h - 4.f);
-            if (!isTicked)
-            {
-                g.setColour (findColour (juce::ToggleButton::ColourIds::textColourId));
-                g.drawRoundedRectangle (bounds, 2, 1);
-            }
-            else
-            {
-                // Fill the background of the tick box with the specified color
-                g.setColour (findColour (juce::ToggleButton::ColourIds::tickDisabledColourId));
-                g.fillRoundedRectangle (bounds, 2);
-            }
-
-            auto tickBoxSize = juce::jmin (bounds.getWidth(), bounds.getHeight());
-
-            // Draw a transparent check mark if the button is ticked
-            if (isTicked)
-            {
-                juce::Path tickPath;
-                tickPath.startNewSubPath (bounds.getX() + 3.0f, bounds.getCentreY());
-                tickPath.lineTo (bounds.getCentreX(), bounds.getBottom() - 3.0f);
-                tickPath.lineTo (bounds.getRight() - 3.0f, bounds.getY() + 3.0f);
-
-                g.setColour (findColour (juce::ToggleButton::ColourIds::tickColourId));
-                g.strokePath (tickPath, juce::PathStrokeType (tickBoxSize * 0.2f));
-            }
         }
 
         void drawTextEditorOutline (juce::Graphics& g, int width, int height, juce::TextEditor& textEditor) override
@@ -180,7 +152,7 @@ namespace melatonin
 
         void drawScrollbar (juce::Graphics& g, juce::ScrollBar&, int x, int y, int width, int height, bool isScrollbarVertical, int thumbStartPosition, int thumbSize, bool, bool) override
         {
-            //fill bg in black
+            // fill bg in black
             g.fillAll (colors::blackColor);
 
             juce::Rectangle<int> thumbBounds;
@@ -189,7 +161,7 @@ namespace melatonin
             else
                 thumbBounds = juce::Rectangle<int> (thumbStartPosition, y, thumbSize, height);
 
-            g.setColour (findColour (juce::ScrollBar::ColourIds::thumbColourId));
+            g.setColour (colors::scrollbar);
             g.fillRoundedRectangle (thumbBounds.reduced (5).toFloat(), 2);
         }
 

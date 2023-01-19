@@ -70,26 +70,26 @@ namespace melatonin
 
         [[nodiscard]] juce::Array<juce::PropertyComponent*> createTextEditors() const
         {
-            auto opaque = new juce::BooleanPropertyComponent (juce::Value (model.opaqueValue), "Opaque:", "");
+            auto opaque = new juce::BooleanPropertyComponent (juce::Value (model.opaqueValue), "Opaque", "");
             opaque->setEnabled (false);
 
-            auto cachedImage = new juce::BooleanPropertyComponent (juce::Value (model.hasCachedImageValue), "CachedToImage:", "");
+            auto cachedImage = new juce::BooleanPropertyComponent (juce::Value (model.hasCachedImageValue), "CachedToImage", "");
             cachedImage->setEnabled (false);
 
-            auto focused = new juce::BooleanPropertyComponent (juce::Value (model.focused), "Focused:", "");
+            auto focused = new juce::BooleanPropertyComponent (juce::Value (model.focused), "Focused", "");
             focused->setEnabled (false);
 
-            auto accessibilityHandled = new juce::BooleanPropertyComponent (juce::Value (model.accessibilityHandled), "Accessibility:", "");
+            auto accessibilityHandled = new juce::BooleanPropertyComponent (juce::Value (model.accessibilityHandled), "Accessibility", "");
             accessibilityHandled->setEnabled (false);
 
             return {
-                new juce::TextPropertyComponent (juce::Value (model.lookAndFeel), "LookAndFeel:", 200, false, false),
-                new juce::TextPropertyComponent (model.xValue, "X:", 5, false),
-                new juce::TextPropertyComponent (model.yValue, "Y:", 5, false),
-                new juce::TextPropertyComponent (model.widthValue, "Width:", 5, false),
-                new juce::TextPropertyComponent (model.heightValue, "Height:", 5, false),
-                new juce::TextPropertyComponent (juce::Value (model.fontValue), "Font:", 5, false, false),
-                new juce::TextPropertyComponent (juce::Value (model.alphaValue), "Alpha:", 5, false, false),
+                new juce::TextPropertyComponent (juce::Value (model.lookAndFeel), "LookAndFeel", 200, false, false),
+                new juce::TextPropertyComponent (model.xValue, "X", 5, false),
+                new juce::TextPropertyComponent (model.yValue, "Y", 5, false),
+                new juce::TextPropertyComponent (model.widthValue, "Width", 5, false),
+                new juce::TextPropertyComponent (model.heightValue, "Height", 5, false),
+                new juce::TextPropertyComponent (juce::Value (model.fontValue), "Font", 5, false, false),
+                new juce::TextPropertyComponent (juce::Value (model.alphaValue), "Alpha", 5, false, false),
                 accessibilityHandled,
                 focused,
                 opaque,

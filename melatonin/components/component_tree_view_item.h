@@ -85,7 +85,7 @@ namespace melatonin
 
             if (isSelected())
             {
-                g.setColour (colors::blackColor);
+                g.setColour (colors::treeItemSelection);
                 g.fillRect (-18 - textIndent, 0, w, h);
                 g.setColour(colors::treeItemTextSelected);
             }
