@@ -27,7 +27,7 @@ namespace melatonin
             widthLabel.setColour (juce::Label::textColourId, colors::white);
 
             addAndMakeVisible (byLabel);
-            byLabel.setText (L" × ", juce::dontSendNotification);
+            byLabel.setText (juce::CharPointer_UTF8("\xc3\x97"), juce::dontSendNotification);
             byLabel.setFont (20.f);
             byLabel.setJustificationType (juce::Justification::centred);
             byLabel.setColour (juce::Label::textColourId, colors::white);
@@ -116,23 +116,20 @@ namespace melatonin
 
         void resized() override
         {
-            //            paddingVer = 0;
-            //            paddingHor = 0;
-
             auto bounds = parentComponentRectangle();
             auto center = bounds.getCentre();
             auto labelHeight = 30;
 
-            parentComponentLabel.setBounds (bounds.getX(), bounds.getY() - labelHeight + 5, bounds.getWidth(), labelHeight);
-            componentLabel.setBounds (componentRectangle().getX(), componentRectangle().getY() - labelHeight + 5, componentRectangle().getWidth(), labelHeight);
+            parentComponentLabel.setBounds (bounds.getX(), bounds.getY() - labelHeight + 4, bounds.getWidth(), labelHeight);
+            componentLabel.setBounds (componentRectangle().getX(), componentRectangle().getY() - labelHeight + 4, componentRectangle().getWidth(), labelHeight);
 
             widthLabel.setBounds (center.getX() - 10 - paddingToParent, center.getY() - 15, paddingToParent, labelHeight);
             byLabel.setBounds (center.getX() - 10, center.getY() - 15, 20, labelHeight);
             heightLabel.setBounds (center.getX() + 10, center.getY() - 15, paddingToParent, labelHeight);
 
-            topToParentLabel.setBounds (center.getX() - paddingToParent / 2, padding + paddingToParent / 2 - labelHeight / 2, paddingToParent, labelHeight);
+            topToParentLabel.setBounds (center.getX() - paddingToParent / 2, padding + paddingToParent / 2 - labelHeight / 2 - 3, paddingToParent, labelHeight);
             rightToParentLabel.setBounds (getWidth() - padding - paddingToParent / 2 - paddingToParent / 2, center.getY() - labelHeight / 2, paddingToParent, labelHeight);
-            bottomToParentLabel.setBounds (center.getX() - paddingToParent / 2, getHeight() - padding - paddingToParent / 2 - labelHeight / 2, paddingToParent, labelHeight);
+            bottomToParentLabel.setBounds (center.getX() - paddingToParent / 2, getHeight() - padding - paddingToParent / 2 - labelHeight / 2 + 3, paddingToParent, labelHeight);
             leftToParentLabel.setBounds (padding + paddingToParent / 2 - paddingToParent / 2, center.getY() - labelHeight / 2, paddingToParent, labelHeight);
 
             auto area1 = bounds.reduced (paddingToParent)

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "components/image_button.h"
+#include "components/inspector_image_button.h"
 #include "helpers/misc.h"
 #include "melatonin_inspector/melatonin/components/box_model.h"
 #include "melatonin_inspector/melatonin/components/color_picker.h"
@@ -66,6 +66,7 @@ namespace melatonin
             searchBox.setColour (juce::TextEditor::focusedOutlineColourId, juce::Colours::transparentBlack);
             searchBox.setTextToShowWhenEmpty ("Filter components...", colors::searchTextLabelColor);
             searchBox.setJustification (juce::Justification::centredLeft);
+            searchBox.onEscapeKey = [&] { searchBox.setText (""); searchBox.giveAwayKeyboardFocus(); };
 
             auto logoIcon = getIcon ("Logo");
             logo.onClick = [this] { juce::URL ("https://github.com/sudara/melatonin_inspector/").launchInDefaultBrowser(); };
@@ -100,6 +101,7 @@ namespace melatonin
 
             clearBtn.onClick = [this] {
                 searchBox.setText ("");
+                searchBox.giveAwayKeyboardFocus();
             };
 
             // the tree view is empty even if inspector is enabled
@@ -116,7 +118,7 @@ namespace melatonin
             g.fillRect (topArea);
 
             g.setColour (colors::blackColor);
-            g.fillRect (searchBoxBounds);
+            g.fillRect (searchBoxBounds.expanded (0, 2));
 
             g.setGradientFill ({ colors::treeBackgroundLighter, (float) treeViewBounds.getX(), (float) treeViewBounds.getY(), colors::treeBackgroundDarker, (float) treeViewBounds.getWidth(), 0, false });
             g.fillRect (treeViewBounds);
@@ -154,6 +156,7 @@ namespace melatonin
 
             toggleButton.setBounds (topArea.withX (padding));
 
+            mainCol.removeFromTop (10);
             boxModel.setBounds (mainCol.removeFromTop (300));
 
             previewComponentPanel.setBounds (mainCol.removeFromTop (32));
@@ -168,14 +171,14 @@ namespace melatonin
             colorPickerPanel.setBounds (colorBounds.removeFromTop (32));
 
             propertiesPanel.setBounds (mainCol.removeFromTop (32));
-            properties.setBounds (mainCol.withTrimmedLeft(36));
+            properties.setBounds (mainCol.withTrimmedLeft (36));
 
             searchBoxBounds = area.removeFromTop (headerHeight);
             auto b = searchBoxBounds;
 
             clearBtn.setBounds (b.removeFromRight (48));
             searchIcon.setBounds (b.removeFromLeft (48));
-            searchBox.setBounds (b);
+            searchBox.setBounds (b.reduced(0, 2));
 
             emptySearchLabel.setBounds (area.reduced (4, 24));
 
