@@ -1,10 +1,76 @@
-## Melatonin Component Inspector
+# Melatonin Inspector
 
-This is a JUCE module that gives you the ability to inspect and resize components in your UI.
+This is a JUCE module that gives you the ability to inspect and visually edit (non-destructively) components in your UI.
 
 It's inspired by [Figma](https://figma.com) (where I prefer to design UI), browser web inspectors and Jim Credland's [Component Debugger](https://github.com/jcredland/juce-toys/blob/master/jcf_debug/source/component_debugger.cpp) [juce-toys](https://github.com/jcredland/juce-toys). 
 
-https://user-images.githubusercontent.com/472/115873623-6f2e4700-a443-11eb-9ba1-03d992cc12e1.mp4
+
+![AudioPluginHost - 2023-01-20 29@2x](https://user-images.githubusercontent.com/472/213710642-389d4313-5b5a-4656-859e-ea014c859021.jpg)
+
+## Features
+
+### Preview Component
+
+![AudioPluginHost - 2023-01-20 46](https://user-images.githubusercontent.com/472/213702194-c3c586e1-981f-4760-b095-5d7a13f322b7.gif)
+
+### Browse and select components visually
+
+Point n' click to inspect a component, see their size and distance to parent.
+
+![AudioPluginHost - 2023-01-20 21](https://user-images.githubusercontent.com/472/213708404-90948d45-6440-455d-bac0-662acf5a1d70.gif)
+
+### Explore the component heirarchy and see what's visible
+
+![AudioPluginHost - 2023-01-20 45](https://user-images.githubusercontent.com/472/213709528-b0f4d3dc-61bb-4e72-aae5-7c414ee5e798.gif)
+
+### Filter and find components by name
+
+We grab names from stock components, label/button text, otherwise we demangle the class names.
+
+![AudioPluginHost - 2023-01-20 08](https://user-images.githubusercontent.com/472/213702600-2e479677-8a6e-459b-ba38-1db93be689e3.gif)
+
+Thanks Dmytro!
+
+### Edit component dimensions
+
+![AudioPluginHost - 2023-01-20 55](https://user-images.githubusercontent.com/472/213701508-eaf1dfc6-4465-4581-915e-7d788d47e08c.gif)
+
+### Inspect component properties
+
+See the most important component properties at a glance, including look and feels, fonts for labels, etc.
+
+Thanks Dmytro!
+
+[AudioPluginHost - 2023-01-20 25@2x](https://user-images.githubusercontent.com/472/213707219-dc8619c1-8800-4267-b3f3-0c9911817a63.jpg)
+
+### Nudge components around 
+
+Good for (non-destructively) verifying what new positions should be, getting things pixel perfect.
+
+Thanks Dmytro!
+
+![AudioPluginHost - 2023-01-20 07](https://user-images.githubusercontent.com/472/213701074-a48414e8-a86c-4881-a911-392710078ce7.gif)
+
+### Single click a Component to select it and resize
+
+(Note: size changes aren't permanent, it's similar to how you can play with things in a browser's web inspector)
+
+### Hold "alt" while component is selected to view positioning relative to neighbors
+
+Figma inspired feature.
+
+Thanks Dmytro!
+
+![AudioPluginHost - 2023-01-20 45](https://user-images.githubusercontent.com/472/213705531-d9887c7b-15a7-4b78-bab4-6868765d45a5.gif)
+
+### Basic color picker
+
+Displays simple RGB values.
+
+Thanks Dmytro!
+
+![AudioPluginHost - 2023-01-20 30](https://user-images.githubusercontent.com/472/213706422-42c5eb90-c41f-45f8-9a0c-0125b125a622.gif)
+
 
 ## How to install
 
@@ -67,22 +133,6 @@ melatonin::Inspector inspector { *this, false };
 ### 5. Set it visible
 
 Out of the box, the window won't popup until you call `setVisible(true)` on the inspector!
-
-## Features
-
-### Hover over Component to view size and bounds to parent
-
-### Single click a Component to select it and resize
-
-(Note: size changes aren't permanent, it's similar to how you can play with things in a browser's web inspector)
-
-### Hold "alt" after a Component is selected to view positioning relative to neighbors
-
-(Coming soon)
-
-### Navigate and select from the Component tree
-
-The names used in the UI are the Component name, if specified (e.g. JUCE buttons), otherwise demangled class names
 
 ## FAQ
 
