@@ -11,11 +11,14 @@ endif ()
 set (CMAKE_CXX_STANDARD 17)
 set (CMAKE_CXX_STANDARD_REQUIRED YES)
 
-file(GLOB_RECURSE MelatoninInspectorAssetFiles CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/Assets/*")
-juce_add_binary_data(MelatoninInspectorAssets SOURCES ${MelatoninInspectorAssetFiles} HEADER_NAME InspectorBinaryData.h NAMESPACE InspectorBinaryData)
-set_target_properties(MelatoninInspectorAssets PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
-
 juce_add_module ("${CMAKE_CURRENT_LIST_DIR}")
 
 add_library(Melatonin::Inspector ALIAS melatonin_inspector)
-target_link_libraries(melatonin_inspector INTERFACE MelatoninInspectorAssets)
+
+# Assets are precompiled in the module to make it Projucer friendly
+# Uncomment these lines to generate the assets again (then copy over from the build folder)
+
+# file(GLOB_RECURSE MelatoninInspectorAssetFiles CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/Assets/*")
+# juce_add_binary_data(MelatoninInspectorAssets SOURCES ${MelatoninInspectorAssetFiles} HEADER_NAME InspectorBinaryData.h NAMESPACE InspectorBinaryData)
+# set_target_properties(MelatoninInspectorAssets PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+# target_link_libraries(melatonin_inspector INTERFACE MelatoninInspectorAssets)

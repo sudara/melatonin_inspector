@@ -1,13 +1,13 @@
 /*
 BEGIN_JUCE_MODULE_DECLARATION
 
- ID:               melatonin_inspector
- vendor:           Sudara
- version:          1.2.0
- name:             Melatonin Inspector
- description:      A component inspector for JUCE, inspired by Figma, web inspector and Jim Credland's Component Debugger
- license:          MIT
- dependencies:     juce_gui_basics
+ID:               melatonin_inspector
+vendor:           Sudara
+version:          1.2.0
+name:             Melatonin Inspector
+description:      A component inspector for JUCE, inspired by Figma, web inspector and Jim Credland's Component Debugger
+license:          MIT
+dependencies:     juce_gui_basics
 
 END_JUCE_MODULE_DECLARATION
 */
@@ -15,12 +15,29 @@ END_JUCE_MODULE_DECLARATION
 #include "melatonin/lookandfeel.h"
 #include "melatonin_inspector/melatonin/components/overlay.h"
 #include "melatonin_inspector/melatonin/inspector_component.h"
+#include "LatestCompiledAssets/InspectorBinaryData.h"
 
 namespace melatonin
 {
     class Inspector : public juce::ComponentListener, public juce::DocumentWindow
     {
     public:
+        class OpenInspector : public juce::KeyListener
+        {
+        public:
+            explicit OpenInspector (Inspector& i) : inspector (i) {}
+            Inspector& inspector;
+
+            bool keyPressed (const juce::KeyPress& key, Component* /*originatingComponent*/) override
+            {
+                DBG (key.getTextDescription());
+                if (key == juce::KeyPress::isKeyCurrentlyDown ('i') && juce::ModifierKeys::getCurrentModifiers().isCommandDown())
+                    inspector.toggle();
+
+                // let the keypress propagate
+                return false;
+            }
+        };
         explicit Inspector (juce::Component& rootComponent, bool enabledAtStart = true)
             : juce::DocumentWindow ("Melatonin Inspector", colors::background, 7, true),
               inspector (rootComponent, enabledAtStart),
@@ -29,6 +46,7 @@ namespace melatonin
         {
             root.addAndMakeVisible (overlay);
             root.addComponentListener (this);
+            root.addKeyListener (&keyListener);
 
             // don't use the app's lnf for overlay or inspector
             setLookAndFeel (&inspectorLookAndFeel);
@@ -55,6 +73,7 @@ namespace melatonin
 
         ~Inspector() override
         {
+            root.removeKeyListener(&keyListener);
             root.removeComponentListener (this);
             setLookAndFeel (nullptr);
         }
@@ -110,7 +129,7 @@ namespace melatonin
             setVisible (false);
         }
 
-        void toggle (bool newStatus)
+        void toggle (bool newStatus = true)
         {
             enabled = newStatus;
             overlay.setVisible (newStatus);
@@ -128,6 +147,7 @@ namespace melatonin
         bool enabled;
         melatonin::Overlay overlay;
         melatonin::MouseInspector mouseInspector { root };
+        OpenInspector keyListener { *this };
 
         // Resize our overlay when the root component changes
         void componentMovedOrResized (Component& rootComponent, bool wasMoved, bool wasResized) override
