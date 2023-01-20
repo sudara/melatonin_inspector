@@ -25,7 +25,7 @@ public:
 
     void resized() override
     {
-        toggleButton.setBounds (getLocalBounds().reduced (8, 0));
+        toggleButton.setBounds (getLocalBounds().reduced (8, 2));
     }
 
 private:

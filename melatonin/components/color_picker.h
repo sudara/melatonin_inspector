@@ -14,7 +14,9 @@ namespace melatonin
             addAndMakeVisible (colorValField);
             addAndMakeVisible (colorPickerButton);
 
-            selectedColor = juce::Colours::black;
+            colorValField.setJustificationType(juce::Justification::centredLeft);
+            colorValField.setColour(juce::TextEditor::ColourIds::textColourId, colors::propertyValue);
+            selectedColor = juce::Colours::transparentBlack;
 
             // we overlap the header, so let people click that as usual
             setInterceptsMouseClicks (false, true);
@@ -22,14 +24,17 @@ namespace melatonin
 
         void paint (juce::Graphics& g) override
         {
-            auto bounds = getLocalBounds().withTrimmedLeft (36).removeFromLeft (18).withSizeKeepingCentre (18, 18).toFloat();
-            g.setColour (selectedColor);
-            g.fillRoundedRectangle (bounds, 2.f);
+            auto bounds = juce::Rectangle<float> ({ 32, 40, 18, 18 });
 
             if (selectedColor.isTransparent())
             {
                 g.setColour (colors::titleTextColor);
                 g.drawRoundedRectangle (bounds, 2.f, 1.f);
+            }
+            else
+            {
+                g.setColour (selectedColor);
+                g.fillRoundedRectangle (bounds, 2.f);
             }
             g.setColour (colors::panelLineSeparatorColor);
             g.drawHorizontalLine (getHeight() - 1, 0, (float) getWidth()); // separator
@@ -43,8 +48,8 @@ namespace melatonin
                                              .withSizeKeepingCentre (32, 32));
 
             auto area = getLocalBounds();
-            area.removeFromTop (32); // overlap with our header + bit of padding
-            colorValField.setBounds (area.withTrimmedLeft (36));
+            area.removeFromTop (29); // overlap with our header + bit of padding
+            colorValField.setBounds (area.withTrimmedLeft (64));
         }
 
         void mouseEnter (const juce::MouseEvent& event) override
@@ -110,7 +115,7 @@ namespace melatonin
         }
 
     private:
-        InspectorImageButton colorPickerButton { "Eyedropper", { 32, 32 }, true };
+        InspectorImageButton colorPickerButton { "Eyedropper", { 0, 6 }, true };
         juce::Label colorValField {
             "Color value",
         };
@@ -122,11 +127,10 @@ namespace melatonin
 
         void updateLabels()
         {
-            juce::String rgbaString = juce::String::formatted ("%d, %d, %d, %d",
+            juce::String rgbaString = juce::String::formatted ("%d, %d, %d",
                 selectedColor.getRed(),
                 selectedColor.getGreen(),
-                selectedColor.getBlue(),
-                selectedColor.getAlpha());
+                selectedColor.getBlue());
             colorValField.setText (rgbaString, juce::dontSendNotification);
             colorValField.setVisible (true);
 

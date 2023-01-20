@@ -3,8 +3,7 @@
 
 namespace melatonin
 {
-    class Properties : public juce::Component,
-                            private ComponentModel::Listener
+    class Properties : public juce::Component, private ComponentModel::Listener
     {
     public:
         explicit Properties (ComponentModel& _model) : model (_model)
@@ -22,8 +21,8 @@ namespace melatonin
 
         void resized() override
         {
-            panel.setBounds (propsRectangle());
-            // paddingHor = 8;
+            // let the property panel know what total height we need to be
+            panel.setBounds (getLocalBounds());
         }
 
     private:
@@ -32,13 +31,6 @@ namespace melatonin
 
         int padding = 5;
         int propsSize = 0;
-
-        [[nodiscard]] juce::Rectangle<int> propsRectangle() const
-        {
-            // from juce::PropertyPanel
-            int preferredHeight = 25;
-            return { getWidth(), propsSize + 1 * padding + propsSize * preferredHeight };
-        }
 
         void componentChanged (ComponentModel&) override
         {
