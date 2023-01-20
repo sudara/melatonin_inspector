@@ -1,50 +1,79 @@
 /*
 BEGIN_JUCE_MODULE_DECLARATION
 
- ID:               melatonin_inspector
- vendor:           Sudara
- version:          1.1.0
- name:             Melatonin Inspector
- description:      A component inspector for JUCE, inspired by Figma, web inspector and Jim Credland's Component Debugger
- license:          MIT
- dependencies:     juce_gui_basics 
+ID:               melatonin_inspector
+vendor:           Sudara
+version:          1.2.0
+name:             Melatonin Inspector
+description:      A component inspector for JUCE, inspired by Figma, web inspector and Jim Credland's Component Debugger
+license:          MIT
+dependencies:     juce_gui_basics
 
 END_JUCE_MODULE_DECLARATION
 */
 #pragma once
-#include "melatonin/inspector_panel.h"
-#include "melatonin/overlay.h"
+#include "melatonin/lookandfeel.h"
+#include "melatonin_inspector/melatonin/components/overlay.h"
+#include "melatonin_inspector/melatonin/inspector_component.h"
+#include "LatestCompiledAssets/InspectorBinaryData.h"
 
 namespace melatonin
 {
     class Inspector : public juce::ComponentListener, public juce::DocumentWindow
     {
     public:
-        Inspector (juce::Component& rootComponent, bool enabledAtStart = true)
-            : juce::DocumentWindow ("Melatonin Inspector", melatonin::color::background, 7, true),
-              panel (rootComponent, enabledAtStart),
+        class OpenInspector : public juce::KeyListener
+        {
+        public:
+            explicit OpenInspector (Inspector& i) : inspector (i) {}
+            Inspector& inspector;
+
+            bool keyPressed (const juce::KeyPress& key, Component* /*originatingComponent*/) override
+            {
+                DBG (key.getTextDescription());
+                if (key == juce::KeyPress::isKeyCurrentlyDown ('i') && juce::ModifierKeys::getCurrentModifiers().isCommandDown())
+                    inspector.toggle();
+
+                // let the keypress propagate
+                return false;
+            }
+        };
+        explicit Inspector (juce::Component& rootComponent, bool enabledAtStart = true)
+            : juce::DocumentWindow ("Melatonin Inspector", colors::background, 7, true),
+              inspector (rootComponent, enabledAtStart),
               root (rootComponent),
               enabled (enabledAtStart)
         {
             root.addAndMakeVisible (overlay);
             root.addComponentListener (this);
+            root.addKeyListener (&keyListener);
 
-            // don't use the app's lnf for overlay or panel
+            // don't use the app's lnf for overlay or inspector
             setLookAndFeel (&inspectorLookAndFeel);
             overlay.setLookAndFeel (&inspectorLookAndFeel);
-            panel.setLookAndFeel (&inspectorLookAndFeel);
+            inspector.setLookAndFeel (&inspectorLookAndFeel);
 
             setResizable (true, false);
-            setResizeLimits (300, 500, 1200, 1200);
-            setSize (350, 650);
-            panel.setSize (400, 400);
+
+            updateWindowSize();
+
             setUsingNativeTitleBar (true);
-            setContentNonOwned (&panel, true);
+            setContentNonOwned (&inspector, true);
             setupCallbacks();
+        }
+
+        void updateWindowSize()
+        {
+            auto width = enabled ? juce::jmax (700, getWidth()) : 380;
+            auto height = enabled ? juce::jmax (getHeight(), 800) : 400;
+            setResizeLimits (width, height, 1200, 1200);
+            setSize (width, height);
+            inspector.setSize (width, height);
         }
 
         ~Inspector() override
         {
+            root.removeKeyListener(&keyListener);
             root.removeComponentListener (this);
             setLookAndFeel (nullptr);
         }
@@ -56,7 +85,15 @@ namespace melatonin
                 return;
 
             overlay.outlineComponent (c);
-            panel.displayComponentInfo (c);
+            inspector.displayComponentInfo (c);
+        }
+
+        void outlineDistanceCallback (Component* c)
+        {
+            if (!enabled || overlay.isParentOf (c))
+                return;
+
+            overlay.outlineDistanceCallback (c);
         }
 
         void selectComponent (Component* c, bool collapseTree = true)
@@ -65,7 +102,24 @@ namespace melatonin
                 return;
 
             overlay.selectComponent (c);
-            panel.selectComponent (c, collapseTree);
+            inspector.selectComponent (c, collapseTree);
+        }
+
+        void dragComponent (Component* c, const juce::MouseEvent& e)
+        {
+            if (!enabled || overlay.isParentOf (c))
+                return;
+
+            overlay.dragSelectedComponent (e);
+            inspector.displayComponentInfo (c);
+        }
+
+        void startDragComponent (Component* c, const juce::MouseEvent& e)
+        {
+            if (!enabled || overlay.isParentOf (c))
+                return;
+
+            overlay.startDraggingComponent (e);
         }
 
         // closing the window means turning off the inspector
@@ -75,39 +129,47 @@ namespace melatonin
             setVisible (false);
         }
 
-        void toggle (bool newStatus)
+        void toggle (bool newStatus = true)
         {
             enabled = newStatus;
             overlay.setVisible (newStatus);
-            panel.toggle (newStatus);
+            inspector.toggle (newStatus);
+
+            updateWindowSize();
         }
 
     private:
         // LNF has to be declared before components using it
         melatonin::InspectorLookAndFeel inspectorLookAndFeel;
 
-        melatonin::InspectorPanel panel;
+        melatonin::InspectorComponent inspector;
         juce::Component& root;
         bool enabled;
         melatonin::Overlay overlay;
         melatonin::MouseInspector mouseInspector { root };
+        OpenInspector keyListener { *this };
 
         // Resize our overlay when the root component changes
-        void componentMovedOrResized (Component& rootComponent, bool /*wasMoved*/, bool wasResized) override
+        void componentMovedOrResized (Component& rootComponent, bool wasMoved, bool wasResized) override
         {
-            if (wasResized)
+            if (wasResized || wasMoved)
+            {
                 overlay.setBounds (rootComponent.getBounds());
+            }
         }
 
         void setupCallbacks()
         {
             mouseInspector.outlineComponentCallback = [this] (Component* c) { this->outlineComponent (c); };
+            mouseInspector.outlineDistanceCallback = [this] (Component* c) { this->outlineDistanceCallback (c); };
             mouseInspector.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, true); };
-            mouseInspector.mouseExitCallback = [this]() { if (this->enabled) panel.redisplaySelectedComponent(); };
+            mouseInspector.componentStartDraggingCallback = [this] (Component* c, const juce::MouseEvent& e) { this->startDragComponent (c, e); };
+            mouseInspector.componentDraggedCallback = [this] (Component* c, const juce::MouseEvent& e) { this->dragComponent (c, e); };
+            mouseInspector.mouseExitCallback = [this]() { if (this->enabled) inspector.redisplaySelectedComponent(); };
 
-            panel.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, false); };
-            panel.outlineComponentCallback = [this] (Component* c) { this->outlineComponent (c); };
-            panel.toggleCallback = [this] (bool enable) { this->toggle (enable); };
+            inspector.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, true); };
+            inspector.outlineComponentCallback = [this] (Component* c) { this->outlineComponent (c); };
+            inspector.toggleCallback = [this] (bool enable) { this->toggle (enable); };
         }
     };
 }

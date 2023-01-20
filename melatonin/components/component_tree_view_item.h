@@ -1,5 +1,4 @@
 #pragma once
-#include "helpers.h"
 
 namespace melatonin
 {
@@ -13,7 +12,9 @@ namespace melatonin
     public:
         bool hasTabbedComponent = false;
 
-        explicit ComponentTreeViewItem (juce::Component* c, std::function<void (juce::Component* c)> outline, std::function<void (juce::Component* c)> select)
+        explicit ComponentTreeViewItem (juce::Component* c,
+            std::function<void (juce::Component* c)> outline,
+            std::function<void (juce::Component* c)> select)
             : outlineComponentCallback (outline), selectComponentCallback (select), component (c)
         {
             // A few JUCE component types need massaging to get their child components
@@ -34,6 +35,8 @@ namespace melatonin
                 addItemsForChildComponents();
             }
 
+            setDrawsInLeftMargin (true);
+
             // Make our tree self-aware
             component->addComponentListener (this);
         }
@@ -47,7 +50,7 @@ namespace melatonin
 
         bool mightContainSubItems() override
         {
-            return component ? (component->getNumChildComponents() > 0) : false;
+            return component != nullptr && (component->getNumChildComponents() > 0);
         }
 
         // naive but functional...
@@ -75,27 +78,32 @@ namespace melatonin
         {
             if (!component)
                 return;
-            if (isSelected())
-            {
-                g.setColour (color::blueLabelBackgroundColor);
-                g.fillRect (3, 0, w - 30, h);
-            }
-
-            g.setColour (color::blueLabelTextColor);
-            if (!component->isVisible())
-                g.setColour (juce::Colours::grey);
-
-            g.setFont (juce::Font ("Verdana", 14, juce::Font::FontStyleFlags::plain));
 
             auto textIndent = mightContainSubItems() ? 7 : 5;
-            juce::String keyboard = component->getWantsKeyboardFocus() ? " (wantsKeyboard)" : "";
+
+            g.setColour (colors::treeItemText);
+
+            if (isSelected())
+            {
+                g.setColour (colors::treeItemSelection);
+                g.fillRect (-18 - textIndent, 0, w, h);
+                g.setColour(colors::treeItemTextSelected);
+            }
+
+            if (!component->isVisible())
+                g.setColour (colors::treeItemTextDisabled);
+
+            auto wantKeyboardFocus = component->getWantsKeyboardFocus();
+            juce::String keyboard = wantKeyboardFocus ? " (wantsKeyboard)" : "";
+
+            g.setFont (juce::Font ("Verdana", 15, juce::Font::FontStyleFlags::plain));
             g.drawText (componentString (component) + keyboard, textIndent, 0, w - textIndent, h, juce::Justification::left, true);
         }
 
         // must override to set the disclosure triangle color
         void paintOpenCloseButton (juce::Graphics& g, const juce::Rectangle<float>& area, juce::Colour /*backgroundColour*/, bool isMouseOver) override
         {
-            getOwnerView()->getLookAndFeel().drawTreeviewPlusMinusBox (g, area, color::blueLabelBackgroundColor, isOpen(), isMouseOver);
+            getOwnerView()->getLookAndFeel().drawTreeviewPlusMinusBox (g, area, colors::treeViewMinusPlusColor, isOpen(), isMouseOver);
         }
 
         void itemClicked (const juce::MouseEvent&) override
@@ -120,10 +128,64 @@ namespace melatonin
             }
         }
 
+        void filterNodesRecursively (const juce::String& searchString)
+        {
+            // Iterate over the child nodes of the current node
+            for (int i = getNumSubItems() - 1; i >= 0; --i)
+            {
+                // Recursively call the function on the current child node
+                if (auto* ct = dynamic_cast<ComponentTreeViewItem*> (getSubItem (i)))
+                {
+                    ct->filterNodesRecursively (searchString);
+                }
+            }
+            // Check if the current node's name does not contain the search string
+            if (!getComponentName().containsIgnoreCase (searchString))
+            {
+                // Remove the subtree rooted at the current node
+                if (getParentItem() != nullptr && getNumSubItems() == 0)
+                {
+                    getParentItem()->removeSubItem (getIndexInParent());
+                    DBG ("For removal: " << getComponentName());
+                }
+                else
+                    setOpen (true);
+            }
+            else if (getComponentName().startsWithIgnoreCase (searchString))
+            {
+                outlineComponentCallback (component);
+                setSelected (true, true);
+                setOpen (true);
+            }
+            else
+            {
+                setOpen (true);
+            }
+        }
+
         // Callback from the component listener. Reconstruct children when component is deleted
         void componentChildrenChanged (juce::Component& /*changedComponent*/) override
         {
             validateSubItems();
+        }
+
+        juce::String getComponentName()
+        {
+            juce::String res = "";
+            if (component && !component->getName().isEmpty())
+            {
+                return component->getName();
+            }
+            else if (component)
+            {
+                return type (*component);
+            }
+            return res;
+        }
+
+        int getItemHeight() const override
+        {
+            return 29;
         }
 
         std::function<void (juce::Component* c)> outlineComponentCallback;
