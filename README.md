@@ -5,8 +5,21 @@ A JUCE module that gives you the ability to inspect and visually edit (non-destr
 
 It's inspired by [Figma](https://figma.com) (where I prefer to design UI), browser web inspectors and Jim Credland's [Component Debugger](https://github.com/jcredland/juce-toys/blob/master/jcf_debug/source/component_debugger.cpp) [juce-toys](https://github.com/jcredland/juce-toys). 
 
+A big hearty thanks to [Dmytro Kiro](https://github.com/dikadk) for many of the current features.
+
 <p align="center">
 <img src="https://user-images.githubusercontent.com/472/213710642-389d4313-5b5a-4656-859e-ea014c859021.jpg" width="500"/>
+</p>
+
+
+<p align="center">
+✨<br/>
+✨✨<br/>
+✨✨✨<br/>
+<b><i>what are the features?...</i></b><br/>
+✨✨✨<br/>
+✨✨<br/>
+✨<br/>
 </p>
 
 ## Browse and select components visually
@@ -29,7 +42,6 @@ Point n' click to inspect a component, see its size and distance to parent.
 
 See what exactly is drawing on a per-component basis, even if it's hidden.
 
-Thanks Dmytro!
 
 <p align="center">
 <img src="https://user-images.githubusercontent.com/472/213702194-c3c586e1-981f-4760-b095-5d7a13f322b7.gif" width="600"/>
@@ -37,9 +49,8 @@ Thanks Dmytro!
 
 ## Filter and find components by name
 
-We grab names from stock components, label/button text, otherwise we demangle the class names.
+Names are derived from stock components, label/button text, or demangled class names.
 
-Thanks Dmytro!
 
 <p align="center">
 <img src="https://user-images.githubusercontent.com/472/213702600-2e479677-8a6e-459b-ba38-1db93be689e3.gif" width="400"/>
@@ -58,8 +69,6 @@ There's like...4 different ways to do this, visually and numerically...
 
 See the most important component properties at a glance, including look and feels, fonts for labels, etc.
 
-Thanks Dmytro!
-
 <p align="center">
 <img src="https://user-images.githubusercontent.com/472/213707219-dc8619c1-8800-4267-b3f3-0c9911817a63.jpg" width="600"/>
 </p>
@@ -69,7 +78,6 @@ Thanks Dmytro!
 
 Good for (non-destructively) verifying what new positions should be, getting things pixel perfect.
 
-Thanks Dmytro!
 
 <p align="center">
 <img src="https://user-images.githubusercontent.com/472/213701074-a48414e8-a86c-4881-a911-392710078ce7.gif" width="600"/>
@@ -79,8 +87,6 @@ Thanks Dmytro!
 
 Figma inspired feature.
 
-Thanks Dmytro!
-
 <p align="center">
 <img src="https://user-images.githubusercontent.com/472/213705531-d9887c7b-15a7-4b78-bab4-6868765d45a5.gif" width="450"/>
 </p>
@@ -88,8 +94,6 @@ Thanks Dmytro!
 ### Basic color picker
 
 Displays simple RGB values.
-
-Thanks Dmytro!
 
 <p align="center">
 <img src="https://user-images.githubusercontent.com/472/213706422-42c5eb90-c41f-45f8-9a0c-0125b125a622.gif" width="600"/>
