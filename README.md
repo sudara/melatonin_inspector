@@ -16,7 +16,7 @@ A big hearty thanks to [Dmytro Kiro](https://github.com/dikadk) for many of the 
 ✨<br/>
 ✨✨<br/>
 ✨✨✨<br/>
-<b><i>what are the features?...</i></b><br/>
+<b><i>...and what are the features?...</i></b><br/>
 ✨✨✨<br/>
 ✨✨<br/>
 ✨<br/>
