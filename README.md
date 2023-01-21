@@ -76,16 +76,15 @@ See the most important component properties at a glance, including look and feel
 
 ## Nudge components around 
 
-Good for (non-destructively) verifying what new positions should be, getting things pixel perfect.
-
+Verify new values, get things pixel perfect.
 
 <p align="center">
 <img src="https://user-images.githubusercontent.com/472/213701074-a48414e8-a86c-4881-a911-392710078ce7.gif" width="600"/>
 </p>
 
-### Hold "alt" while component is selected to view positioning relative to neighbors
+### View spacing relative to siblings/neighbors
 
-Figma inspired feature.
+Hold "alt" while component is selected. A Figma inspired feature.
 
 <p align="center">
 <img src="https://user-images.githubusercontent.com/472/213705531-d9887c7b-15a7-4b78-bab4-6868765d45a5.gif" width="450"/>
