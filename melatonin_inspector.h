@@ -12,10 +12,10 @@ dependencies:     juce_gui_basics
 END_JUCE_MODULE_DECLARATION
 */
 #pragma once
+#include "LatestCompiledAssets/InspectorBinaryData.h"
 #include "melatonin/lookandfeel.h"
 #include "melatonin_inspector/melatonin/components/overlay.h"
 #include "melatonin_inspector/melatonin/inspector_component.h"
-#include "LatestCompiledAssets/InspectorBinaryData.h"
 
 namespace melatonin
 {
@@ -30,9 +30,16 @@ namespace melatonin
 
             bool keyPressed (const juce::KeyPress& key, Component* /*originatingComponent*/) override
             {
-                DBG (key.getTextDescription());
-                if (key == juce::KeyPress::isKeyCurrentlyDown ('i') && juce::ModifierKeys::getCurrentModifiers().isCommandDown())
+#if JUCE_WINDOWS
+                bool modifierPresent = juce::ModifierKeys::getCurrentModifiers().isCtrlDown();
+#else
+                bool modifierPresent = juce::ModifierKeys::getCurrentModifiers().isCommandDown();
+#endif
+                if (key.isKeyCurrentlyDown ('I') && modifierPresent)
+                {
                     inspector.toggle();
+                    return true;
+                }
 
                 // let the keypress propagate
                 return false;
@@ -40,25 +47,30 @@ namespace melatonin
         };
         explicit Inspector (juce::Component& rootComponent, bool enabledAtStart = true)
             : juce::DocumentWindow ("Melatonin Inspector", colors::background, 7, true),
-              inspector (rootComponent, enabledAtStart),
+              inspectorComponent (rootComponent, enabledAtStart),
               root (rootComponent),
               enabled (enabledAtStart)
         {
             root.addAndMakeVisible (overlay);
             root.addComponentListener (this);
+
+            // allow us to open/close the inspector by key command
+            // bit sketchy because we're modifying the source app to accept key focus
             root.addKeyListener (&keyListener);
+            root.setWantsKeyboardFocus (true);
+            this->addKeyListener (&keyListener);
 
             // don't use the app's lnf for overlay or inspector
             setLookAndFeel (&inspectorLookAndFeel);
             overlay.setLookAndFeel (&inspectorLookAndFeel);
-            inspector.setLookAndFeel (&inspectorLookAndFeel);
+            inspectorComponent.setLookAndFeel (&inspectorLookAndFeel);
 
             setResizable (true, false);
 
             updateWindowSize();
 
             setUsingNativeTitleBar (true);
-            setContentNonOwned (&inspector, true);
+            setContentNonOwned (&inspectorComponent, true);
             setupCallbacks();
         }
 
@@ -68,12 +80,13 @@ namespace melatonin
             auto height = enabled ? juce::jmax (getHeight(), 800) : 400;
             setResizeLimits (width, height, 1200, 1200);
             setSize (width, height);
-            inspector.setSize (width, height);
+            inspectorComponent.setSize (width, height);
         }
 
         ~Inspector() override
         {
-            root.removeKeyListener(&keyListener);
+            root.removeKeyListener (&keyListener);
+            this->removeKeyListener (&keyListener);
             root.removeComponentListener (this);
             setLookAndFeel (nullptr);
         }
@@ -85,7 +98,7 @@ namespace melatonin
                 return;
 
             overlay.outlineComponent (c);
-            inspector.displayComponentInfo (c);
+            inspectorComponent.displayComponentInfo (c);
         }
 
         void outlineDistanceCallback (Component* c)
@@ -102,7 +115,7 @@ namespace melatonin
                 return;
 
             overlay.selectComponent (c);
-            inspector.selectComponent (c, collapseTree);
+            inspectorComponent.selectComponent (c, collapseTree);
         }
 
         void dragComponent (Component* c, const juce::MouseEvent& e)
@@ -111,7 +124,7 @@ namespace melatonin
                 return;
 
             overlay.dragSelectedComponent (e);
-            inspector.displayComponentInfo (c);
+            inspectorComponent.displayComponentInfo (c);
         }
 
         void startDragComponent (Component* c, const juce::MouseEvent& e)
@@ -129,20 +142,28 @@ namespace melatonin
             setVisible (false);
         }
 
-        void toggle (bool newStatus = true)
+        void toggle (bool newStatus)
         {
             enabled = newStatus;
             overlay.setVisible (newStatus);
-            inspector.toggle (newStatus);
+
+            // once the inspector is open, leave the minimal version open
+            setVisible (true);
+            inspectorComponent.toggle (newStatus);
 
             updateWindowSize();
+        }
+
+        void toggle()
+        {
+            toggle (!enabled);
         }
 
     private:
         // LNF has to be declared before components using it
         melatonin::InspectorLookAndFeel inspectorLookAndFeel;
 
-        melatonin::InspectorComponent inspector;
+        melatonin::InspectorComponent inspectorComponent;
         juce::Component& root;
         bool enabled;
         melatonin::Overlay overlay;
@@ -165,11 +186,11 @@ namespace melatonin
             mouseInspector.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, true); };
             mouseInspector.componentStartDraggingCallback = [this] (Component* c, const juce::MouseEvent& e) { this->startDragComponent (c, e); };
             mouseInspector.componentDraggedCallback = [this] (Component* c, const juce::MouseEvent& e) { this->dragComponent (c, e); };
-            mouseInspector.mouseExitCallback = [this]() { if (this->enabled) inspector.redisplaySelectedComponent(); };
+            mouseInspector.mouseExitCallback = [this]() { if (this->enabled) inspectorComponent.redisplaySelectedComponent(); };
 
-            inspector.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, true); };
-            inspector.outlineComponentCallback = [this] (Component* c) { this->outlineComponent (c); };
-            inspector.toggleCallback = [this] (bool enable) { this->toggle (enable); };
+            inspectorComponent.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, true); };
+            inspectorComponent.outlineComponentCallback = [this] (Component* c) { this->outlineComponent (c); };
+            inspectorComponent.toggleCallback = [this] (bool enable) { this->toggle (enable); };
         }
     };
 }

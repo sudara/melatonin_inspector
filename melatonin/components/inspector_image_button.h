@@ -35,7 +35,6 @@ namespace melatonin
 
         void mouseDown (const juce::MouseEvent& /*event*/) override
         {
-            DBG("clicked");
             enabled = !enabled;
             if (onClick != nullptr)
                 onClick();

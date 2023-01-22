@@ -146,7 +146,6 @@ namespace melatonin
                 if (getParentItem() != nullptr && getNumSubItems() == 0)
                 {
                     getParentItem()->removeSubItem (getIndexInParent());
-                    DBG ("For removal: " << getComponentName());
                 }
                 else
                     setOpen (true);

@@ -164,9 +164,6 @@ namespace melatonin
             g.setColour (colors::scrollbar);
             g.fillRoundedRectangle (thumbBounds.reduced (5).toFloat(), 2);
         }
-
-    private:
-        const float cornerRadius = 4.f;
     };
 
 }

@@ -69,7 +69,7 @@ namespace melatonin
             searchBox.onEscapeKey = [&] { searchBox.setText (""); searchBox.giveAwayKeyboardFocus(); };
 
             auto logoIcon = getIcon ("Logo");
-            logo.onClick = [this] { juce::URL ("https://github.com/sudara/melatonin_inspector/").launchInDefaultBrowser(); };
+            logo.onClick = []() { juce::URL ("https://github.com/sudara/melatonin_inspector/").launchInDefaultBrowser(); };
             searchBox.onTextChange = [this] {
                 auto searchText = searchBox.getText();
                 reconstructRoot();
@@ -178,7 +178,7 @@ namespace melatonin
 
             clearBtn.setBounds (b.removeFromRight (48));
             searchIcon.setBounds (b.removeFromLeft (48));
-            searchBox.setBounds (b.reduced(0, 2));
+            searchBox.setBounds (b.reduced (0, 2));
 
             emptySearchLabel.setBounds (area.reduced (4, 24));
 
@@ -254,11 +254,10 @@ namespace melatonin
             {
                 auto enabled = toggleButton.getToggleState();
                 toggle (enabled);
+
+                // this callback needs to stay here
+                // so it's never called from the inspector document (via cmd-i)
                 toggleCallback (enabled);
-
-                colorPicker.reset();
-
-                resized();
             }
         }
 
@@ -275,6 +274,14 @@ namespace melatonin
 
             if (!enabled)
                 model.deselectComponent();
+
+            // when opened from key command, select the root
+            if (enabled && selectedComponent == nullptr)
+                selectComponent (&root, false);
+
+            colorPicker.reset();
+
+            resized();
         }
 
         std::function<void (Component* c)> selectComponentCallback;
