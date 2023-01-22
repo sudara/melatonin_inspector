@@ -69,7 +69,10 @@ There's like...4 different ways to do this, visually and numerically...
 
 This requires that padding is stored as component properties (e.g. `paddingLeft`, `paddingTop`, etc), see my `PaddedComponent` [base class as an example](https://gist.github.com/sudara/eed6b8bb3b960b4c2156a0883913ea15).
 
-![AudioPluginHost - 2023-01-22 40](https://user-images.githubusercontent.com/472/213940575-0f9fa289-6b00-4899-b07e-9c9ae9e500c9.gif)
+<p align="center">
+<img src="https://user-images.githubusercontent.com/472/213940575-0f9fa289-6b00-4899-b07e-9c9ae9e500c9.gif" width="600"/>
+</p>
+
 
 ## Inspect component properties
 
