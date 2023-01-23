@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.20)
 
-project (Melatonin::Inspector VERSION 1.0.0 LANGUAGES CXX
+project (Melatonin::Inspector VERSION 1.2.0 LANGUAGES CXX
 		 DESCRIPTION "JUCE module for inspecting Components"
 		 HOMEPAGE_URL "https://github.com/sudara/melatonin_inspector")
 
