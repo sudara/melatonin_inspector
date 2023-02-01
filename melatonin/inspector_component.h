@@ -16,7 +16,11 @@
 
 namespace melatonin
 {
+#if MELATONIN_USE_COMPILED_BINARY_DATA
+#include "InspectorBinaryData.h"
+#else
 #include "BinaryData.h"
+#endif
     class InspectorComponent : public juce::Component, public juce::Button::Listener
     {
     public:
