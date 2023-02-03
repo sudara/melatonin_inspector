@@ -16,7 +16,6 @@
 
 namespace melatonin
 {
-#include "BinaryData.h"
     class InspectorComponent : public juce::Component, public juce::Button::Listener
     {
     public:
