@@ -26,5 +26,7 @@ if (MELATONIN_COMPILE_BINARY_DATA)
 	target_link_libraries(melatonin_inspector INTERFACE MelatoninInspectorAssets)
 	target_compile_definitions(melatonin_inspector INTERFACE MELATONIN_USE_COMPILED_BINARY_DATA=1)
 else()
+	target_include_directories(melatonin_inspector INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/LatestCompiledAssets)
 	target_compile_definitions(melatonin_inspector INTERFACE MELATONIN_USE_COMPILED_BINARY_DATA=0)
 endif()
+

@@ -12,7 +12,11 @@ dependencies:     juce_gui_basics
 END_JUCE_MODULE_DECLARATION
 */
 #pragma once
+#if MELATONIN_USE_COMPILED_BINARY_DATA
+#include "InspectorBinaryData.h"
+#else
 #include "LatestCompiledAssets/InspectorBinaryData.h"
+#endif
 #include "melatonin/lookandfeel.h"
 #include "melatonin_inspector/melatonin/components/overlay.h"
 #include "melatonin_inspector/melatonin/inspector_component.h"
