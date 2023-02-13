@@ -43,10 +43,12 @@ namespace melatonin
         {
             return juce::String ("Label: ") + label->getText().substring (0, 20);
         }
+#if JUCE_MODULE_AVAILABLE_juce_audio_processors 
         else if (auto editor = dynamic_cast<juce::AudioProcessorEditor*> (c))
         {
             return juce::String ("Editor: ") + editor->getAudioProcessor()->getName();
         }
+#endif
         else if (c && !c->getName().isEmpty())
         {
             return c->getName();
