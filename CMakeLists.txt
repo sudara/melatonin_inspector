@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.20)
 
-project (Melatonin::Inspector VERSION 1.2.0 LANGUAGES CXX
+project (MelatoninInspector VERSION 1.2.1 LANGUAGES CXX
 		 DESCRIPTION "JUCE module for inspecting Components"
 		 HOMEPAGE_URL "https://github.com/sudara/melatonin_inspector")
 
@@ -11,6 +11,7 @@ endif ()
 set (CMAKE_CXX_STANDARD 17)
 set (CMAKE_CXX_STANDARD_REQUIRED YES)
 
+# this makes the assumption the current directory is named melatonin_inspector
 juce_add_module ("${CMAKE_CURRENT_LIST_DIR}")
 
 add_library(Melatonin::Inspector ALIAS melatonin_inspector)
