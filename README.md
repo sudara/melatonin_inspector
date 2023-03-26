@@ -135,8 +135,6 @@ git submodule add -b main https://github.com/sudara/melatonin_inspector.git modu
 and then simply call `add_subdirectory` in your CMakeLists.txt:
 ```cmake
 add_subdirectory (modules/melatonin_inspector)
-
-target_link_libraries (yourTarget PRIVATE Melatonin::Inspector)
 ```
 
 To update melatonin_inspector down the road (gasp! maintained dependencies!?) you can:
@@ -146,16 +144,14 @@ git submodule update --remote --merge modules/melatonin_inspector
 
 ### Tell JUCE about the module
 
-When using CMake, inform JUCE about the module in your `CMakeLists.txt`. Important: Do this *before* your call to `juce_add_module`!!
-```
-juce_add_module("modules/melatonin_inspector")
-```
-
-In addition, you'll need to link the module to your plugin, for example:
+After your `juce_add_plugin` call, you'll need to link the module to your plugin, for example:
 
 ```
 target_link_libraries("YourProject" PRIVATE melatonin_inspector)
 ```
+
+Note: you don't have to call `juce_add_module`, that's handled by CMake automatically.
+
 
 If you use projucer, add the module manually.
  
