@@ -93,6 +93,7 @@ namespace melatonin
                 fontValue = componentFontValue (selectedComponent);
                 alphaValue = juce::String (selectedComponent->getAlpha());
 
+                focused = selectedComponent->hasKeyboardFocus (true);
                 accessibilityHandled = selectedComponent->isAccessible();
 
                 widthValue.addListener (this);
