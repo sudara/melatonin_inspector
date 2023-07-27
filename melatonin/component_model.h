@@ -41,7 +41,7 @@ namespace melatonin
         }
 
         juce::Value widthValue, heightValue, xValue, yValue;
-        bool opaqueValue{}, hasCachedImageValue{}, accessibilityHandled{}, focused{};
+        bool enabled, opaqueValue, hasCachedImageValue, accessibilityHandled, focused, interceptsMouse, childrenInterceptsMouse;
         juce::String lookAndFeel { "" }, fontValue, alphaValue;
 
         void displayComponent (juce::Component*)
@@ -87,6 +87,7 @@ namespace melatonin
                 xValue.setValue (boundsInParent.getX());
                 yValue.setValue (boundsInParent.getY());
 
+                enabled = selectedComponent->isEnabled();
                 opaqueValue = selectedComponent->isOpaque();
                 hasCachedImageValue = selectedComponent->getCachedComponentImage() != nullptr;
                 lookAndFeel = lnfString (selectedComponent);
@@ -101,6 +102,8 @@ namespace melatonin
 
                 xValue.addListener (this);
                 yValue.addListener (this);
+
+                selectedComponent->getInterceptsMouseClicks (interceptsMouse, childrenInterceptsMouse);
             }
 
             listenerList.call ([this] (Listener& vml) {

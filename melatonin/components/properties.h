@@ -63,6 +63,7 @@ namespace melatonin
         [[nodiscard]] juce::Array<juce::PropertyComponent*> createTextEditors() const
         {
             auto opaque = new juce::BooleanPropertyComponent (juce::Value (model.opaqueValue), "Opaque", "");
+            // we can't actually set these values from the front end, so disable them
             opaque->setEnabled (false);
 
             auto cachedImage = new juce::BooleanPropertyComponent (juce::Value (model.hasCachedImageValue), "CachedToImage", "");
@@ -74,6 +75,15 @@ namespace melatonin
             auto accessibilityHandled = new juce::BooleanPropertyComponent (juce::Value (model.accessibilityHandled), "Accessibility", "");
             accessibilityHandled->setEnabled (false);
 
+            auto interceptsMouse = new juce::BooleanPropertyComponent (juce::Value (model.interceptsMouse), "Intercepts Mouse", "");
+            interceptsMouse->setEnabled (false);
+
+            auto childrenInterceptsMouse = new juce::BooleanPropertyComponent (juce::Value (model.childrenInterceptsMouse), "Children Intercepts", "");
+            childrenInterceptsMouse->setEnabled (false);
+
+            auto enabled = new juce::BooleanPropertyComponent (juce::Value (model.enabled), "Enabled", "");
+            enabled->setEnabled (false);
+
             return {
                 new juce::TextPropertyComponent (juce::Value (model.lookAndFeel), "LookAndFeel", 200, false, false),
                 new juce::TextPropertyComponent (model.xValue, "X", 5, false),
@@ -82,10 +92,13 @@ namespace melatonin
                 new juce::TextPropertyComponent (model.heightValue, "Height", 5, false),
                 new juce::TextPropertyComponent (juce::Value (model.fontValue), "Font", 5, false, false),
                 new juce::TextPropertyComponent (juce::Value (model.alphaValue), "Alpha", 5, false, false),
-                accessibilityHandled,
-                focused,
+                enabled,
                 opaque,
-                cachedImage
+                focused,
+                accessibilityHandled,
+                cachedImage,
+                interceptsMouse,
+                childrenInterceptsMouse
             };
         }
 
