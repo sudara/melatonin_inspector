@@ -32,7 +32,7 @@ namespace melatonin
         int padding = 5;
         int propsSize = 0;
 
-        void componentChanged (ComponentModel&) override
+        void componentModelChanged (ComponentModel&) override
         {
             updateProperties();
         }

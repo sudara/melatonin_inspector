@@ -204,7 +204,7 @@ namespace melatonin
             }
         }
 
-        void componentChanged (ComponentModel&) override
+        void componentModelChanged (ComponentModel&) override
         {
             updateLabels();
             updatePaddingLabelsIfNeeded();

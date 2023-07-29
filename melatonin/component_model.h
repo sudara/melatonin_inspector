@@ -11,7 +11,7 @@ namespace melatonin
         {
         public:
             virtual ~Listener() = default;
-            virtual void componentChanged (ComponentModel& model) = 0;
+            virtual void componentModelChanged (ComponentModel& model) = 0;
         };
 
         ComponentModel() = default;
@@ -37,7 +37,7 @@ namespace melatonin
 
             selectedComponent = nullptr;
 
-            resetModel();
+            removeListeners();
         }
 
         juce::Value widthValue, heightValue, xValue, yValue;
@@ -71,11 +71,7 @@ namespace melatonin
 
         void updateModel()
         {
-            widthValue.removeListener (this);
-            heightValue.removeListener (this);
-
-            xValue.removeListener (this);
-            yValue.removeListener (this);
+            removeListeners();
 
             if (selectedComponent)
             {
@@ -106,40 +102,43 @@ namespace melatonin
                 selectedComponent->getInterceptsMouseClicks (interceptsMouse, childrenInterceptsMouse);
             }
 
-            listenerList.call ([this] (Listener& vml) {
-                vml.componentChanged (*this);
+            listenerList.call ([this] (Listener& listener) {
+                listener.componentModelChanged (*this);
             });
         }
 
-        void resetModel()
+        void removeListeners()
         {
             widthValue.removeListener (this);
             heightValue.removeListener (this);
-
             xValue.removeListener (this);
             yValue.removeListener (this);
 
-            listenerList.call ([this] (Listener& vml) {
-                vml.componentChanged (*this);
+            listenerList.call ([this] (Listener& listener) {
+                listener.componentModelChanged (*this);
             });
         }
 
+        // allows properties to be set from our properties
         void valueChanged (juce::Value& value) override
         {
             if (selectedComponent)
             {
-                if (value == widthValue || value == heightValue)
+                if (value.refersToSameSourceAs(widthValue) || value.refersToSameSourceAs(heightValue))
                 {
                     selectedComponent->setSize ((int) widthValue.getValue(), (int) heightValue.getValue());
                 }
-                if (value == xValue || value == yValue)
+                if (value.refersToSameSourceAs(xValue) || value.refersToSameSourceAs(yValue))
                 {
                     int leftVal = xValue.getValue();
                     int topVal = yValue.getValue();
 
-                    selectedComponent->setTopLeftPosition (leftVal, topVal);
-                    selectedComponent->setSize ((int) widthValue.getValue(),
-                        (int) heightValue.getValue());
+                    // in cases where components are animated or moved via AffineTransforms
+                    // we can get a feedback loop, as the left/top values are no longer
+                    // the actual position in the component
+                    // so first remove any transform present
+                    selectedComponent->setTransform (juce::AffineTransform());
+                    selectedComponent->setTopLeftPosition(leftVal, topVal);
                 }
             }
             else
