@@ -30,6 +30,13 @@ namespace melatonin
             dimensions.setJustificationType (juce::Justification::centred);
             dimensions.setColour (juce::Label::textColourId, colors::white);
         }
+
+        ~Overlay() override
+        {
+            if (selectedComponent)
+                deselectComponent();
+        }
+
         void paint (juce::Graphics& g) override
         {
             g.setColour (colors::blueLineColor);

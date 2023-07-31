@@ -30,6 +30,7 @@ namespace melatonin
         {
             // you told me to load an image that doesn't exist
             jassertfalse;
+            return {};
         }
     }
 

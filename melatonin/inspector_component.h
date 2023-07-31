@@ -108,6 +108,11 @@ namespace melatonin
             // we can either wait and launch async update or add empty label
         }
 
+        ~InspectorComponent() override
+        {
+            tree.setRootItem (nullptr);
+        }
+
         void paint (juce::Graphics& g) override
         {
             g.setGradientFill ({ colors::panelBackgroundLighter, 0, 0, colors::panelBackgroundDarker, (float) getWidth(), 0, false });

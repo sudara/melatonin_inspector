@@ -45,7 +45,7 @@ namespace melatonin
                 return false;
             }
         };
-        explicit Inspector (juce::Component& rootComponent, bool enabledAtStart = true)
+        explicit Inspector (juce::Component& rootComponent, bool enabledAtStart = true, juce::PropertiesFile* settings_ = nullptr)
             : juce::DocumentWindow ("Melatonin Inspector", colors::background, 7, true),
               inspectorComponent (rootComponent, enabledAtStart),
               root (rootComponent),
@@ -66,7 +66,7 @@ namespace melatonin
             inspectorComponent.setLookAndFeel (&inspectorLookAndFeel);
 
             setResizable (true, false);
-
+            setSettings (settings_);
             updateWindowSize();
 
             setUsingNativeTitleBar (true);
@@ -74,13 +74,69 @@ namespace melatonin
             setupCallbacks();
         }
 
+        void setSettings (juce::PropertiesFile* settings_)
+        {
+            if (settings_ != nullptr)
+            {
+                settings.set (settings_, false);
+            }
+            else
+            {
+                juce::PropertiesFile::Options opts;
+
+                opts.applicationName = "melatonin_inspector";
+                opts.filenameSuffix = ".xml";
+                opts.folderName = "sudara";
+                opts.osxLibrarySubFolder = "Application Support";
+                opts.commonToAllUsers = false;
+                opts.ignoreCaseOfKeyNames = false;
+                opts.doNotSave = false;
+                opts.millisecondsBeforeSaving = 1;
+                opts.storageFormat = juce::PropertiesFile::storeAsXML;
+
+                settings.set (new juce::PropertiesFile (opts), true);
+            }
+        }
+
+        void moved() override
+        {
+            DocumentWindow::resized();
+            saveWindowPosition();
+        }
+
+        void resized() override
+        {
+            DocumentWindow::resized();
+            saveWindowPosition();
+        }
+
+        void saveWindowPosition()
+        {
+            if (settings != nullptr)
+            {
+                settings->setValue ("melatoninInspectorPosition", getWindowStateAsString());
+                settings->saveIfNeeded();
+            }
+        }
+
         void updateWindowSize()
         {
-            auto width = enabled ? juce::jmax (700, getWidth()) : 380;
-            auto height = enabled ? juce::jmax (getHeight(), 800) : 400;
-            setResizeLimits (width, height, 1200, 1200);
-            setSize (width, height);
-            inspectorComponent.setSize (width, height);
+            auto position = settings->getValue ("melatoninInspectorPosition", "");
+
+            setResizeLimits (380, 400, 1200, 1200);
+
+            if (position.isNotEmpty())
+            {
+                restoreWindowStateFromString (position);
+                inspectorComponent.setSize (getWidth(), getHeight());
+            }
+            else
+            {
+                auto width = enabled ? juce::jmax (700, getWidth()) : 380;
+                auto height = enabled ? juce::jmax (getHeight(), 800) : 400;
+                setSize (width, height);
+                inspectorComponent.setSize (width, height);
+            }
         }
 
         ~Inspector() override
@@ -138,8 +194,15 @@ namespace melatonin
         // closing the window means turning off the inspector
         void closeButtonPressed() override
         {
-            toggle (false);
-            setVisible (false);
+            if (onClose)
+            {
+                onClose();
+            }
+            else
+            {
+                toggle (false);
+                setVisible (false);
+            }
         }
 
         void toggle (bool newStatus)
@@ -159,8 +222,12 @@ namespace melatonin
             toggle (!enabled);
         }
 
+        std::function<void ()> onClose;
+
     private:
         // LNF has to be declared before components using it
+        juce::OptionalScopedPointer<juce::PropertiesFile> settings;
+
         melatonin::InspectorLookAndFeel inspectorLookAndFeel;
 
         melatonin::InspectorComponent inspectorComponent;

@@ -22,6 +22,12 @@ namespace melatonin
             setInterceptsMouseClicks (false, true);
         }
 
+        ~ColorPicker() override
+        {
+            if (root != nullptr)
+                root->removeMouseListener (this);
+        }
+
         void paint (juce::Graphics& g) override
         {
             auto bounds = juce::Rectangle<float> ({ 32, 40, 18, 18 });
