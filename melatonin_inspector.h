@@ -52,6 +52,7 @@ namespace melatonin
               enabled (enabledAtStart)
         {
             root.addAndMakeVisible (overlay);
+            overlay.setBounds (root.getLocalBounds());
             root.addComponentListener (this);
 
             // allow us to open/close the inspector by key command
@@ -242,7 +243,7 @@ namespace melatonin
         {
             if (wasResized || wasMoved)
             {
-                overlay.setBounds (rootComponent.getBounds());
+                overlay.setBounds (rootComponent.getLocalBounds());
             }
         }
 
