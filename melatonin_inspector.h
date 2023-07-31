@@ -84,7 +84,7 @@ namespace melatonin
             {
                 juce::PropertiesFile::Options opts;
 
-                opts.applicationName = "refx";
+                opts.applicationName = "melatonin_inspector";
                 opts.filenameSuffix = ".xml";
                 opts.folderName = "sudara";
                 opts.osxLibrarySubFolder = "Application Support";
