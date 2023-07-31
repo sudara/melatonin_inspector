@@ -138,8 +138,15 @@ namespace melatonin
         // closing the window means turning off the inspector
         void closeButtonPressed() override
         {
-            toggle (false);
-            setVisible (false);
+            if (onClose)
+            {
+                onClose();
+            }
+            else
+            {
+                toggle (false);
+                setVisible (false);
+            }
         }
 
         void toggle (bool newStatus)
@@ -158,6 +165,8 @@ namespace melatonin
         {
             toggle (!enabled);
         }
+
+        std::function<void ()> onClose;
 
     private:
         // LNF has to be declared before components using it
