@@ -16,6 +16,11 @@ namespace melatonin
 
         ComponentModel() = default;
 
+        ~ComponentModel() override
+        {
+            selectComponent (nullptr);
+        }
+
         void selectComponent (juce::Component* component)
         {
             // add component listener to component and unsubscribe from previous component
