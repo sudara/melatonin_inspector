@@ -85,6 +85,7 @@ namespace melatonin
             enabled->setEnabled (false);
 
             return {
+                new juce::TextPropertyComponent (model.typeValue, "Class", 200, false, false),
                 new juce::TextPropertyComponent (model.lookAndFeelValue, "LookAndFeel", 200, false, false),
                 new juce::TextPropertyComponent (model.xValue, "X", 5, false),
                 new juce::TextPropertyComponent (model.yValue, "Y", 5, false),

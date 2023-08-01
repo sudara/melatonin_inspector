@@ -47,7 +47,7 @@ namespace melatonin
 
         juce::Value widthValue, heightValue, xValue, yValue;
         juce::Value enabledValue, opaqueValue, hasCachedImageValue, accessibilityHandledValue, focusedValue, interceptsMouseValue, childrenInterceptsMouseValue;
-        juce::Value lookAndFeelValue, fontValue, alphaValue;
+        juce::Value lookAndFeelValue, typeValue, fontValue, alphaValue;
 
         void displayComponent (juce::Component*)
         {
@@ -91,6 +91,7 @@ namespace melatonin
                 enabledValue = selectedComponent->isEnabled();
                 opaqueValue = selectedComponent->isOpaque();
                 hasCachedImageValue = selectedComponent->getCachedComponentImage() != nullptr;
+                typeValue = type (*selectedComponent);
                 lookAndFeelValue = lnfString (selectedComponent);
                 fontValue = componentFontValue (selectedComponent);
                 alphaValue = juce::String (selectedComponent->getAlpha());
