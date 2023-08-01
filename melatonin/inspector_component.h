@@ -166,15 +166,15 @@ namespace melatonin
             previewComponentPanel.setBounds (mainCol.removeFromTop (32));
             previewComponent.setBounds (mainCol.removeFromTop (previewComponent.isVisible() ? 100 : 0));
 
-            auto colorBounds = mainCol.removeFromTop (32 + 40);
+            auto colorBounds = mainCol.removeFromTop (32 + (colorPicker.isVisible() ? 40 : 0));
             if (colorPicker.isVisible())
             {
                 // we have an icon in the panel header, so we overlap it
                 colorPicker.setBounds (colorBounds);
             }
-            colorPickerPanel.setBounds (colorBounds.removeFromTop (36));
+            colorPickerPanel.setBounds (colorBounds.removeFromTop (32));
 
-            propertiesPanel.setBounds (mainCol.removeFromTop (36));
+            propertiesPanel.setBounds (mainCol.removeFromTop (32));
             properties.setBounds (mainCol.withTrimmedLeft (36));
 
             searchBoxBounds = area.removeFromTop (headerHeight);
@@ -190,9 +190,7 @@ namespace melatonin
             treeViewBounds = area;
 
             if (tree.isVisible())
-            {
                 tree.setBounds (area.withTrimmedLeft (18).withTrimmedTop (24));
-            }
             else
                 emptySelectionPrompt.setBounds (area.withTrimmedLeft (18).withTrimmedTop (24));
         }
