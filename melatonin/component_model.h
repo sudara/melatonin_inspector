@@ -46,8 +46,8 @@ namespace melatonin
         }
 
         juce::Value widthValue, heightValue, xValue, yValue;
-        bool enabled, opaqueValue, hasCachedImageValue, accessibilityHandled, focused, interceptsMouse, childrenInterceptsMouse;
-        juce::String lookAndFeel { "" }, fontValue, alphaValue;
+        juce::Value enabledValue, opaqueValue, hasCachedImageValue, accessibilityHandledValue, focusedValue, interceptsMouseValue, childrenInterceptsMouseValue;
+        juce::Value lookAndFeelValue, fontValue, alphaValue;
 
         void displayComponent (juce::Component*)
         {
@@ -88,15 +88,15 @@ namespace melatonin
                 xValue.setValue (boundsInParent.getX());
                 yValue.setValue (boundsInParent.getY());
 
-                enabled = selectedComponent->isEnabled();
+                enabledValue = selectedComponent->isEnabled();
                 opaqueValue = selectedComponent->isOpaque();
                 hasCachedImageValue = selectedComponent->getCachedComponentImage() != nullptr;
-                lookAndFeel = lnfString (selectedComponent);
+                lookAndFeelValue = lnfString (selectedComponent);
                 fontValue = componentFontValue (selectedComponent);
                 alphaValue = juce::String (selectedComponent->getAlpha());
 
-                focused = selectedComponent->hasKeyboardFocus (true);
-                accessibilityHandled = selectedComponent->isAccessible();
+                focusedValue = selectedComponent->hasKeyboardFocus (true);
+                accessibilityHandledValue = selectedComponent->isAccessible();
 
                 widthValue.addListener (this);
                 heightValue.addListener (this);
@@ -104,7 +104,13 @@ namespace melatonin
                 xValue.addListener (this);
                 yValue.addListener (this);
 
-                selectedComponent->getInterceptsMouseClicks (interceptsMouse, childrenInterceptsMouse);
+                {
+                    bool interceptsMouse = false;
+                    bool childrenInterceptsMouse = false;
+                    selectedComponent->getInterceptsMouseClicks (interceptsMouse, childrenInterceptsMouse);
+                    interceptsMouseValue = interceptsMouse;
+                    childrenInterceptsMouseValue = childrenInterceptsMouse;
+                }
             }
 
             listenerList.call ([this] (Listener& listener) {
