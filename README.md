@@ -179,9 +179,11 @@ melatonin::Inspector inspector { *this, false };
 
 ## 5. Set it visible
 
-`setVisible` will actually pop the window open.
+When the inspector as an editor member, you can use `cmd/ctrl i` to toggle whether the inspector is enabled.
 
-What I do is have a GUI toggle that pops open the window and enables the inspector:
+`setVisible` on the member will also pop the window open.
+
+What I do is have a GUI toggle that pops open the window and enables inspection:
 
 ```cpp
 // open the inspector window
