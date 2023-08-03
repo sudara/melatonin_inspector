@@ -50,6 +50,20 @@ namespace melatonin
         juce::Value visibleValue, wantsFocusValue, interceptsMouseValue, childrenInterceptsMouseValue;
         juce::Value lookAndFeelValue, typeValue, fontValue, alphaValue;
 
+        struct NamedProperty
+        {
+            NamedProperty() = default;
+            NamedProperty (const juce::String& n, const juce::var& v)
+                : name (n), value (v)
+            {
+            }
+
+            juce::String    name;
+            juce::Value     value;
+        };
+
+        std::vector<NamedProperty> namedProperties;
+
         void displayComponent (juce::Component*)
         {
             updateModel();
@@ -123,6 +137,15 @@ namespace melatonin
                     interceptsMouseValue = interceptsMouse;
                     childrenInterceptsMouseValue = childrenInterceptsMouse;
                 }
+
+                {
+                    auto& properties = selectedComponent->getProperties();
+                    for (auto nv : properties)
+                        namedProperties.push_back ({nv.name.toString(), nv.value});
+
+                    for (auto& nv : namedProperties)
+                        nv.value.addListener (this);
+                }
             }
 
             listenerList.call ([this] (Listener& listener) {
@@ -144,6 +167,10 @@ namespace melatonin
             accessibilityHandledValue.removeListener (this);
             interceptsMouseValue.removeListener (this);
             childrenInterceptsMouseValue.removeListener (this);
+
+            for (auto& np : namedProperties)
+                np.value.removeListener (this);
+            namedProperties.clear();
 
             listenerList.call ([this] (Listener& listener) {
                 listener.componentModelChanged (*this);
@@ -198,6 +225,18 @@ namespace melatonin
                 else if (value.refersToSameSourceAs (interceptsMouseValue) || value.refersToSameSourceAs (childrenInterceptsMouseValue))
                 {
                     selectedComponent->setInterceptsMouseClicks (interceptsMouseValue.getValue(), childrenInterceptsMouseValue.getValue());
+                }
+                else
+                {
+                    for (auto& nv : namedProperties)
+                    {
+                        if (value.refersToSameSourceAs (nv.value))
+                        {
+                            selectedComponent->getProperties().set (nv.name, nv.value.getValue());
+                            selectedComponent->repaint();
+                            break;
+                        }
+                    }
                 }
             }
             else

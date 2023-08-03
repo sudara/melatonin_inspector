@@ -1,5 +1,6 @@
 #pragma once
 #include "melatonin_inspector/melatonin/component_model.h"
+#include "colour_property_component.h"
 
 namespace melatonin
 {
@@ -66,7 +67,8 @@ namespace melatonin
             auto cachedImage = new juce::BooleanPropertyComponent (model.hasCachedImageValue, "CachedToImage", "");
             cachedImage->setEnabled (false);
 
-            return {
+            juce::Array<juce::PropertyComponent*> props =
+            {
                 new juce::TextPropertyComponent (model.typeValue, "Class", 200, false, false),
                 new juce::TextPropertyComponent (model.lookAndFeelValue, "LookAndFeel", 200, false, false),
                 new juce::TextPropertyComponent (model.xValue, "X", 5, false),
@@ -84,6 +86,18 @@ namespace melatonin
                 new juce::BooleanPropertyComponent (model.interceptsMouseValue, "Intercepts Mouse", ""),
                 new juce::BooleanPropertyComponent (model.childrenInterceptsMouseValue, "Children Intercepts", "")
             };
+
+            for (auto& nv : model.namedProperties)
+            {
+                if (nv.name.startsWith ("jcclr_"))
+                    props.add (new ColourPropertyComponent (nv.value, nv.name, true));
+                else if (nv.value.getValue().isBool())
+                    props.add (new juce::BooleanPropertyComponent (nv.value, nv.name, ""));
+                else
+                    props.add (new juce::TextPropertyComponent (nv.value, nv.name, 200, false));
+            }
+
+            return props;
         }
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Properties)

@@ -1,0 +1,123 @@
+#pragma once
+
+namespace melatonin
+{
+    //==============================================================================*/
+    class ColourPropertyComponent : public juce::PropertyComponent,
+                                    private juce::Value::Listener
+    {
+    public:
+        ColourPropertyComponent (const juce::Value& valueToControl, const juce::String& propertyName, bool showAlpha = false)
+            : juce::PropertyComponent (propertyName), value (valueToControl), container (value, showAlpha)
+        {
+            addAndMakeVisible (container);
+            value.addListener (this);
+        }
+
+        juce::Value& getValueObject()
+        {
+            return value;
+        }
+
+        void refresh() override
+        {
+            repaint();
+        }
+
+        void paint (juce::Graphics& g) override
+        {
+            PropertyComponent::paint (g);
+
+            g.setColour (findColour (juce::BooleanPropertyComponent::backgroundColourId));
+            g.fillRect (container.getBounds());
+
+            g.setColour (findColour (juce::BooleanPropertyComponent::outlineColourId));
+            g.drawRect (container.getBounds());
+        }
+
+    private:
+        void valueChanged (juce::Value&) override
+        {
+            refresh();
+        }
+
+        juce::Value value;
+        
+        class ColourSelectorEx : public juce::ColourSelector,
+                                 private juce::ChangeListener
+        {
+        public:
+            ColourSelectorEx (int flags = (showAlphaChannel | showColourAtTop | showSliders | showColourspace),
+                              int edgeGap = 4,
+                              int gapAroundColourSpaceComponent = 7)
+                : juce::ColourSelector ( flags, edgeGap, gapAroundColourSpaceComponent )
+            {
+                addChangeListener (this);
+            }
+
+            ~ColourSelectorEx() override
+            {
+                if (onDismiss)
+                    onDismiss();
+
+            }
+
+            void changeListenerCallback (juce::ChangeBroadcaster*) override
+            {
+                if (onChange)
+                    onChange();
+            }
+
+            std::function<void ()> onDismiss;
+            std::function<void ()> onChange;
+        };
+
+        class Container : public Component
+        {
+        public:
+            Container (juce::Value& value_, bool a)
+                : value (value_), alpha (a)
+            {
+            }
+
+            void paint (juce::Graphics& g) override
+            {
+                auto c = juce::Colour ((uint32_t) int (value.getValue()));
+
+                g.setColour (c);
+                g.fillRect (getLocalBounds().reduced (4));
+
+                g.setColour (c.contrasting());
+                g.drawText (c.toDisplayString (alpha), getLocalBounds(), juce::Justification::centred);
+            }
+
+            void mouseUp (const juce::MouseEvent& e) override
+            {
+                if (e.mouseWasClicked())
+                {
+                    auto colourSelector = std::make_unique<ColourSelectorEx> (juce::ColourSelector::showColourAtTop | juce::ColourSelector::showSliders | juce::ColourSelector::showColourspace);
+
+                    colourSelector->setSize (300, 280);
+                    colourSelector->setCurrentColour (juce::Colour::fromString (value.toString()), juce::dontSendNotification);
+                    colourSelector->onDismiss = [this, cs = colourSelector.get()]()
+                    {
+                        value = (int) cs->getCurrentColour().getARGB();
+                        repaint();
+                    };
+                    colourSelector->onChange = [this, cs = colourSelector.get()]()
+                    {
+                        value = (int) cs->getCurrentColour().getARGB();
+                        repaint();
+                    };
+
+                    juce::CallOutBox::launchAsynchronously (std::move (colourSelector), getScreenBounds(), nullptr);
+                }
+            }
+
+            juce::Value& value;
+            bool alpha;
+        };
+
+        Container container;
+    };
+}
