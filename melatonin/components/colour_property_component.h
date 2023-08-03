@@ -50,7 +50,7 @@ namespace melatonin
             ColourSelectorEx (int flags = (showAlphaChannel | showColourAtTop | showSliders | showColourspace),
                               int edgeGap = 4,
                               int gapAroundColourSpaceComponent = 7)
-                : juce::ColourSelector ( flags, edgeGap, gapAroundColourSpaceComponent )
+                : juce::ColourSelector (flags, edgeGap, gapAroundColourSpaceComponent)
             {
                 addChangeListener (this);
             }
@@ -59,7 +59,6 @@ namespace melatonin
             {
                 if (onDismiss)
                     onDismiss();
-
             }
 
             void changeListenerCallback (juce::ChangeBroadcaster*) override
@@ -95,7 +94,11 @@ namespace melatonin
             {
                 if (e.mouseWasClicked())
                 {
-                    auto colourSelector = std::make_unique<ColourSelectorEx> (juce::ColourSelector::showColourAtTop | juce::ColourSelector::showSliders | juce::ColourSelector::showColourspace);
+                    auto flags = juce::ColourSelector::showColourAtTop | juce::ColourSelector::showSliders | juce::ColourSelector::showColourspace;
+                    if (alpha)
+                        flags |= juce::ColourSelector::showAlphaChannel;
+
+                    auto colourSelector = std::make_unique<ColourSelectorEx> (flags);
 
                     colourSelector->setSize (300, 280);
                     colourSelector->setCurrentColour (juce::Colour::fromString (value.toString()), juce::dontSendNotification);
