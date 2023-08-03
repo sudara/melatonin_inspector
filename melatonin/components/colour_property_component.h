@@ -101,7 +101,7 @@ namespace melatonin
                     auto colourSelector = std::make_unique<ColourSelectorEx> (flags);
 
                     colourSelector->setSize (300, 280);
-                    colourSelector->setCurrentColour (juce::Colour::fromString (value.toString()), juce::dontSendNotification);
+                    colourSelector->setCurrentColour (juce::Colour ((uint32_t) int (value.getValue())), juce::dontSendNotification);
                     colourSelector->onDismiss = [this, cs = colourSelector.get()]()
                     {
                         value = (int) cs->getCurrentColour().getARGB();
