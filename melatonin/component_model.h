@@ -14,6 +14,12 @@ namespace melatonin
             virtual void componentModelChanged (ComponentModel& model) = 0;
         };
 
+        juce::Value widthValue, heightValue, xValue, yValue;
+        juce::Value enabledValue, opaqueValue, hasCachedImageValue, accessibilityHandledValue, focusedValue, interceptsMouseValue, childrenInterceptsMouseValue;
+        juce::Value lookAndFeelValue, typeValue, fontValue, alphaValue;
+        std::vector<juce::Value> customKeys;
+        std::vector<juce::Value> customValues;
+
         ComponentModel() = default;
 
         ~ComponentModel() override
@@ -45,10 +51,6 @@ namespace melatonin
             removeListeners();
         }
 
-        juce::Value widthValue, heightValue, xValue, yValue;
-        juce::Value enabledValue, opaqueValue, hasCachedImageValue, accessibilityHandledValue, focusedValue, interceptsMouseValue, childrenInterceptsMouseValue;
-        juce::Value lookAndFeelValue, typeValue, fontValue, alphaValue;
-
         void displayComponent (juce::Component*)
         {
             updateModel();
@@ -78,45 +80,66 @@ namespace melatonin
         {
             removeListeners();
 
-            if (selectedComponent)
+            if (!selectedComponent)
+                return;
+
+            auto boundsInParent = selectedComponent->getBoundsInParent();
+
+            widthValue.setValue (selectedComponent->getWidth());
+            heightValue.setValue (selectedComponent->getHeight());
+
+            xValue.setValue (boundsInParent.getX());
+            yValue.setValue (boundsInParent.getY());
+
+            enabledValue = selectedComponent->isEnabled();
+            opaqueValue = selectedComponent->isOpaque();
+            hasCachedImageValue = selectedComponent->getCachedComponentImage() != nullptr;
+            typeValue = type (*selectedComponent);
+            lookAndFeelValue = lnfString (selectedComponent);
+            fontValue = componentFontValue (selectedComponent);
+            alphaValue = juce::String (selectedComponent->getAlpha());
+
+            focusedValue = selectedComponent->hasKeyboardFocus (true);
+            accessibilityHandledValue = selectedComponent->isAccessible();
+
+            widthValue.addListener (this);
+            heightValue.addListener (this);
+
+            xValue.addListener (this);
+            yValue.addListener (this);
+
             {
-                auto boundsInParent = selectedComponent->getBoundsInParent();
-
-                widthValue.setValue (selectedComponent->getWidth());
-                heightValue.setValue (selectedComponent->getHeight());
-
-                xValue.setValue (boundsInParent.getX());
-                yValue.setValue (boundsInParent.getY());
-
-                enabledValue = selectedComponent->isEnabled();
-                opaqueValue = selectedComponent->isOpaque();
-                hasCachedImageValue = selectedComponent->getCachedComponentImage() != nullptr;
-                typeValue = type (*selectedComponent);
-                lookAndFeelValue = lnfString (selectedComponent);
-                fontValue = componentFontValue (selectedComponent);
-                alphaValue = juce::String (selectedComponent->getAlpha());
-
-                focusedValue = selectedComponent->hasKeyboardFocus (true);
-                accessibilityHandledValue = selectedComponent->isAccessible();
-
-                widthValue.addListener (this);
-                heightValue.addListener (this);
-
-                xValue.addListener (this);
-                yValue.addListener (this);
-
-                {
-                    bool interceptsMouse = false;
-                    bool childrenInterceptsMouse = false;
-                    selectedComponent->getInterceptsMouseClicks (interceptsMouse, childrenInterceptsMouse);
-                    interceptsMouseValue = interceptsMouse;
-                    childrenInterceptsMouseValue = childrenInterceptsMouse;
-                }
+                bool interceptsMouse = false;
+                bool childrenInterceptsMouse = false;
+                selectedComponent->getInterceptsMouseClicks (interceptsMouse, childrenInterceptsMouse);
+                interceptsMouseValue = interceptsMouse;
+                childrenInterceptsMouseValue = childrenInterceptsMouse;
             }
+
+            populateCustomValues (selectedComponent->getProperties());
 
             listenerList.call ([this] (Listener& listener) {
                 listener.componentModelChanged (*this);
             });
+        }
+
+        void populateCustomValues (const juce::NamedValueSet& props)
+        {
+            customKeys.clear();
+            customValues.clear();
+
+            // allow up to 10 custom properties for now
+            for (auto i = 1; i < 11; ++i)
+            {
+                // inspectorCustom1, inspectorCustom2, inspectorCustom3
+                auto propName = juce::String("inspectorPropertyName") + juce::String(i);
+                auto propValue = juce::String("inspectorPropertyValue") + juce::String(i);
+                if (props.contains(propName))
+                {
+                    customKeys.emplace_back (props[propName]);
+                    customValues.emplace_back (props[propValue]);
+                }
+            }
         }
 
         void removeListeners()
@@ -136,11 +159,11 @@ namespace melatonin
         {
             if (selectedComponent)
             {
-                if (value.refersToSameSourceAs(widthValue) || value.refersToSameSourceAs(heightValue))
+                if (value.refersToSameSourceAs (widthValue) || value.refersToSameSourceAs (heightValue))
                 {
                     selectedComponent->setSize ((int) widthValue.getValue(), (int) heightValue.getValue());
                 }
-                if (value.refersToSameSourceAs(xValue) || value.refersToSameSourceAs(yValue))
+                if (value.refersToSameSourceAs (xValue) || value.refersToSameSourceAs (yValue))
                 {
                     int leftVal = xValue.getValue();
                     int topVal = yValue.getValue();
@@ -150,7 +173,7 @@ namespace melatonin
                     // the actual position in the component
                     // so first remove any transform present
                     selectedComponent->setTransform (juce::AffineTransform());
-                    selectedComponent->setTopLeftPosition(leftVal, topVal);
+                    selectedComponent->setTopLeftPosition (leftVal, topVal);
                 }
             }
             else

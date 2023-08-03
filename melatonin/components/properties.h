@@ -84,7 +84,26 @@ namespace melatonin
             auto enabled = new juce::BooleanPropertyComponent (model.enabledValue, "Enabled", "");
             enabled->setEnabled (false);
 
-            return {
+            juce::Array<juce::PropertyComponent*> props;
+
+            for (size_t i = 0; i < model.customKeys.size(); ++i)
+            {
+                auto name = model.customKeys[i].getValue().toString();
+                auto value = model.customValues[i].getValue();
+                if (value.isBool())
+                {
+                    auto prop = new juce::BooleanPropertyComponent (model.customValues[i], name, "");
+                    prop->setEnabled (false);
+                    props.add (prop);
+                }
+                else
+                {
+                    auto prop = new juce::TextPropertyComponent (model.customValues[i], name, 200, false, false);
+                    props.add (prop);
+                }
+            }
+
+            props.addArray (juce::Array<juce::PropertyComponent*> {
                 new juce::TextPropertyComponent (model.typeValue, "Class", 200, false, false),
                 new juce::TextPropertyComponent (model.lookAndFeelValue, "LookAndFeel", 200, false, false),
                 new juce::TextPropertyComponent (model.xValue, "X", 5, false),
@@ -99,8 +118,8 @@ namespace melatonin
                 accessibilityHandled,
                 cachedImage,
                 interceptsMouse,
-                childrenInterceptsMouse
-            };
+                childrenInterceptsMouse });
+            return props;
         }
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Properties)

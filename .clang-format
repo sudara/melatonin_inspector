@@ -73,6 +73,7 @@ Standard: "c++20"
 TabWidth: 4
 UseTab: Never
 UseCRLF: false
+LineEnding: LF
 ---
 Language: ObjC
 BasedOnStyle: Chromium

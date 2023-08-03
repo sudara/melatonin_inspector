@@ -34,4 +34,20 @@ namespace melatonin
         }
     }
 
+    // see ComponentModel::populateCustomValues
+    static void setCustomInspectorProperty (juce::Component* component, juce::String key, juce::var value)
+    {
+        auto& props = component->getProperties();
+
+        // allow up to 10 custom properties for now
+        for (auto i = 1; i < 11; ++i)
+        {
+            if (!props.contains ("inspectorPropertyName" + juce::String (i)))
+            {
+                props.set ("inspectorPropertyName" + juce::String (i), key);
+                props.set ("inspectorPropertyValue" + juce::String (i), value);
+                return;
+            }
+        }
+    }
 }
