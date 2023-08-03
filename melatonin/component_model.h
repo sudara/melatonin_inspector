@@ -46,7 +46,7 @@ namespace melatonin
         }
 
         juce::Value widthValue, heightValue, xValue, yValue;
-        juce::Value enabledValue, opaqueValue, hasCachedImageValue, accessibilityHandledValue, focusedValue;
+        juce::Value enabledValue, opaqueValue, hasCachedImageValue, accessibilityHandledValue;
         juce::Value visibleValue, wantsFocusValue, interceptsMouseValue, childrenInterceptsMouseValue;
         juce::Value lookAndFeelValue, typeValue, fontValue, alphaValue;
 
@@ -99,7 +99,6 @@ namespace melatonin
                 fontValue = componentFontValue (selectedComponent);
                 alphaValue = juce::String (selectedComponent->getAlpha());
 
-                focusedValue = selectedComponent->hasKeyboardFocus (true);
                 accessibilityHandledValue = selectedComponent->isAccessible();
 
                 widthValue.addListener (this);

@@ -66,9 +66,6 @@ namespace melatonin
             auto cachedImage = new juce::BooleanPropertyComponent (model.hasCachedImageValue, "CachedToImage", "");
             cachedImage->setEnabled (false);
 
-            auto focused = new juce::BooleanPropertyComponent (model.focusedValue, "Focused", "");
-            focused->setEnabled (false);
-
             return {
                 new juce::TextPropertyComponent (model.typeValue, "Class", 200, false, false),
                 new juce::TextPropertyComponent (model.lookAndFeelValue, "LookAndFeel", 200, false, false),
@@ -82,7 +79,6 @@ namespace melatonin
                 new juce::BooleanPropertyComponent (model.enabledValue, "Enabled", ""),
                 new juce::BooleanPropertyComponent (model.opaqueValue, "Opaque", ""),
                 new juce::BooleanPropertyComponent (model.wantsFocusValue, "Wants Keyboard Focus", ""),
-                focused,
                 new juce::BooleanPropertyComponent (model.accessibilityHandledValue, "Accessibility", ""),
                 cachedImage,
                 new juce::BooleanPropertyComponent (model.interceptsMouseValue, "Intercepts Mouse", ""),
