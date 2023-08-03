@@ -93,11 +93,8 @@ namespace melatonin
             if (!component->isVisible())
                 g.setColour (colors::treeItemTextDisabled);
 
-            auto wantKeyboardFocus = component->getWantsKeyboardFocus();
-            juce::String keyboard = wantKeyboardFocus ? " (wantsKeyboard)" : "";
-
             g.setFont (juce::Font ("Verdana", 15, juce::Font::FontStyleFlags::plain));
-            g.drawText (componentString (component) + keyboard, textIndent, 0, w - textIndent, h, juce::Justification::left, true);
+            g.drawText (componentString (component), textIndent, 0, w - textIndent, h, juce::Justification::left, true);
         }
 
         // must override to set the disclosure triangle color

@@ -46,7 +46,8 @@ namespace melatonin
         }
 
         juce::Value widthValue, heightValue, xValue, yValue;
-        juce::Value enabledValue, opaqueValue, hasCachedImageValue, accessibilityHandledValue, focusedValue, interceptsMouseValue, childrenInterceptsMouseValue;
+        juce::Value enabledValue, opaqueValue, hasCachedImageValue, accessibilityHandledValue, focusedValue;
+        juce::Value visibleValue, wantsFocusValue, interceptsMouseValue, childrenInterceptsMouseValue;
         juce::Value lookAndFeelValue, typeValue, fontValue, alphaValue;
 
         void displayComponent (juce::Component*)
@@ -88,6 +89,8 @@ namespace melatonin
                 xValue.setValue (boundsInParent.getX());
                 yValue.setValue (boundsInParent.getY());
 
+                visibleValue = selectedComponent->isVisible ();
+                wantsFocusValue = selectedComponent->getWantsKeyboardFocus ();
                 enabledValue = selectedComponent->isEnabled();
                 opaqueValue = selectedComponent->isOpaque();
                 hasCachedImageValue = selectedComponent->getCachedComponentImage() != nullptr;
@@ -104,6 +107,15 @@ namespace melatonin
 
                 xValue.addListener (this);
                 yValue.addListener (this);
+
+                visibleValue.addListener (this);
+                wantsFocusValue.addListener (this);
+                enabledValue.addListener (this);
+                opaqueValue.addListener (this);
+                alphaValue.addListener (this);
+                accessibilityHandledValue.addListener (this);
+                interceptsMouseValue.addListener (this);
+                childrenInterceptsMouseValue.addListener (this);
 
                 {
                     bool interceptsMouse = false;
@@ -125,6 +137,14 @@ namespace melatonin
             heightValue.removeListener (this);
             xValue.removeListener (this);
             yValue.removeListener (this);
+            enabledValue.removeListener (this);
+            opaqueValue.removeListener (this);
+            alphaValue.removeListener (this);
+            visibleValue.removeListener (this);
+            wantsFocusValue.removeListener (this);
+            accessibilityHandledValue.removeListener (this);
+            interceptsMouseValue.removeListener (this);
+            childrenInterceptsMouseValue.removeListener (this);
 
             listenerList.call ([this] (Listener& listener) {
                 listener.componentModelChanged (*this);
@@ -136,11 +156,11 @@ namespace melatonin
         {
             if (selectedComponent)
             {
-                if (value.refersToSameSourceAs(widthValue) || value.refersToSameSourceAs(heightValue))
+                if (value.refersToSameSourceAs (widthValue) || value.refersToSameSourceAs (heightValue))
                 {
                     selectedComponent->setSize ((int) widthValue.getValue(), (int) heightValue.getValue());
                 }
-                if (value.refersToSameSourceAs(xValue) || value.refersToSameSourceAs(yValue))
+                else if (value.refersToSameSourceAs (xValue) || value.refersToSameSourceAs (yValue))
                 {
                     int leftVal = xValue.getValue();
                     int topVal = yValue.getValue();
@@ -150,11 +170,41 @@ namespace melatonin
                     // the actual position in the component
                     // so first remove any transform present
                     selectedComponent->setTransform (juce::AffineTransform());
-                    selectedComponent->setTopLeftPosition(leftVal, topVal);
+                    selectedComponent->setTopLeftPosition (leftVal, topVal);
+                }
+                else if (value.refersToSameSourceAs (visibleValue))
+                {
+                    selectedComponent->setVisible (visibleValue.getValue());
+                }
+                else if (value.refersToSameSourceAs (wantsFocusValue))
+                {
+                    selectedComponent->setWantsKeyboardFocus (wantsFocusValue.getValue());
+                }
+                else if (value.refersToSameSourceAs (enabledValue))
+                {
+                    selectedComponent->setEnabled (enabledValue.getValue());
+                }
+                else if (value.refersToSameSourceAs (alphaValue))
+                {
+                    selectedComponent->setAlpha ((float) alphaValue.getValue());
+                }
+                else if (value.refersToSameSourceAs (opaqueValue))
+                {
+                    selectedComponent->setOpaque (opaqueValue.getValue());
+                }
+                else if (value.refersToSameSourceAs (accessibilityHandledValue))
+                {
+                    selectedComponent->setAccessible (accessibilityHandledValue.getValue());
+                }
+                else if (value.refersToSameSourceAs (interceptsMouseValue) || value.refersToSameSourceAs (childrenInterceptsMouseValue))
+                {
+                    selectedComponent->setInterceptsMouseClicks (interceptsMouseValue.getValue(), childrenInterceptsMouseValue.getValue());
                 }
             }
             else
+            {
                 jassertfalse;
+            }
         }
 
         void componentMovedOrResized (juce::Component&, bool wasMoved, bool wasResized) override
