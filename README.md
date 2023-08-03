@@ -16,7 +16,7 @@ A big hearty thanks to [Dmytro Kiro](https://github.com/dikadk) for many of the 
 ✨<br/>
 ✨✨<br/>
 ✨✨✨<br/>
-<b><i>...and what are the features?...</i></b><br/>
+<b><i>...the features...</i></b><br/>
 ✨✨✨<br/>
 ✨✨<br/>
 ✨<br/>
@@ -165,34 +165,68 @@ Include the module header:
 
 ## 4. Add the inspector as a private member to your Editor
 
-Pass a reference to the root component of your UI (typically the  Editor itself, but you could also inspect another window, etc).
+The easiest way to get started is to pass a reference to the root component of your UI (typically the Editor itself like in this example, but you could also inspect anything that derives from `juce::Component`).
 
 ```cpp
 melatonin::Inspector inspector { *this };
 ```
 
-## 5. Set it visible
-
-If you'd like the inspector to be disabled by default, pass false as the second argument.
+If you prefer the inspector open in the disabled state by default, you can pass false as the second argument.
 
 ```cpp
 melatonin::Inspector inspector { *this, false };
 ```
 
-This is what I do. I have a GUI toggle to enable it when necessary which calls 
+## 5. Set it visible
+
+When the inspector as an editor member, you can use `cmd/ctrl i` to toggle whether the inspector is enabled.
+
+`setVisible` on the member will also pop the window open.
+
+What I do is have a GUI toggle that pops open the window and enables inspection:
 
 ```cpp
+// open the inspector window
 inspector.setVisible(true); 
+
+// enable the inspector
 inspector.toggle(true);
 ```
 
+## 6. Optional: Make it smarter 
+
+Setting up as above means that the inspector will always be constructed with your editor. Clicking close on the inspector's `DocumentWindow` will just hide it while disabling inspection. 
+
+If you wrap the inspector with `#if DEBUG` this might be fine for you.
+
+However, if you'd plan to ship a product that includes the inspector, or otherwise want to lazily construct it to be more efficient, use a `unique_ptr` instead and set the `onClose` callback to reset the pointer.
+
+```c++
+// PluginEditor.h
+std::unique_ptr<melatonin::Inspector> inspector;
+
+// in some button on-click logic
+// replace `this` with a reference to your editor if necessary
+if (!inspector)
+{
+    inspector = std::make_unique<melatonin::Inspector> (*this);
+    inspector->onClose = [this]() { inspector.reset(); };
+}
+
+inspector->setVisible (true);
+```
+Thanks to @FigBug for this feature.
 
 ## FAQ
 
-### Can I save my resizes or edits?
+### Can I save my component resizes or edits?
 
-Nope! For that, one would need a component system relying on data for placement and size vs. code. See [Daniel's Foley GUI Magic](https://github.com/ffAudio/foleys_gui_magic).
+Nope! 
+
+For that, one would need a component system relying on data for placement and size vs. code. See [Daniel's Foley GUI Magic](https://github.com/ffAudio/foleys_gui_magic).
 
 ### How is the component hierarchy created?
 
-It traverses components from the root, building a `TreeView`. In the special case of `TabbedComponent`, each tab is added as a child. 
+It traverses components from the root, building a `TreeView`. 
+
+In the special case of `TabbedComponent`, each tab is added as a child. 

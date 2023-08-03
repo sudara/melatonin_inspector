@@ -66,13 +66,21 @@ namespace melatonin
             overlay.setLookAndFeel (&inspectorLookAndFeel);
             inspectorComponent.setLookAndFeel (&inspectorLookAndFeel);
 
-            setResizable (true, false);
             setSettings (settings_);
-            updateWindowSize();
+
+            restoreBoundsIfNeeded();
 
             setUsingNativeTitleBar (true);
             setContentNonOwned (&inspectorComponent, true);
             setupCallbacks();
+        }
+
+        ~Inspector() override
+        {
+            root.removeKeyListener (&keyListener);
+            this->removeKeyListener (&keyListener);
+            root.removeComponentListener (this);
+            setLookAndFeel (nullptr);
         }
 
         void setSettings (juce::PropertiesFile* settings_)
@@ -102,50 +110,63 @@ namespace melatonin
         void moved() override
         {
             DocumentWindow::resized();
-            saveWindowPosition();
+            saveBounds();
         }
 
         void resized() override
         {
             DocumentWindow::resized();
-            saveWindowPosition();
+            saveBounds();
         }
 
-        void saveWindowPosition()
+        void saveBounds()
         {
-            if (settings != nullptr)
+            if (settings == nullptr)
+                return;
+
+            settings->setValue ("x", getX());
+            settings->setValue ("y", getY());
+
+            // only overwrite width/height when enabled.
+            // the disabled dimensions are fixed,
+            // so this lets us "open back up" when re-enabling
+            if (enabled)
             {
-                settings->setValue ("melatoninInspectorPosition", getWindowStateAsString());
-                settings->saveIfNeeded();
+                settings->setValue ("enabledWidth", getWidth());
+                settings->setValue ("enabledHeight", getHeight());
             }
+
+            settings->saveIfNeeded();
         }
 
-        void updateWindowSize()
+        void restoreBoundsIfNeeded()
         {
-            auto position = settings->getValue ("melatoninInspectorPosition", "");
+            // disabled is a fixed 380x400
+            // enabled must be at least 700x800
+            auto minWidth = enabled ? 700 : 380;
+            auto minHeight = enabled ? 800 : 400;
 
-            setResizeLimits (380, 400, 1200, 1200);
+            auto x = settings->getIntValue ("x", 0);
+            auto y = settings->getIntValue ("y", 0);
 
-            if (position.isNotEmpty())
+
+            if (enabled)
             {
-                restoreWindowStateFromString (position);
-                inspectorComponent.setSize (getWidth(), getHeight());
+                auto width = settings->getIntValue ("enabledWidth", minWidth);
+                auto height = settings->getIntValue ("enabledHeight", minHeight);
+                setResizable (true, false);
+                setResizeLimits (minWidth, minHeight, 1200, 1200);
+                setBounds (x, y, width, height);
             }
             else
             {
-                auto width = enabled ? juce::jmax (700, getWidth()) : 380;
-                auto height = enabled ? juce::jmax (getHeight(), 800) : 400;
-                setSize (width, height);
-                inspectorComponent.setSize (width, height);
+                // decrease the resize limits first for the setSize call to work!
+                setResizeLimits (minWidth, minHeight, minWidth, minHeight);
+                setBounds (x, y, minWidth, minHeight);
+                setResizable (false, false);
             }
-        }
 
-        ~Inspector() override
-        {
-            root.removeKeyListener (&keyListener);
-            this->removeKeyListener (&keyListener);
-            root.removeComponentListener (this);
-            setLookAndFeel (nullptr);
+            inspectorComponent.setBounds (getLocalBounds());
         }
 
         void outlineComponent (Component* c)
@@ -197,10 +218,12 @@ namespace melatonin
         {
             if (onClose)
             {
+                // you can provide a callback to destroy the inspector
                 onClose();
             }
             else
             {
+                // otherwise we'll just hide it
                 toggle (false);
                 setVisible (false);
             }
@@ -208,14 +231,14 @@ namespace melatonin
 
         void toggle (bool newStatus)
         {
+            // the DocumentWindow always stays open, even when disabled
+            setVisible (true);
+
             enabled = newStatus;
             overlay.setVisible (newStatus);
-
-            // once the inspector is open, leave the minimal version open
-            setVisible (true);
             inspectorComponent.toggle (newStatus);
 
-            updateWindowSize();
+            restoreBoundsIfNeeded();
         }
 
         void toggle()
@@ -223,7 +246,7 @@ namespace melatonin
             toggle (!enabled);
         }
 
-        std::function<void ()> onClose;
+        std::function<void()> onClose;
 
     private:
         // LNF has to be declared before components using it
