@@ -55,7 +55,7 @@ namespace melatonin
             toggleButton.addListener (this);
 
             tree.setIndentSize (12);
-            tree.getViewport()->setViewPosition (18, 24);
+            tree.getViewport()->setViewPosition (18, 20);
 
             searchBox.setHelpText ("search");
             searchBox.setFont (juce::Font ("Verdana", 17, juce::Font::FontStyleFlags::plain));
@@ -164,7 +164,8 @@ namespace melatonin
             boxModel.setBounds (mainCol.removeFromTop (300));
 
             previewComponentPanel.setBounds (mainCol.removeFromTop (32));
-            previewComponent.setBounds (mainCol.removeFromTop (previewComponent.isVisible() ? 100 : 0));
+            auto previewExpandedBounds = previewComponent.hasPerformanceTiming() ? 150 : 100;
+            previewComponent.setBounds (mainCol.removeFromTop ( previewComponent.isVisible() ? previewExpandedBounds : 0));
 
             auto colorBounds = mainCol.removeFromTop (32 + (colorPicker.isVisible() ? 40 : 0));
             if (colorPicker.isVisible())
@@ -190,9 +191,9 @@ namespace melatonin
             treeViewBounds = area;
 
             if (tree.isVisible())
-                tree.setBounds (area.withTrimmedLeft (18).withTrimmedTop (24));
+                tree.setBounds (area.withTrimmedLeft (18).withTrimmedTop (18));
             else
-                emptySelectionPrompt.setBounds (area.withTrimmedLeft (18).withTrimmedTop (24));
+                emptySelectionPrompt.setBounds (area.withTrimmedLeft (18).withTrimmedTop (18));
         }
 
         void displayComponentInfo (Component* component)

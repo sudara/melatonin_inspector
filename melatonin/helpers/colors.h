@@ -26,6 +26,9 @@ namespace melatonin
 
         const juce::Colour propertyName = mainTextColor;
         const juce::Colour propertyValue = juce::Colour::fromRGB (206, 235, 255);
+        const juce::Colour propertyValueWarn = juce::Colour::fromRGB (255, 117, 117);
+        const juce::Colour propertyValueError = juce::Colour::fromRGB (255, 51, 51);
+        const juce::Colour propertyValueDisabled = treeItemTextDisabled;
 
         const juce::Colour checkboxCheck = juce::Colour::fromRGB (41, 11, 79);
 

@@ -8,21 +8,19 @@ namespace melatonin
     class TreeComponent : public juce::Component, private ComponentModel::Listener
     {
     public:
-
-        TreeComponent(ComponentModel& _model): model(_model){
-            model.addListener(*this);
+        explicit TreeComponent (ComponentModel& _model) : model (_model)
+        {
+            model.addListener (*this);
         }
 
-        ~TreeComponent(){
-            model.removeListener(*this);
+        ~TreeComponent() override
+        {
+            model.removeListener (*this);
         }
 
         void resized() override
         {
             auto area = getLocalBounds();
-
-            //using btn toggle state (better to switch to using class variable
-            //or inspectors prop)
 
             if (tree.isVisible())
             {
@@ -31,7 +29,9 @@ namespace melatonin
                 searchRow.removeFromRight (8);
                 searchBox.setBounds (searchRow);
 
-                tree.setBounds (area); // padding in these default components are a mess
+                // padding in stock components are a mess
+                tree.setBounds (area);
+
                 emptySearchLabel.setBounds (area.reduced (4));
             }
             else
@@ -47,21 +47,5 @@ namespace melatonin
         juce::TextEditor searchBox { "Search box" };
         juce::TextButton clearBtn { "clear" };
         std::unique_ptr<ComponentTreeViewItem> rootItem;
-
-        void componentChanged (ComponentModel& componentModel) override
-        {
-            if(auto component = componentModel.getSelectedComponent()){
-                /*if (collapseTreeBeforeSelection)
-                {
-                    getRoot()->recursivelyCloseSubItems();
-                }
-                getRoot()->openTreeAndSelect (component);
-
-                tree.scrollToKeepItemVisible (tree.getSelectedItem (0));*/
-            }
-            else {
-                //tree.setRootItem (getRoot());
-            }
-        }
     };
 }
