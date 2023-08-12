@@ -15,6 +15,7 @@ END_JUCE_MODULE_DECLARATION
 #include "LatestCompiledAssets/InspectorBinaryData.h"
 #include "melatonin/lookandfeel.h"
 #include "melatonin_inspector/melatonin/components/overlay.h"
+#include "melatonin_inspector/melatonin/helpers/inspector_settings.h"
 #include "melatonin_inspector/melatonin/inspector_component.h"
 
 namespace melatonin
@@ -45,12 +46,13 @@ namespace melatonin
                 return false;
             }
         };
-        explicit Inspector (juce::Component& rootComponent, bool enabledAtStart = true, juce::PropertiesFile* settings_ = nullptr)
+        explicit Inspector (juce::Component& rootComponent, bool enabledAtStart = true)
             : juce::DocumentWindow ("Melatonin Inspector", colors::background, 7, true),
               inspectorComponent (rootComponent, enabledAtStart),
               root (rootComponent),
               enabled (enabledAtStart)
         {
+            setMouseClickGrabsKeyboardFocus (false);
             root.addAndMakeVisible (overlay);
             overlay.setBounds (root.getLocalBounds());
             root.addComponentListener (this);
@@ -61,14 +63,13 @@ namespace melatonin
             root.setWantsKeyboardFocus (true);
             this->addKeyListener (&keyListener);
 
-            // don't use the app's lnf for overlay or inspector
+            // needs to come before the LNF
+            restoreBoundsIfNeeded();
+
+            // use our own lnf for both overlay and inspector
             setLookAndFeel (&inspectorLookAndFeel);
             overlay.setLookAndFeel (&inspectorLookAndFeel);
             inspectorComponent.setLookAndFeel (&inspectorLookAndFeel);
-
-            setSettings (settings_);
-
-            restoreBoundsIfNeeded();
 
             setUsingNativeTitleBar (true);
             setContentNonOwned (&inspectorComponent, true);
@@ -80,31 +81,10 @@ namespace melatonin
             root.removeKeyListener (&keyListener);
             this->removeKeyListener (&keyListener);
             root.removeComponentListener (this);
+
+            // needed, otherwise removing look and feel will save bounds
+            settings->props.reset();
             setLookAndFeel (nullptr);
-        }
-
-        void setSettings (juce::PropertiesFile* settings_)
-        {
-            if (settings_ != nullptr)
-            {
-                settings.set (settings_, false);
-            }
-            else
-            {
-                juce::PropertiesFile::Options opts;
-
-                opts.applicationName = "melatonin_inspector";
-                opts.filenameSuffix = ".xml";
-                opts.folderName = "sudara";
-                opts.osxLibrarySubFolder = "Application Support";
-                opts.commonToAllUsers = false;
-                opts.ignoreCaseOfKeyNames = false;
-                opts.doNotSave = false;
-                opts.millisecondsBeforeSaving = 1;
-                opts.storageFormat = juce::PropertiesFile::storeAsXML;
-
-                settings.set (new juce::PropertiesFile (opts), true);
-            }
         }
 
         void moved() override
@@ -119,21 +99,23 @@ namespace melatonin
             saveBounds();
         }
 
+        // this is a bit brittle and called a bit too frequently
+        // for example 4-5 times on construction
         void saveBounds()
         {
-            if (settings == nullptr)
+            if (settings->props == nullptr)
                 return;
 
-            settings->setValue ("x", getX());
-            settings->setValue ("y", getY());
+            settings->props->setValue ("x", getX());
+            settings->props->setValue ("y", getY());
 
             // only overwrite width/height when enabled.
             // the disabled dimensions are fixed,
             // so this lets us "open back up" when re-enabling
             if (enabled)
             {
-                settings->setValue ("enabledWidth", getWidth());
-                settings->setValue ("enabledHeight", getHeight());
+                settings->props->setValue ("enabledWidth", getWidth());
+                settings->props->setValue ("enabledHeight", getHeight());
             }
 
             settings->saveIfNeeded();
@@ -146,14 +128,13 @@ namespace melatonin
             auto minWidth = enabled ? 700 : 380;
             auto minHeight = enabled ? 800 : 400;
 
-            auto x = settings->getIntValue ("x", 0);
-            auto y = settings->getIntValue ("y", 0);
-
+            auto x = settings->props->getIntValue ("x", 0);
+            auto y = settings->props->getIntValue ("y", 0);
 
             if (enabled)
             {
-                auto width = settings->getIntValue ("enabledWidth", minWidth);
-                auto height = settings->getIntValue ("enabledHeight", minHeight);
+                auto width = settings->props->getIntValue ("enabledWidth", minWidth);
+                auto height = settings->props->getIntValue ("enabledHeight", minHeight);
                 setResizable (true, false);
                 setResizeLimits (minWidth, minHeight, 1200, 1200);
                 setBounds (x, y, width, height);
@@ -249,11 +230,8 @@ namespace melatonin
         std::function<void()> onClose;
 
     private:
-        // LNF has to be declared before components using it
-        juce::OptionalScopedPointer<juce::PropertiesFile> settings;
-
+        juce::SharedResourcePointer<InspectorSettings> settings;
         melatonin::InspectorLookAndFeel inspectorLookAndFeel;
-
         melatonin::InspectorComponent inspectorComponent;
         juce::Component& root;
         bool enabled;

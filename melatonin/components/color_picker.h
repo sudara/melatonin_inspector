@@ -1,47 +1,46 @@
 #pragma once
 
+#include "colour_property_component.h"
 #include "juce_gui_extra/juce_gui_extra.h"
 #include "melatonin_inspector/melatonin/components/overlay.h"
+#include "preview.h"
 
 namespace melatonin
 {
 
-    class ColorPicker : public juce::Component
+    class ColorPicker : public juce::Component, private ComponentModel::Listener
     {
     public:
-        ColorPicker()
+        explicit ColorPicker (ComponentModel& _model, Preview& p) : model (_model), preview (p)
         {
             addAndMakeVisible (colorValField);
             addAndMakeVisible (colorPickerButton);
+            addAndMakeVisible (&panel);
 
-            colorValField.setJustificationType(juce::Justification::centredLeft);
-            colorValField.setColour(juce::TextEditor::ColourIds::textColourId, colors::propertyValue);
+            colorValField.setJustificationType (juce::Justification::centred);
+            colorValField.setFont (juce::Font (13.0f, juce::Font::bold));
+            colorValField.setColour (juce::TextEditor::ColourIds::textColourId, colors::customPropertyName);
+
             selectedColor = juce::Colours::transparentBlack;
 
             // we overlap the header, so let people click that as usual
             setInterceptsMouseClicks (false, true);
+
+            model.addListener (*this);
+
+            // hide the text when the picker isn't active
+            colorPickerButton.onClick = [this]() { if(!colorPickerButton.isEnabled()) colorValField.setVisible(false); };
         }
 
         ~ColorPicker() override
         {
+            model.removeListener (*this);
             if (root != nullptr)
                 root->removeMouseListener (this);
         }
 
         void paint (juce::Graphics& g) override
         {
-            auto bounds = juce::Rectangle<float> ({ 32, 40, 18, 18 });
-
-            if (selectedColor.isTransparent())
-            {
-                g.setColour (colors::titleTextColor);
-                g.drawRoundedRectangle (bounds, 2.f, 1.f);
-            }
-            else
-            {
-                g.setColour (selectedColor);
-                g.fillRoundedRectangle (bounds, 2.f);
-            }
             g.setColour (colors::panelLineSeparatorColor);
             g.drawHorizontalLine (getHeight() - 1, 0, (float) getWidth()); // separator
         }
@@ -50,12 +49,19 @@ namespace melatonin
         {
             colorPickerButton.setBounds (getLocalBounds()
                                              .removeFromRight (32)
-                                             .removeFromTop (32)
+                                             .removeFromTop (29)
                                              .withSizeKeepingCentre (32, 32));
 
             auto area = getLocalBounds();
-            area.removeFromTop (29); // overlap with our header + bit of padding
-            colorValField.setBounds (area.withTrimmedLeft (64));
+
+            // overlaps with the panel + bit of padding
+            colorValField.setBounds (area.removeFromTop (32).withTrimmedRight (36));
+
+            if (!model.colors.empty())
+            {
+                area.removeFromTop (5);
+                panel.setBounds (area);
+            }
         }
 
         void mouseEnter (const juce::MouseEvent& event) override
@@ -63,16 +69,13 @@ namespace melatonin
             if (root == nullptr)
                 return;
 
+            event.eventComponent->setMouseCursor (colorPickerButton.enabled ? eyedropperCursor : juce::MouseCursor::NormalCursor);
+
             auto rootPos = event.getEventRelativeTo (root).getPosition();
 
             image = std::make_unique<juce::Image> (root->createComponentSnapshot ({ root->getWidth(), root->getHeight() }, false));
-            if (colorPickerButton.enabled)
-            {
-                selectedColor = image->getPixelAt (rootPos.x, rootPos.y);
-                updateLabels();
-            }
 
-            root->setMouseCursor (colorPickerButton.enabled ? juce::MouseCursor::CrosshairCursor : juce::MouseCursor::NormalCursor);
+            updatePicker (rootPos);
         }
 
         void mouseMove (const juce::MouseEvent& event) override
@@ -81,16 +84,24 @@ namespace melatonin
                 return;
             auto rootPos = event.getEventRelativeTo (root).getPosition();
 
-            if (colorPickerButton.enabled)
-            {
-                selectedColor = image->getPixelAt (rootPos.x, rootPos.y);
-                updateLabels();
-            }
+            updatePicker (rootPos);
         }
 
-        void mouseExit (const juce::MouseEvent&) override
+        void mouseExit (const juce::MouseEvent& event) override
         {
-            root->setMouseCursor (colorPickerButton.enabled ? juce::MouseCursor::CrosshairCursor : juce::MouseCursor::NormalCursor);
+            event.eventComponent->setMouseCursor (colorPickerButton.enabled ? eyedropperCursor : juce::MouseCursor::NormalCursor);
+        }
+
+        void mouseDown (const juce::MouseEvent& /*event*/) override
+        {
+            if (root == nullptr || image == nullptr)
+                return;
+
+            if (selectedColor != juce::Colours::transparentBlack)
+            {
+                model.pickedColor.setValue ((int) selectedColor.getARGB());
+                getParentComponent()->repaint(); // might need to resize the panel
+            }
         }
 
         void setRootComponent (Component* rootComponent)
@@ -116,20 +127,68 @@ namespace melatonin
 
         void reset()
         {
+            panel.clear();
             updateLabels();
             resized();
         }
 
+        void componentModelChanged (ComponentModel&) override
+        {
+            panel.clear();
+            juce::Array<juce::PropertyComponent*> props;
+
+            for (auto& nv : model.colors)
+            {
+                auto* prop = new ColourPropertyComponent (nv.value, colors::enumNameIfPresent (nv.name), true);
+                if (nv.name == "Last Picked")
+                {
+                    prop->setColour (juce::PropertyComponent::labelTextColourId, colors::customPropertyName);
+                }
+                prop->setLookAndFeel (&getLookAndFeel());
+                props.add (prop);
+            }
+            panel.addProperties (props, 5);
+            resized();
+        }
+
     private:
+        ComponentModel& model;
+        Preview& preview;
+
+        juce::PropertyPanel panel { "Properties" };
         InspectorImageButton colorPickerButton { "Eyedropper", { 0, 6 }, true };
-        juce::Label colorValField {
-            "Color value",
-        };
+        juce::Label colorValField { "Color value" };
+
+        juce::Image eyedropperCursorImage = getIcon ("Eyedropperon").rescaled (16, 16);
+        juce::MouseCursor eyedropperCursor { eyedropperCursorImage, 0, 15 };
 
         std::unique_ptr<juce::Image> image;
         juce::Colour selectedColor { juce::Colours::transparentBlack };
 
         juce::Component* root {};
+
+        void updatePicker (juce::Point<int>& point)
+        {
+            if (!colorPickerButton.enabled)
+                return;
+
+            selectedColor = image->getPixelAt (point.x, point.y);
+
+            // we are creating a 20x zoom
+            // at minimum width of 380, that's 19 pixels total
+            // we want an odd number of zoomed in width/height pixels so our selected pixel is always centered
+            int maxNumOfFullHorizontalPixels = int (getWidth() / 20);
+            int extraBleed = 2; // 1 extra pixel for bleed on each side
+            if (maxNumOfFullHorizontalPixels % 2 == 0)
+            {
+                maxNumOfFullHorizontalPixels -= 1;
+            }
+            int xRadius = (maxNumOfFullHorizontalPixels + extraBleed - 1) / 2;
+            preview.setVisible (true);
+            preview.setZoomedImage (image->getClippedImage ({ point.x - xRadius, point.y - 2, maxNumOfFullHorizontalPixels + extraBleed, 5 }));
+            updateLabels();
+            colorValField.setVisible (true);
+        }
 
         void updateLabels()
         {

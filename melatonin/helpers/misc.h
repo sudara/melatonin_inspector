@@ -17,7 +17,7 @@ namespace melatonin
         return juce::String (v);
     }
 
-    static inline juce::Image getIcon (juce::String iconName)
+    static inline juce::Image getIcon (const juce::String& iconName)
     {
         int size = 0;
         auto filename = iconName.replace (" ", "") + "_png";

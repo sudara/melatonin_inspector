@@ -1,5 +1,7 @@
 #pragma once
 
+#include <utility>
+
 #include "juce_gui_basics/juce_gui_basics.h"
 
 namespace melatonin
@@ -49,20 +51,22 @@ namespace melatonin
         juce::Value enabledValue, opaqueValue, hasCachedImageValue, accessibilityHandledValue;
         juce::Value visibleValue, wantsFocusValue, interceptsMouseValue, childrenInterceptsMouseValue;
         juce::Value lookAndFeelValue, typeValue, fontValue, alphaValue;
+        juce::Value pickedColor;
 
         struct NamedProperty
         {
             NamedProperty() = default;
-            NamedProperty (const juce::String& n, const juce::var& v)
-                : name (n), value (v)
+            NamedProperty (juce::String n, const juce::var& v)
+                : name (std::move (n)), value (v)
             {
             }
 
-            juce::String    name;
-            juce::Value     value;
+            juce::String name;
+            juce::Value value;
         };
 
         std::vector<NamedProperty> namedProperties;
+        std::vector<NamedProperty> colors;
 
         void displayComponent (juce::Component*)
         {
@@ -95,32 +99,22 @@ namespace melatonin
 
             if (selectedComponent)
             {
-                auto boundsInParent = selectedComponent->getBoundsInParent();
-
-                widthValue.setValue (selectedComponent->getWidth());
-                heightValue.setValue (selectedComponent->getHeight());
-
-                xValue.setValue (boundsInParent.getX());
-                yValue.setValue (boundsInParent.getY());
-
-                visibleValue = selectedComponent->isVisible ();
-                wantsFocusValue = selectedComponent->getWantsKeyboardFocus ();
+                lookAndFeelValue = lnfString (selectedComponent);
+                visibleValue = selectedComponent->isVisible();
                 enabledValue = selectedComponent->isEnabled();
+                alphaValue = juce::String (selectedComponent->getAlpha());
                 opaqueValue = selectedComponent->isOpaque();
+                wantsFocusValue = selectedComponent->getWantsKeyboardFocus();
+                fontValue = componentFontValue (selectedComponent);
                 hasCachedImageValue = selectedComponent->getCachedComponentImage() != nullptr;
                 typeValue = type (*selectedComponent);
-                lookAndFeelValue = lnfString (selectedComponent);
-                fontValue = componentFontValue (selectedComponent);
-                alphaValue = juce::String (selectedComponent->getAlpha());
 
                 accessibilityHandledValue = selectedComponent->isAccessible();
 
                 widthValue.addListener (this);
                 heightValue.addListener (this);
-
                 xValue.addListener (this);
                 yValue.addListener (this);
-
                 visibleValue.addListener (this);
                 wantsFocusValue.addListener (this);
                 enabledValue.addListener (this);
@@ -139,11 +133,22 @@ namespace melatonin
                 }
 
                 {
+                    if (!pickedColor.getValue().isVoid())
+                        colors.emplace_back("Last Picked", pickedColor);
+
                     auto& properties = selectedComponent->getProperties();
-                    for (auto nv : properties)
-                        namedProperties.push_back ({nv.name.toString(), nv.value});
+                    for (const auto& nv : properties)
+                    {
+                        if (nv.name.toString().startsWith ("jcclr_"))
+                            colors.emplace_back (nv.name.toString(), nv.value);
+                        else
+                            namedProperties.emplace_back (nv.name.toString(), nv.value);
+                    }
 
                     for (auto& nv : namedProperties)
+                        nv.value.addListener (this);
+
+                    for (auto& nv : colors)
                         nv.value.addListener (this);
                 }
             }
@@ -170,6 +175,11 @@ namespace melatonin
 
             for (auto& np : namedProperties)
                 np.value.removeListener (this);
+
+            for (auto& np : colors)
+                np.value.removeListener (this);
+
+            colors.clear();
             namedProperties.clear();
 
             listenerList.call ([this] (Listener& listener) {
@@ -229,6 +239,16 @@ namespace melatonin
                 else
                 {
                     for (auto& nv : namedProperties)
+                    {
+                        if (value.refersToSameSourceAs (nv.value))
+                        {
+                            selectedComponent->getProperties().set (nv.name, nv.value.getValue());
+                            selectedComponent->repaint();
+                            break;
+                        }
+                    }
+
+                    for (auto& nv : colors)
                     {
                         if (value.refersToSameSourceAs (nv.value))
                         {

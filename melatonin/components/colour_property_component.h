@@ -42,14 +42,14 @@ namespace melatonin
         }
 
         juce::Value value;
-        
+
         class ColourSelectorEx : public juce::ColourSelector,
                                  private juce::ChangeListener
         {
         public:
             ColourSelectorEx (int flags = (showAlphaChannel | showColourAtTop | showSliders | showColourspace),
-                              int edgeGap = 4,
-                              int gapAroundColourSpaceComponent = 7)
+                int edgeGap = 4,
+                int gapAroundColourSpaceComponent = 7)
                 : juce::ColourSelector (flags, edgeGap, gapAroundColourSpaceComponent)
             {
                 addChangeListener (this);
@@ -67,8 +67,8 @@ namespace melatonin
                     onChange();
             }
 
-            std::function<void ()> onDismiss;
-            std::function<void ()> onChange;
+            std::function<void()> onDismiss;
+            std::function<void()> onChange;
         };
 
         class Container : public Component
@@ -83,11 +83,14 @@ namespace melatonin
             {
                 auto c = juce::Colour ((uint32_t) int (value.getValue()));
 
-                g.setColour (c);
-                g.fillRect (getLocalBounds().reduced (4));
+                auto area = getLocalBounds();
 
-                g.setColour (c.contrasting());
-                g.drawText (c.toDisplayString (alpha), getLocalBounds(), juce::Justification::centred);
+                g.setColour (c);
+                g.fillRoundedRectangle (area.removeFromLeft (18).withHeight (18).toFloat(), 1.f);
+
+                area.removeFromLeft (8);
+                g.setColour (colors::propertyValue);
+                g.drawText (c.toString(), area.withTrimmedBottom(1), juce::Justification::centredLeft);
             }
 
             void mouseUp (const juce::MouseEvent& e) override
@@ -100,15 +103,14 @@ namespace melatonin
 
                     auto colourSelector = std::make_unique<ColourSelectorEx> (flags);
 
+                    colourSelector->setLookAndFeel (&getLookAndFeel());
                     colourSelector->setSize (300, 280);
                     colourSelector->setCurrentColour (juce::Colour ((uint32_t) int (value.getValue())), juce::dontSendNotification);
-                    colourSelector->onDismiss = [this, cs = colourSelector.get()]()
-                    {
+                    colourSelector->onDismiss = [this, cs = colourSelector.get()]() {
                         value = (int) cs->getCurrentColour().getARGB();
                         repaint();
                     };
-                    colourSelector->onChange = [this, cs = colourSelector.get()]()
-                    {
+                    colourSelector->onChange = [this, cs = colourSelector.get()]() {
                         value = (int) cs->getCurrentColour().getARGB();
                         repaint();
                     };

@@ -182,6 +182,7 @@ namespace melatonin
 
         void labelTextChanged (juce::Label* changedLabel) override
         {
+
             if (changedLabel == &widthLabel || changedLabel == &heightLabel)
             {
                 model.getSelectedComponent()->setSize (widthLabel.getText().getIntValue(), heightLabel.getText().getIntValue());

@@ -89,11 +89,11 @@ namespace melatonin
             return juce::BorderSize<int> (0);
         }
 
-        // the main "enable inspector" checkbox
+        // boolean properties and the main "enable inspector" checkbox
         void drawToggleButton (juce::Graphics& g, juce::ToggleButton& button, bool /*shouldDrawButtonAsHighlighted*/, bool /*shouldDrawButtonAsDown*/) override
         {
             float toggleWidth = 14;
-            float leftPadding = 6;
+            float leftPadding = 0;
 
             juce::Rectangle<float> bounds (leftPadding, (float) button.getHeight() / 2 - toggleWidth / 2.f, toggleWidth, toggleWidth);
 
