@@ -11,18 +11,17 @@ namespace melatonin
         InspectorLookAndFeel()
         {
             // often the app overrides this
-            setColour (juce::Label::outlineWhenEditingColourId, colors::highlightColor);
+            setColour (juce::Label::outlineWhenEditingColourId, colors::highlight);
 
-            setColour (juce::Label::textColourId, colors::blueTextLabelColor);
-
-            setColour (juce::ToggleButton::ColourIds::textColourId, colors::mainTextColor);
-            setColour (juce::ToggleButton::ColourIds::tickDisabledColourId, colors::mainTextColor);
-            setColour (juce::ToggleButton::ColourIds::tickColourId, colors::highlightColor);
-
-            setColour (juce::TextEditor::textColourId, colors::blueTextLabelColor);
+            setColour (juce::Label::textColourId, colors::label);
+            setColour (juce::TextEditor::textColourId, colors::label);
             setColour (juce::TextEditor::backgroundColourId, juce::Colours::transparentBlack);
-            setColour (juce::TextEditor::highlightColourId, juce::Colour::fromString ("FF373737"));
-            setColour (juce::CaretComponent::caretColourId, colors::blueLineColor);
+            setColour (juce::TextEditor::highlightColourId, colors::highlightedText);
+            setColour (juce::CaretComponent::caretColourId, colors::caret);
+
+            setColour (juce::ToggleButton::ColourIds::textColourId, colors::text);
+            setColour (juce::ToggleButton::ColourIds::tickDisabledColourId, colors::text);
+            setColour (juce::ToggleButton::ColourIds::tickColourId, colors::highlight);
 
             setColour (juce::TextButton::buttonColourId, juce::Colours::transparentBlack);
             setColour (juce::ComboBox::outlineColourId, juce::Colours::transparentBlack);
@@ -38,7 +37,8 @@ namespace melatonin
             setColour (juce::BooleanPropertyComponent::backgroundColourId, juce::Colours::transparentBlack);
             setColour (juce::BooleanPropertyComponent::outlineColourId, juce::Colours::transparentBlack);
 
-            setColour (juce::TreeView::ColourIds::selectedItemBackgroundColourId, colors::blackColor);
+            // this is transparent so that we can paint it in our item
+            setColour (juce::TreeView::ColourIds::selectedItemBackgroundColourId, colors::black.withAlpha (0.0f));
             setColour (juce::TreeView::ColourIds::backgroundColourId, juce::Colours::transparentBlack);
         }
 
@@ -53,20 +53,23 @@ namespace melatonin
         void drawTreeviewPlusMinusBox (juce::Graphics& g, const juce::Rectangle<float>& area, juce::Colour backgroundColour, bool isOpen, bool /*isMouseOver*/) override
         {
             auto tickBounds = area;
+
+            // root component is larger than 28 because of top padding
+            tickBounds = tickBounds.removeFromBottom(28);
             tickBounds.reduce (0, 2);
             auto boxSize = juce::jmin (tickBounds.getHeight(), tickBounds.getWidth());
 
             juce::Path p;
             p.addTriangle (tickBounds.getX() + 1, tickBounds.getY() + boxSize * 0.5f, tickBounds.getX() + boxSize + 1, tickBounds.getY() + boxSize * 0.5f, tickBounds.getX() + boxSize * 0.5f + 1, tickBounds.getY() + boxSize + boxSize * 0.25f);
 
-            g.setColour (backgroundColour);
+            g.setColour (colors::treeViewMinusPlusColor);
 
             auto transform = juce::AffineTransform::rotation (!isOpen ? juce::degreesToRadians (270.0f) : 0,
                 tickBounds.getCentreX(),
                 tickBounds.getCentreY());
 
             // nothing in JUCE's widget library is properly aligned...
-            transform = transform.translated (0, 1.5f);
+            transform = transform.translated (0, 2.0f);
 
             g.fillPath (p, transform);
         }
@@ -74,7 +77,7 @@ namespace melatonin
         // more friendly scrolling
         int getDefaultScrollbarWidth() override
         {
-            return 22;
+            return 20;
         }
 
         // don't use the target app's font
@@ -99,12 +102,12 @@ namespace melatonin
 
             if (button.getToggleState())
             {
-                g.setColour (colors::highlightColor);
+                g.setColour (colors::highlight);
                 g.fillRoundedRectangle (bounds, 1.5f);
             }
             else
             {
-                g.setColour (colors::mainTextColor);
+                g.setColour (colors::text);
                 g.drawRoundedRectangle (bounds, 1, 1.5f);
             }
 
@@ -127,6 +130,35 @@ namespace melatonin
                 button.getLocalBounds().withTrimmedLeft (juce::roundToInt (toggleWidth) + (int) leftPadding + 12).withTrimmedRight (2),
                 juce::Justification::centredLeft,
                 false);
+        }
+
+        void drawPropertyComponentLabel (juce::Graphics& g, int, int height, juce::PropertyComponent& component) override
+        {
+            g.setColour (component.findColour (juce::PropertyComponent::labelTextColourId)
+                             .withMultipliedAlpha (component.isEnabled() ? 1.0f : 0.6f));
+
+            g.setFont (g.getCurrentFont().withPointHeight (13));
+
+            auto r = getPropertyComponentContentPosition (component);
+
+            g.drawText (component.getName(),
+                3,
+                r.getY(),
+                r.getX() - 5,
+                r.getHeight(),
+                juce::Justification::centredLeft,
+                2);
+
+            if (component.getProperties().getWithDefault ("isUserProperty", false))
+            {
+                auto textWidth = (float) g.getCurrentFont().getStringWidth (component.getName());
+                auto tagBounds = juce::Rectangle<float> (3 + textWidth + 4, 6, 50, 14).toFloat();
+                g.setColour (colors::panelBackgroundDarker);
+                g.fillRoundedRectangle (tagBounds, 3);
+                g.setColour (colors::label);
+                g.setFont (g.getCurrentFont().withPointHeight (9));
+                g.drawText ("CUSTOM", tagBounds, juce::Justification::centred, false);
+            }
         }
 
         void drawTextEditorOutline (juce::Graphics& g, int width, int height, juce::TextEditor& textEditor) override
@@ -152,17 +184,16 @@ namespace melatonin
 
         void drawScrollbar (juce::Graphics& g, juce::ScrollBar&, int x, int y, int width, int height, bool isScrollbarVertical, int thumbStartPosition, int thumbSize, bool, bool) override
         {
-            // fill bg in black
-            g.fillAll (colors::blackColor);
+            g.fillAll (colors::scrollbarBackground);
 
             juce::Rectangle<int> thumbBounds;
             if (isScrollbarVertical)
-                thumbBounds = juce::Rectangle<int> (x, thumbStartPosition, width, thumbSize);
+                thumbBounds = juce::Rectangle<int> (x + 5, thumbStartPosition, 10, thumbSize);
             else
                 thumbBounds = juce::Rectangle<int> (thumbStartPosition, y, thumbSize, height);
 
             g.setColour (colors::scrollbar);
-            g.fillRoundedRectangle (thumbBounds.reduced (5).toFloat(), 2);
+            g.fillRoundedRectangle (thumbBounds.toFloat(), 2);
         }
     };
 

@@ -260,6 +260,7 @@ namespace melatonin
             inspectorComponent.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, true); };
             inspectorComponent.outlineComponentCallback = [this] (Component* c) { this->outlineComponent (c); };
             inspectorComponent.toggleCallback = [this] (bool enable) { this->toggle (enable); };
+            inspectorComponent.toggleOverlayCallback = [this] (bool enable) { this->overlay.setVisible (enable); };
         }
     };
 }

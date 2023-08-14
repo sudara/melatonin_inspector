@@ -50,14 +50,18 @@ namespace melatonin
             emptySearchLabel.setColour (juce::Label::textColourId, colors::treeItemTextSelected);
 
             toggleButton.setButtonText ("Enable inspector");
-            toggleButton.setColour (juce::TextButton::textColourOffId, colors::titleTextColor);
-            toggleButton.setColour (juce::TextButton::textColourOnId, colors::highlightColor);
+            toggleButton.setColour (juce::TextButton::textColourOffId, colors::disclosure);
+            toggleButton.setColour (juce::TextButton::textColourOnId, colors::highlight);
             toggleButton.setToggleState (enabledAtStart, juce::dontSendNotification);
 
             toggleButton.addListener (this);
 
+            // the JUCE widget is unfriendly for theming, so indenting is also manually handled
             tree.setIndentSize (12);
-            tree.getViewport()->setViewPosition (18, 24);
+
+            // JUCE makes it impossible to add any vertical padding within the viewport
+            tree.getViewport()->setViewPosition (0, 0);
+            tree.getViewport()->setScrollBarThickness (20);
 
             searchBox.setHelpText ("search");
             searchBox.setFont (juce::Font ("Verdana", 17, juce::Font::FontStyleFlags::plain));
@@ -65,11 +69,10 @@ namespace melatonin
             searchBox.setColour (juce::Label::textColourId, colors::treeItemTextSelected);
             searchBox.setColour (juce::TextEditor::outlineColourId, juce::Colours::transparentBlack);
             searchBox.setColour (juce::TextEditor::focusedOutlineColourId, juce::Colours::transparentBlack);
-            searchBox.setTextToShowWhenEmpty ("Filter components...", colors::searchTextLabelColor);
+            searchBox.setTextToShowWhenEmpty ("Filter components...", colors::searchText);
             searchBox.setJustification (juce::Justification::centredLeft);
             searchBox.onEscapeKey = [&] { searchBox.setText (""); searchBox.giveAwayKeyboardFocus(); };
 
-            auto logoIcon = getIcon ("Logo");
             logo.onClick = []() { juce::URL ("https://github.com/sudara/melatonin_inspector/").launchInDefaultBrowser(); };
             searchBox.onTextChange = [this] {
                 auto searchText = searchBox.getText();
@@ -117,16 +120,18 @@ namespace melatonin
 
         void paint (juce::Graphics& g) override
         {
-            g.setGradientFill ({ colors::panelBackgroundLighter, 0, 0, colors::panelBackgroundDarker, (float) getWidth(), 0, false });
+            auto mainPanelGradient = juce::ColourGradient::horizontal (colors::panelBackgroundLighter, (float) mainColumnBounds.getX(), colors::panelBackgroundDarker, (float) mainColumnBounds.getWidth());
+            g.setGradientFill (mainPanelGradient);
             g.fillRect (mainColumnBounds);
 
             g.setColour (colors::headerBackground);
             g.fillRect (topArea);
 
-            g.setColour (colors::blackColor);
+            g.setColour (colors::black);
             g.fillRect (searchBoxBounds.expanded (0, 2));
 
-            g.setGradientFill ({ colors::treeBackgroundLighter, (float) treeViewBounds.getX(), (float) treeViewBounds.getY(), colors::treeBackgroundDarker, (float) treeViewBounds.getWidth(), 0, false });
+            auto treeGradient = juce::ColourGradient::horizontal (colors::treeBackgroundLighter, (float) treeViewBounds.getX(), colors::treeBackgroundDarker, (float) treeViewBounds.getWidth());
+            g.setGradientFill (treeGradient);
             g.fillRect (treeViewBounds);
         }
 
@@ -150,15 +155,18 @@ namespace melatonin
             int padding = 8;
 
             auto inspectorEnabled = toggleButton.getToggleState();
-            mainColumnBounds = area.removeFromLeft (inspectorEnabled ? juce::jmax (380, area.getWidth() / 2)
-                                                                     : getWidth());
+
+            if (!inspectorEnabled)
+                mainColumnBounds = area.removeFromLeft (380);
+            else
+                mainColumnBounds = area.removeFromRight (juce::jmax (380, int ((float) area.getWidth() * 0.6f)));
+
             auto mainCol = mainColumnBounds;
             auto headerHeight = 48;
 
             topArea = mainCol.removeFromTop (headerHeight);
-            logo.setBounds (topArea.withWidth (56).withRightX (topArea.getWidth()));
-
-            toggleButton.setBounds (topArea.withX (padding + 6));
+            toggleButton.setBounds (topArea.reduced (padding + 6, 0));
+            logo.setBounds (topArea.withTrimmedLeft (topArea.getWidth() - 56));
 
             mainCol.removeFromTop (10);
             boxModel.setBounds (mainCol.removeFromTop (300));
@@ -166,35 +174,30 @@ namespace melatonin
             previewComponentPanel.setBounds (mainCol.removeFromTop (32));
             previewComponent.setBounds (mainCol.removeFromTop (previewComponent.isVisible() ? 100 : 0));
 
-            // the picker icon needs to overlay the panel header, so we overlap it
+            // the picker icon overlays the panel header, so we overlap it
             auto colorPickerHeight = 72;
-            int numColorsToDisplay = juce::jlimit (0, 3, (int) model.colors.size());
+            int numColorsToDisplay = juce::jlimit (0, properties.isVisible() ? (int) model.colors.size() : 3, (int) model.colors.size());
             if (colorPicker.isVisible() && !model.colors.empty())
                 colorPickerHeight += 32 * numColorsToDisplay;
             auto colorPickerBounds = mainCol.removeFromTop (colorPicker.isVisible() ? colorPickerHeight : 32);
 
-            colorPicker.setBounds (colorPickerBounds.withTrimmedLeft (36));
+            colorPicker.setBounds (colorPickerBounds.withTrimmedLeft (32));
             colorPickerPanel.setBounds (colorPickerBounds.removeFromTop (32));
 
-            propertiesPanel.setBounds (mainCol.removeFromTop (32));
-            properties.setBounds (mainCol.withTrimmedLeft (36));
+            propertiesPanel.setBounds (mainCol.removeFromTop (33)); // extra pixel for divider
+            properties.setBounds (mainCol.withTrimmedLeft (32));
 
             searchBoxBounds = area.removeFromTop (headerHeight);
             auto b = searchBoxBounds;
-
             clearBtn.setBounds (b.removeFromRight (48));
             searchIcon.setBounds (b.removeFromLeft (48));
             searchBox.setBounds (b.reduced (0, 2));
 
-            emptySearchLabel.setBounds (area.reduced (4, 24));
+            emptySearchLabel.setBounds (searchBoxBounds.reduced (4, 24));
 
-            // used to paint the background
+            // these bounds are used to paint the background
             treeViewBounds = area;
-
-            if (tree.isVisible())
-                tree.setBounds (area.withTrimmedLeft (18).withTrimmedTop (24));
-            else
-                emptySelectionPrompt.setBounds (area.withTrimmedLeft (18).withTrimmedTop (24));
+            tree.setBounds (treeViewBounds);
         }
 
         void displayComponentInfo (Component* component)
@@ -273,6 +276,7 @@ namespace melatonin
             previewComponentPanel.setVisible (enabled);
             colorPickerPanel.setVisible (enabled);
             propertiesPanel.setVisible (enabled);
+            tree.setVisible (enabled);
 
             if (!enabled)
                 model.deselectComponent();
@@ -289,6 +293,7 @@ namespace melatonin
         std::function<void (Component* c)> selectComponentCallback;
         std::function<void (Component* c)> outlineComponentCallback;
         std::function<void (bool enabled)> toggleCallback;
+        std::function<void (bool enabled)> toggleOverlayCallback;
 
     private:
         Component::SafePointer<Component> selectedComponent;
@@ -312,7 +317,7 @@ namespace melatonin
         CollapsablePanel colorPickerPanel { "COLORS", &colorPicker };
 
         Properties properties { model };
-        CollapsablePanel propertiesPanel { "PROPERTIES", &properties };
+        CollapsablePanel propertiesPanel { "PROPERTIES", &properties, true };
 
         // TODO: move to its own component
         juce::TreeView tree;

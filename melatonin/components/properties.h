@@ -31,7 +31,7 @@ namespace melatonin
         void resized() override
         {
             // let the property panel know what total height we need to be
-            panel.setBounds (getLocalBounds());
+            panel.setBounds (getLocalBounds().withTrimmedTop (padding));
         }
 
     private:
@@ -91,7 +91,7 @@ namespace melatonin
                 else if (!propertiesToIgnore.contains (nv.name))
                 {
                     auto customProperty = new juce::TextPropertyComponent (nv.value, nv.name, 200, false);
-                    customProperty->setColour (juce::PropertyComponent::labelTextColourId, colors::customPropertyName);
+                    customProperty->getProperties().set ("isUserProperty", true);
                     props.add (customProperty);
                 }
             }

@@ -86,11 +86,18 @@ namespace melatonin
                 auto area = getLocalBounds();
 
                 g.setColour (c);
-                g.fillRoundedRectangle (area.removeFromLeft (18).withHeight (18).toFloat(), 1.f);
+                auto colorRect = area.removeFromLeft (18).withHeight (18).toFloat();
+                g.fillRoundedRectangle (colorRect, 1.f);
+
+                if (colors::areContrasting (c, colors::panelBackgroundLighter, JUCE_LIVE_CONSTANT (0.5f)))
+                {
+                    g.setColour (juce::Colours::grey.withAlpha (0.3f));
+                    g.drawRoundedRectangle (colorRect, 1.f, 1.f);
+                }
 
                 area.removeFromLeft (8);
                 g.setColour (colors::propertyValue);
-                g.drawText (c.toString(), area.withTrimmedBottom(1), juce::Justification::centredLeft);
+                g.drawText (c.toString(), area.withTrimmedBottom (1), juce::Justification::centredLeft);
             }
 
             void mouseUp (const juce::MouseEvent& e) override

@@ -13,13 +13,9 @@ namespace melatonin
     public:
         explicit ColorPicker (ComponentModel& _model, Preview& p) : model (_model), preview (p)
         {
-            addAndMakeVisible (colorValField);
             addAndMakeVisible (colorPickerButton);
             addAndMakeVisible (&panel);
-
-            colorValField.setJustificationType (juce::Justification::centred);
-            colorValField.setFont (juce::Font (13.0f, juce::Font::bold));
-            colorValField.setColour (juce::TextEditor::ColourIds::textColourId, colors::customPropertyName);
+            ;
 
             selectedColor = juce::Colours::transparentBlack;
 
@@ -29,7 +25,7 @@ namespace melatonin
             model.addListener (*this);
 
             // hide the text when the picker isn't active
-            colorPickerButton.onClick = [this]() { if(!colorPickerButton.isEnabled()) colorValField.setVisible(false); };
+            colorPickerButton.onClick = [this]() { if(!colorPickerButton.isEnabled()) selectedColor = juce::Colours::transparentBlack; repaint(); };
         }
 
         ~ColorPicker() override
@@ -41,8 +37,22 @@ namespace melatonin
 
         void paint (juce::Graphics& g) override
         {
-            g.setColour (colors::panelLineSeparatorColor);
-            g.drawHorizontalLine (getHeight() - 1, 0, (float) getWidth()); // separator
+            if (colorPickerButton.enabled && selectedColor != juce::Colours::transparentBlack)
+            {
+                g.setColour (colors::black);
+
+                // rect with only bottom corners rounded
+                g.fillRect (colorValueBounds.withBottom (4));
+                g.fillRoundedRectangle (colorValueBounds.toFloat(), 4);
+
+                g.setColour (colors::white);
+                g.setFont (juce::Font (14.5f, juce::Font::bold));
+                g.drawText (rgbaString(), colorValueBounds, juce::Justification::centred);
+            }
+
+            if (model.colors.empty())
+            {
+            }
         }
 
         void resized() override
@@ -55,7 +65,7 @@ namespace melatonin
             auto area = getLocalBounds();
 
             // overlaps with the panel + bit of padding
-            colorValField.setBounds (area.removeFromTop (32).withTrimmedRight (36));
+            colorValueBounds = area.removeFromTop (32).withTrimmedRight (36);
 
             if (!model.colors.empty())
             {
@@ -100,6 +110,7 @@ namespace melatonin
             if (selectedColor != juce::Colours::transparentBlack)
             {
                 model.pickedColor.setValue ((int) selectedColor.getARGB());
+                colorPickerButton.setEnabled (false);
                 getParentComponent()->repaint(); // might need to resize the panel
             }
         }
@@ -128,7 +139,6 @@ namespace melatonin
         void reset()
         {
             panel.clear();
-            updateLabels();
             resized();
         }
 
@@ -142,7 +152,7 @@ namespace melatonin
                 auto* prop = new ColourPropertyComponent (nv.value, colors::enumNameIfPresent (nv.name), true);
                 if (nv.name == "Last Picked")
                 {
-                    prop->setColour (juce::PropertyComponent::labelTextColourId, colors::customPropertyName);
+                    prop->setColour (juce::PropertyComponent::labelTextColourId, colors::highlight);
                 }
                 prop->setLookAndFeel (&getLookAndFeel());
                 props.add (prop);
@@ -157,7 +167,7 @@ namespace melatonin
 
         juce::PropertyPanel panel { "Properties" };
         InspectorImageButton colorPickerButton { "Eyedropper", { 0, 6 }, true };
-        juce::Label colorValField { "Color value" };
+        juce::Rectangle<int> colorValueBounds;
 
         juce::Image eyedropperCursorImage = getIcon ("Eyedropperon").rescaled (16, 16);
         juce::MouseCursor eyedropperCursor { eyedropperCursorImage, 0, 15 };
@@ -186,21 +196,23 @@ namespace melatonin
             int xRadius = (maxNumOfFullHorizontalPixels + extraBleed - 1) / 2;
             preview.setVisible (true);
             preview.setZoomedImage (image->getClippedImage ({ point.x - xRadius, point.y - 2, maxNumOfFullHorizontalPixels + extraBleed, 5 }));
-            updateLabels();
-            colorValField.setVisible (true);
+            repaint();
         }
 
-        void updateLabels()
+        juce::String rgbaString()
         {
-            juce::String rgbaString = juce::String::formatted ("%d, %d, %d",
+            return juce::String::formatted ("%d, %d, %d",
                 selectedColor.getRed(),
                 selectedColor.getGreen(),
                 selectedColor.getBlue());
-            colorValField.setText (rgbaString, juce::dontSendNotification);
-            colorValField.setVisible (true);
+        }
 
-            resized();
-            repaint();
+        juce::String hexString()
+        {
+            return juce::String::formatted ("#%02x%02x%02x",
+                selectedColor.getRed(),
+                selectedColor.getGreen(),
+                selectedColor.getBlue());
         }
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ColorPicker)

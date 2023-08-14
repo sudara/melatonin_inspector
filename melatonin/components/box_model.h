@@ -14,7 +14,7 @@ namespace melatonin
         explicit BoxModel (ComponentModel& componentModel) : model (componentModel)
         {
             addAndMakeVisible (componentLabel);
-            componentLabel.setColour (juce::Label::textColourId, colors::blueLineColor);
+            componentLabel.setColour (juce::Label::textColourId, colors::boxModelBoundingBox);
             componentLabel.setJustificationType (juce::Justification::centredLeft);
 
             addAndMakeVisible (parentComponentLabel);
@@ -66,7 +66,7 @@ namespace melatonin
                 addChildComponent (l);
                 l->setText ("-", juce::dontSendNotification);
                 l->setJustificationType (juce::Justification::centred);
-                l->setColour (juce::TextEditor::ColourIds::highlightColourId, colors::blueLineColor.darker());
+                l->setColour (juce::TextEditor::ColourIds::highlightColourId, colors::boxModelBoundingBox.darker());
 
                 // centers juce::TextEditor (hack since juce::Label is not doing it by default)
                 l->onEditorShow = [l] {
@@ -98,7 +98,7 @@ namespace melatonin
         void paint (juce::Graphics& g) override
         {
             // dashed line rectangles be hard, yo!
-            g.setColour (colors::blueTextLabelColor.darker (0.6f));
+            g.setColour (colors::label.darker (0.6f));
             float dashLengths[2] = { 2.f, 2.f };
             parentRectanglePath.clear();
             parentRectanglePath.addRectangle (parentComponentRectangle());
@@ -106,11 +106,11 @@ namespace melatonin
             parentStroke.createDashedStroke (parentRectanglePath, parentRectanglePath, dashLengths, 2);
             g.strokePath (parentRectanglePath, parentStroke);
 
-            g.setColour (colors::blueLineColor);
+            g.setColour (colors::boxModelBoundingBox);
             g.drawRect (componentRectangle(), 1.0);
 
             // draw padding
-            g.setColour (colors::blueLineColor.withAlpha (0.2f));
+            g.setColour (colors::boxModelBoundingBox.withAlpha (0.2f));
             g.drawRect (componentRectangle(), (int) padding);
         }
 

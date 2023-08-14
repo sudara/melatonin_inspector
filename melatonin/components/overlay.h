@@ -39,7 +39,7 @@ namespace melatonin
 
         void paint (juce::Graphics& g) override
         {
-            g.setColour (colors::blueLineColor);
+            g.setColour (colors::overlayBoundingBox);
 
             // draws inwards as the line thickens
             if (outlinedComponent)
@@ -66,14 +66,14 @@ namespace melatonin
                 g.fillRect (juce::Rectangle<int> (selectedBounds.getBottomRight().translated (-3, -3), selectedBounds.getBottomRight().translated (3, 3)));
                 g.fillRect (juce::Rectangle<int> (selectedBounds.getBottomLeft().translated (-3, -3), selectedBounds.getBottomLeft().translated (3, 3)));
 
-                g.setColour (colors::blueLabelBackgroundColor);
+                g.setColour (colors::overlayLabelBackground);
                 // text doesn't vertically center very nicely without manual offset
                 g.fillRoundedRectangle (dimensionsLabelBounds.toFloat().withBottom (dimensionsLabelBounds.getBottom()), 2.0f);
             }
 
             if (!hoveredBounds.isEmpty())
             {
-                g.setColour (colors::redLineColor);
+                g.setColour (colors::overlayDistanceToHovered);
                 g.drawRect (hoveredBounds.reduced (1.0f));
                 g.drawRect (selectedBounds.reduced (1.0f));
 

@@ -20,7 +20,7 @@ namespace melatonin
 
         void paint (juce::Graphics& g) override
         {
-            g.fillAll (colors::blackColor);
+            g.fillAll (colors::black);
             if (zoom)
             {
                 // lets see them pixels!
