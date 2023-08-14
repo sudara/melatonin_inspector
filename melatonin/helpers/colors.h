@@ -37,6 +37,9 @@ namespace melatonin::colors
     const juce::Colour propertyValue = juce::Colour::fromRGB (206, 235, 255);
     const juce::Colour checkboxCheck = juce::Colour::fromRGB (41, 11, 79);
     const juce::Colour customBackground = juce::Colour::fromRGB (25, 11, 36).darker();
+    const juce::Colour propertyValueWarn = juce::Colour::fromRGB (255, 117, 117);
+    const juce::Colour propertyValueError = juce::Colour::fromRGB (255, 51, 51);
+    const juce::Colour propertyValueDisabled = treeItemTextDisabled;
 
     // overlay
     const juce::Colour overlayBoundingBox = juce::Colour::fromRGB (66, 157, 226);

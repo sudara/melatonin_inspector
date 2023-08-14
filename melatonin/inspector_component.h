@@ -173,7 +173,9 @@ namespace melatonin
             boxModel.setBounds (mainCol.removeFromTop (300));
 
             previewComponentPanel.setBounds (mainCol.removeFromTop (32));
-            previewComponent.setBounds (mainCol.removeFromTop (previewComponent.isVisible() ? 100 : 0));
+            auto previewExpandedBounds = previewComponent.hasPerformanceTiming() ? 150 : 100;
+            previewComponent.setBounds (mainCol.removeFromTop ( previewComponent.isVisible() ? previewExpandedBounds : 0));
+
 
             // the picker icon overlays the panel header, so we overlap it
             auto colorPickerHeight = 72;

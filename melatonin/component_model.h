@@ -16,6 +16,14 @@ namespace melatonin
             virtual void componentModelChanged (ComponentModel& model) = 0;
         };
 
+        juce::Value widthValue, heightValue, xValue, yValue;
+        juce::Value enabledValue, opaqueValue, hasCachedImageValue, accessibilityHandledValue;
+        juce::Value visibleValue, wantsFocusValue, interceptsMouseValue, childrenInterceptsMouseValue;
+        juce::Value lookAndFeelValue, typeValue, fontValue, alphaValue;
+        juce::Value pickedColor;
+        juce::Value timing1, timing2, timing3, hasChildren;
+        double timingWithChildren1, timingWithChildren2, timingWithChildren3;
+
         ComponentModel() = default;
 
         ~ComponentModel() override
@@ -46,12 +54,6 @@ namespace melatonin
 
             removeListeners();
         }
-
-        juce::Value widthValue, heightValue, xValue, yValue;
-        juce::Value enabledValue, opaqueValue, hasCachedImageValue, accessibilityHandledValue;
-        juce::Value visibleValue, wantsFocusValue, interceptsMouseValue, childrenInterceptsMouseValue;
-        juce::Value lookAndFeelValue, typeValue, fontValue, alphaValue;
-        juce::Value pickedColor;
 
         struct NamedProperty
         {
@@ -97,60 +99,63 @@ namespace melatonin
         {
             removeListeners();
 
-            if (selectedComponent)
+            if (!selectedComponent)
+                return;
+
+            lookAndFeelValue = lnfString (selectedComponent);
+            visibleValue = selectedComponent->isVisible();
+            enabledValue = selectedComponent->isEnabled();
+            alphaValue = juce::String (selectedComponent->getAlpha());
+            opaqueValue = selectedComponent->isOpaque();
+            wantsFocusValue = selectedComponent->getWantsKeyboardFocus();
+            fontValue = componentFontValue (selectedComponent);
+            hasCachedImageValue = selectedComponent->getCachedComponentImage() != nullptr;
+            typeValue = type (*selectedComponent);
+
+            accessibilityHandledValue = selectedComponent->isAccessible();
+
+            widthValue.addListener (this);
+            heightValue.addListener (this);
+            xValue.addListener (this);
+            yValue.addListener (this);
+            visibleValue.addListener (this);
+            wantsFocusValue.addListener (this);
+            enabledValue.addListener (this);
+            opaqueValue.addListener (this);
+            alphaValue.addListener (this);
+            accessibilityHandledValue.addListener (this);
+            interceptsMouseValue.addListener (this);
+            childrenInterceptsMouseValue.addListener (this);
+
             {
-                lookAndFeelValue = lnfString (selectedComponent);
-                visibleValue = selectedComponent->isVisible();
-                enabledValue = selectedComponent->isEnabled();
-                alphaValue = juce::String (selectedComponent->getAlpha());
-                opaqueValue = selectedComponent->isOpaque();
-                wantsFocusValue = selectedComponent->getWantsKeyboardFocus();
-                fontValue = componentFontValue (selectedComponent);
-                hasCachedImageValue = selectedComponent->getCachedComponentImage() != nullptr;
-                typeValue = type (*selectedComponent);
+                bool interceptsMouse = false;
+                bool childrenInterceptsMouse = false;
+                selectedComponent->getInterceptsMouseClicks (interceptsMouse, childrenInterceptsMouse);
+                interceptsMouseValue = interceptsMouse;
+                childrenInterceptsMouseValue = childrenInterceptsMouse;
+            }
 
-                accessibilityHandledValue = selectedComponent->isAccessible();
+            hasChildren.setValue (selectedComponent->getNumChildComponents() > 0);
+            populatePerformanceData (selectedComponent->getProperties());
 
-                widthValue.addListener (this);
-                heightValue.addListener (this);
-                xValue.addListener (this);
-                yValue.addListener (this);
-                visibleValue.addListener (this);
-                wantsFocusValue.addListener (this);
-                enabledValue.addListener (this);
-                opaqueValue.addListener (this);
-                alphaValue.addListener (this);
-                accessibilityHandledValue.addListener (this);
-                interceptsMouseValue.addListener (this);
-                childrenInterceptsMouseValue.addListener (this);
+            {
+                if (!pickedColor.getValue().isVoid())
+                    colors.emplace_back ("Last Picked", pickedColor);
 
+                auto& properties = selectedComponent->getProperties();
+                for (const auto& nv : properties)
                 {
-                    bool interceptsMouse = false;
-                    bool childrenInterceptsMouse = false;
-                    selectedComponent->getInterceptsMouseClicks (interceptsMouse, childrenInterceptsMouse);
-                    interceptsMouseValue = interceptsMouse;
-                    childrenInterceptsMouseValue = childrenInterceptsMouse;
+                    if (nv.name.toString().startsWith ("jcclr_"))
+                        colors.emplace_back (nv.name.toString(), nv.value);
+                    else
+                        namedProperties.emplace_back (nv.name.toString(), nv.value);
                 }
 
-                {
-                    if (!pickedColor.getValue().isVoid())
-                        colors.emplace_back("Last Picked", pickedColor);
+                for (auto& nv : namedProperties)
+                    nv.value.addListener (this);
 
-                    auto& properties = selectedComponent->getProperties();
-                    for (const auto& nv : properties)
-                    {
-                        if (nv.name.toString().startsWith ("jcclr_"))
-                            colors.emplace_back (nv.name.toString(), nv.value);
-                        else
-                            namedProperties.emplace_back (nv.name.toString(), nv.value);
-                    }
-
-                    for (auto& nv : namedProperties)
-                        nv.value.addListener (this);
-
-                    for (auto& nv : colors)
-                        nv.value.addListener (this);
-                }
+                for (auto& nv : colors)
+                    nv.value.addListener (this);
             }
 
             listenerList.call ([this] (Listener& listener) {
@@ -270,6 +275,36 @@ namespace melatonin
             if (wasResized || wasMoved)
             {
                 updateModel();
+            }
+        }
+
+        void populatePerformanceData (const juce::NamedValueSet& props)
+        {
+            if (props.contains ("timing1"))
+            {
+                // assume they are all there
+                timing1 = props["timing1"];
+                timing2 = props["timing2"];
+                timing3 = props["timing3"];
+
+                timingWithChildren1 = timing1.getValue();
+                timingWithChildren2 = timing2.getValue();
+                timingWithChildren3 = timing3.getValue();
+                getTimingWithChildren (selectedComponent);
+            }
+        }
+
+        double getTimingWithChildren (juce::Component* component)
+        {
+            for (auto child : component->getChildren())
+            {
+                if (child->getProperties().contains ("timing1"))
+                {
+                    timingWithChildren1 += (double) child->getProperties()["timing1"];
+                    timingWithChildren2 += (double) child->getProperties()["timing2"];
+                    timingWithChildren3 += (double) child->getProperties()["timing3"];
+                    getTimingWithChildren (child);
+                }
             }
         }
     };
