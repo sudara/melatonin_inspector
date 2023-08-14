@@ -7,15 +7,49 @@
 
 namespace melatonin
 {
+    class RGBAToggle : public juce::Component
+    {
+    public:
+        bool rgba = true;
+        std::function<void()> onClick;
+
+        RGBAToggle()
+        {
+            rgba = settings->props->getBoolValue ("rgba", true);
+        }
+
+        void paint (juce::Graphics& g) override
+        {
+            g.setColour (colors::customBackground);
+            g.fillRoundedRectangle (getLocalBounds().withSizeKeepingCentre (38, 16).toFloat(), 3);
+            g.setColour (colors::label);
+            g.setFont (juce::Font ("Verdana", 9, juce::Font::FontStyleFlags::bold));
+            g.drawText (rgba ? "RGBA" : "HEX", getLocalBounds(), juce::Justification::centred);
+        }
+
+        void mouseDown (const juce::MouseEvent& /*event*/) override
+        {
+            rgba = !rgba;
+            settings->props->setValue ("rgba", rgba);
+            if (onClick)
+                onClick();
+            repaint();
+        }
+
+    private:
+        juce::SharedResourcePointer<InspectorSettings> settings;
+    };
 
     class ColorPicker : public juce::Component, private ComponentModel::Listener
     {
     public:
+        std::function<void (bool)> togglePickerCallback;
+
         explicit ColorPicker (ComponentModel& _model, Preview& p) : model (_model), preview (p)
         {
             addAndMakeVisible (colorPickerButton);
-            addAndMakeVisible (&panel);
-            ;
+            addAndMakeVisible (panel);
+            addAndMakeVisible (rgbaToggle);
 
             selectedColor = juce::Colours::transparentBlack;
 
@@ -24,8 +58,21 @@ namespace melatonin
 
             model.addListener (*this);
 
-            // hide the text when the picker isn't active
-            colorPickerButton.onClick = [this]() { if(!colorPickerButton.isEnabled()) selectedColor = juce::Colours::transparentBlack; repaint(); };
+            colorPickerButton.onClick = [this]() {
+
+                // toggle ovelay as needed
+                if (togglePickerCallback)
+                    togglePickerCallback (!colorPickerButton.enabled);
+
+                // hides the text when the picker isn't active
+                if (!colorPickerButton.isEnabled())
+                    selectedColor = juce::Colours::transparentBlack;
+
+                repaint();
+            };
+
+            // sets the color properties with the correct display format
+            rgbaToggle.onClick = [this]() { componentModelChanged (model); };
         }
 
         ~ColorPicker() override
@@ -43,34 +90,38 @@ namespace melatonin
 
                 // rect with only bottom corners rounded
                 g.fillRect (colorValueBounds.withBottom (4));
-                g.fillRoundedRectangle (colorValueBounds.toFloat(), 4);
+                g.fillRoundedRectangle (colorValueBounds.withTrimmedBottom (1).toFloat(), 4);
 
-                g.setColour (colors::white);
-                g.setFont (juce::Font (14.5f, juce::Font::bold));
-                g.drawText (rgbaString(), colorValueBounds, juce::Justification::centred);
+                g.setColour (colors::text);
+                g.setFont (juce::Font ("Verdana", 14.5, juce::Font::FontStyleFlags::plain));
+                g.drawText (stringForColor (selectedColor), colorValueBounds.withTrimmedBottom (2), juce::Justification::centred);
             }
 
             if (model.colors.empty())
             {
+                g.setColour (colors::propertyName);
+                g.setFont (juce::Font ("Verdana", 15, juce::Font::FontStyleFlags::plain));
+                g.drawText ("No Color Properties", panelBounds.withTrimmedLeft (5), juce::Justification::centredLeft);
             }
         }
 
         void resized() override
         {
-            colorPickerButton.setBounds (getLocalBounds()
-                                             .removeFromRight (32)
-                                             .removeFromTop (29)
-                                             .withSizeKeepingCentre (32, 32));
+            auto buttonsArea = getLocalBounds().removeFromTop (32);
+            colorPickerButton.setBounds (buttonsArea.removeFromRight (32).translated (2, -4));
+            buttonsArea.removeFromRight (12);
+            rgbaToggle.setBounds (buttonsArea.removeFromRight (38));
 
             auto area = getLocalBounds();
 
             // overlaps with the panel + bit of padding
-            colorValueBounds = area.removeFromTop (32).withTrimmedRight (36);
+            colorValueBounds = area.removeFromTop (32).withTrimmedRight (36).withSizeKeepingCentre (rgbaToggle.rgba ? 100 : 90, 32);
 
+            area.removeFromTop (5);
+            panelBounds = area;
             if (!model.colors.empty())
             {
-                area.removeFromTop (5);
-                panel.setBounds (area);
+                panel.setBounds (panelBounds);
             }
         }
 
@@ -107,10 +158,11 @@ namespace melatonin
             if (root == nullptr || image == nullptr)
                 return;
 
-            if (selectedColor != juce::Colours::transparentBlack)
+            if (colorPickerButton.enabled && selectedColor != juce::Colours::transparentBlack)
             {
                 model.pickedColor.setValue ((int) selectedColor.getARGB());
-                colorPickerButton.setEnabled (false);
+                colorPickerButton.enabled = false;
+                colorPickerButton.onClick();
                 getParentComponent()->repaint(); // might need to resize the panel
             }
         }
@@ -149,7 +201,7 @@ namespace melatonin
 
             for (auto& nv : model.colors)
             {
-                auto* prop = new ColourPropertyComponent (nv.value, colors::enumNameIfPresent (nv.name), true);
+                auto* prop = new ColourPropertyComponent (nv.value, colors::enumNameIfPresent (nv.name), rgbaToggle.rgba, true);
                 if (nv.name == "Last Picked")
                 {
                     prop->setColour (juce::PropertyComponent::labelTextColourId, colors::highlight);
@@ -168,6 +220,8 @@ namespace melatonin
         juce::PropertyPanel panel { "Properties" };
         InspectorImageButton colorPickerButton { "Eyedropper", { 0, 6 }, true };
         juce::Rectangle<int> colorValueBounds;
+        juce::Rectangle<int> panelBounds;
+        RGBAToggle rgbaToggle;
 
         juce::Image eyedropperCursorImage = getIcon ("Eyedropperon").rescaled (16, 16);
         juce::MouseCursor eyedropperCursor { eyedropperCursorImage, 0, 15 };
@@ -199,20 +253,9 @@ namespace melatonin
             repaint();
         }
 
-        juce::String rgbaString()
+        juce::String stringForColor (juce::Colour& color)
         {
-            return juce::String::formatted ("%d, %d, %d",
-                selectedColor.getRed(),
-                selectedColor.getGreen(),
-                selectedColor.getBlue());
-        }
-
-        juce::String hexString()
-        {
-            return juce::String::formatted ("#%02x%02x%02x",
-                selectedColor.getRed(),
-                selectedColor.getGreen(),
-                selectedColor.getBlue());
+            return rgbaToggle.rgba ? colors::rgbaString (color) : colors::hexString (color);
         }
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ColorPicker)

@@ -1,5 +1,5 @@
 #pragma once
-
+#include "../helpers/colors.h"
 namespace melatonin
 {
     //==============================================================================*/
@@ -7,8 +7,8 @@ namespace melatonin
                                     private juce::Value::Listener
     {
     public:
-        ColourPropertyComponent (const juce::Value& valueToControl, const juce::String& propertyName, bool showAlpha = false)
-            : juce::PropertyComponent (propertyName), value (valueToControl), container (value, showAlpha)
+        ColourPropertyComponent (const juce::Value& valueToControl, const juce::String& propertyName, bool displayRGBA = true, bool showAlpha = false)
+            : juce::PropertyComponent (propertyName), value (valueToControl), container (value, displayRGBA, showAlpha)
         {
             addAndMakeVisible (container);
             value.addListener (this);
@@ -36,18 +36,17 @@ namespace melatonin
         }
 
     private:
+        juce::Value value;
+        bool displayRGBA;
         void valueChanged (juce::Value&) override
         {
             refresh();
         }
 
-        juce::Value value;
-
-        class ColourSelectorEx : public juce::ColourSelector,
-                                 private juce::ChangeListener
+        class ColorSelector : public juce::ColourSelector, private juce::ChangeListener
         {
         public:
-            ColourSelectorEx (int flags = (showAlphaChannel | showColourAtTop | showSliders | showColourspace),
+            explicit ColorSelector (int flags = (showAlphaChannel | showColourAtTop | showSliders | showColourspace),
                 int edgeGap = 4,
                 int gapAroundColourSpaceComponent = 7)
                 : juce::ColourSelector (flags, edgeGap, gapAroundColourSpaceComponent)
@@ -55,7 +54,7 @@ namespace melatonin
                 addChangeListener (this);
             }
 
-            ~ColourSelectorEx() override
+            ~ColorSelector() override
             {
                 if (onDismiss)
                     onDismiss();
@@ -74,8 +73,8 @@ namespace melatonin
         class Container : public Component
         {
         public:
-            Container (juce::Value& value_, bool a)
-                : value (value_), alpha (a)
+            Container (juce::Value& value_, bool rgba, bool a)
+                : value (value_), displayRGBA (rgba), alpha (a)
             {
             }
 
@@ -86,10 +85,11 @@ namespace melatonin
                 auto area = getLocalBounds();
 
                 g.setColour (c);
-                auto colorRect = area.removeFromLeft (18).withHeight (18).toFloat();
+                auto colorRect = area.removeFromLeft (20).withSizeKeepingCentre (18, 18).toFloat();
                 g.fillRoundedRectangle (colorRect, 1.f);
 
-                if (colors::areContrasting (c, colors::panelBackgroundLighter, JUCE_LIVE_CONSTANT (0.5f)))
+                // help out the dark blue/purple/blacks
+                if (!colors::areContrasting (c, colors::panelBackgroundLighter, 0.1f))
                 {
                     g.setColour (juce::Colours::grey.withAlpha (0.3f));
                     g.drawRoundedRectangle (colorRect, 1.f, 1.f);
@@ -97,21 +97,21 @@ namespace melatonin
 
                 area.removeFromLeft (8);
                 g.setColour (colors::propertyValue);
-                g.drawText (c.toString(), area.withTrimmedBottom (1), juce::Justification::centredLeft);
+                g.drawText (displayRGBA ? colors::rgbaString (c) : colors::hexString (c), area.withTrimmedBottom (1), juce::Justification::centredLeft);
             }
 
             void mouseUp (const juce::MouseEvent& e) override
             {
                 if (e.mouseWasClicked())
                 {
-                    auto flags = juce::ColourSelector::showColourAtTop | juce::ColourSelector::showSliders | juce::ColourSelector::showColourspace;
+                    auto flags = juce::ColourSelector::showSliders | juce::ColourSelector::showColourspace;
                     if (alpha)
                         flags |= juce::ColourSelector::showAlphaChannel;
 
-                    auto colourSelector = std::make_unique<ColourSelectorEx> (flags);
+                    auto colourSelector = std::make_unique<ColorSelector> (flags);
 
                     colourSelector->setLookAndFeel (&getLookAndFeel());
-                    colourSelector->setSize (300, 280);
+                    colourSelector->setSize (300, 300);
                     colourSelector->setCurrentColour (juce::Colour ((uint32_t) int (value.getValue())), juce::dontSendNotification);
                     colourSelector->onDismiss = [this, cs = colourSelector.get()]() {
                         value = (int) cs->getCurrentColour().getARGB();
@@ -122,11 +122,13 @@ namespace melatonin
                         repaint();
                     };
 
-                    juce::CallOutBox::launchAsynchronously (std::move (colourSelector), getScreenBounds(), nullptr);
+                    auto& callout = juce::CallOutBox::launchAsynchronously (std::move (colourSelector), getScreenBounds().removeFromLeft (20), nullptr);
+                    callout.setLookAndFeel (&getLookAndFeel());
                 }
             }
 
             juce::Value& value;
+            bool displayRGBA;
             bool alpha;
         };
 

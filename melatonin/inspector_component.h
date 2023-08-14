@@ -44,6 +44,7 @@ namespace melatonin
             addChildComponent (clearBtn);
 
             colorPicker.setRootComponent (&root);
+            colorPicker.togglePickerCallback = [this](bool value) { if (toggleOverlayCallback) toggleOverlayCallback(value); };
 
             emptySelectionPrompt.setJustificationType (juce::Justification::centredTop);
             emptySearchLabel.setJustificationType (juce::Justification::centredTop);
@@ -120,7 +121,7 @@ namespace melatonin
 
         void paint (juce::Graphics& g) override
         {
-            auto mainPanelGradient = juce::ColourGradient::horizontal (colors::panelBackgroundLighter, (float) mainColumnBounds.getX(), colors::panelBackgroundDarker, (float) mainColumnBounds.getWidth());
+            auto mainPanelGradient = juce::ColourGradient::horizontal (colors::panelBackgroundDarker, (float) mainColumnBounds.getX(), colors::panelBackgroundLighter, (float) mainColumnBounds.getWidth());
             g.setGradientFill (mainPanelGradient);
             g.fillRect (mainColumnBounds);
 
@@ -176,9 +177,9 @@ namespace melatonin
 
             // the picker icon overlays the panel header, so we overlap it
             auto colorPickerHeight = 72;
-            int numColorsToDisplay = juce::jlimit (0, properties.isVisible() ? (int) model.colors.size() : 3, (int) model.colors.size());
+            int numColorsToDisplay = juce::jlimit (0, properties.isVisible() ? 12 : 3, (int) model.colors.size());
             if (colorPicker.isVisible() && !model.colors.empty())
-                colorPickerHeight += 32 * numColorsToDisplay;
+                colorPickerHeight += 24 * numColorsToDisplay;
             auto colorPickerBounds = mainCol.removeFromTop (colorPicker.isVisible() ? colorPickerHeight : 32);
 
             colorPicker.setBounds (colorPickerBounds.withTrimmedLeft (32));

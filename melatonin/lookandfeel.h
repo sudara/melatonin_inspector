@@ -40,6 +40,18 @@ namespace melatonin
             // this is transparent so that we can paint it in our item
             setColour (juce::TreeView::ColourIds::selectedItemBackgroundColourId, colors::black.withAlpha (0.0f));
             setColour (juce::TreeView::ColourIds::backgroundColourId, juce::Colours::transparentBlack);
+
+            // ColourSelector sliders
+            setColour (juce::ColourSelector::backgroundColourId, colors::treeBackgroundDarker);
+            setColour (juce::ColourSelector::labelTextColourId, colors::label);
+
+            setColour (juce::Slider::backgroundColourId, colors::treeBackgroundDarker);
+            setColour (juce::Slider::thumbColourId, colors::boxModelBoundingBox);
+            setColour (juce::Slider::trackColourId, colors::boxModelBoundingBox.withAlpha (0.2f));
+            setColour (juce::TextEditor::highlightColourId, colors::highlightedText);
+            setColour (juce::Slider::textBoxBackgroundColourId, juce::Colours::transparentBlack);
+            setColour (juce::Slider::textBoxHighlightColourId, colors::highlightedText);
+            setColour (juce::Slider::textBoxOutlineColourId, juce::Colours::transparentBlack);
         }
 
         // we don't want our resizer in the overlay to have a fugly border
@@ -55,7 +67,7 @@ namespace melatonin
             auto tickBounds = area;
 
             // root component is larger than 28 because of top padding
-            tickBounds = tickBounds.removeFromBottom(28);
+            tickBounds = tickBounds.removeFromBottom (28);
             tickBounds.reduce (0, 2);
             auto boxSize = juce::jmin (tickBounds.getHeight(), tickBounds.getWidth());
 
@@ -152,12 +164,12 @@ namespace melatonin
             if (component.getProperties().getWithDefault ("isUserProperty", false))
             {
                 auto textWidth = (float) g.getCurrentFont().getStringWidth (component.getName());
-                auto tagBounds = juce::Rectangle<float> (3 + textWidth + 4, 6, 50, 14).toFloat();
+                auto tagBounds = juce::Rectangle<float> (3 + textWidth + 3, 7, 40, 14).toFloat();
                 g.setColour (colors::panelBackgroundDarker);
                 g.fillRoundedRectangle (tagBounds, 3);
-                g.setColour (colors::label);
+                g.setColour (colors::highlight);
                 g.setFont (g.getCurrentFont().withPointHeight (9));
-                g.drawText ("CUSTOM", tagBounds, juce::Justification::centred, false);
+                g.drawText ("PROPS", tagBounds, juce::Justification::centred, false);
             }
         }
 
@@ -194,6 +206,26 @@ namespace melatonin
 
             g.setColour (colors::scrollbar);
             g.fillRoundedRectangle (thumbBounds.toFloat(), 2);
+        }
+
+        void drawCallOutBoxBackground (juce::CallOutBox& box, juce::Graphics& g, const juce::Path& path, juce::Image& cachedImage)
+        {
+            if (cachedImage.isNull())
+            {
+                cachedImage = { juce::Image::ARGB, box.getWidth(), box.getHeight(), true };
+                juce::Graphics g2 (cachedImage);
+
+                juce::DropShadow (colors::highlight.withAlpha (0.3f), 12, { 0, 2 }).drawForPath (g2, path);
+            }
+
+            g.setColour (colors::black);
+            g.drawImageAt (cachedImage, 0, 0);
+
+            g.setColour (colors::treeBackgroundDarker);
+            g.fillPath (path);
+
+            g.setColour (colors::highlight.withAlpha (0.7f));
+            g.strokePath (path, juce::PathStrokeType (2.0f));
         }
     };
 

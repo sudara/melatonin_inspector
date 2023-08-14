@@ -146,12 +146,12 @@ namespace melatonin
             auto secretPadding = 18;
 
             // getIndentX is private... yet another hurdle preventing proper skinning
-            int numIndents = 0;
+            int numIndents = -1;
             for (auto* p = getParentItem(); p != nullptr; p = p->getParentItem())
                 ++numIndents;
 
             // 12 is a magic number, originally set on the tree...
-            if (event.x < (secretPadding + numIndents * 12))
+            if (event.x < (numIndents * 12))
             {
                 setOpen (!isOpen());
                 return true;

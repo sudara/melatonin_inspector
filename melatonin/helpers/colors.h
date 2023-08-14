@@ -36,13 +36,33 @@ namespace melatonin::colors
     const juce::Colour propertyName = text;
     const juce::Colour propertyValue = juce::Colour::fromRGB (206, 235, 255);
     const juce::Colour checkboxCheck = juce::Colour::fromRGB (41, 11, 79);
-    const juce::Colour customBackground = juce::Colour::fromRGB (41, 11, 79);
+    const juce::Colour customBackground = juce::Colour::fromRGB (25, 11, 36).darker();
 
     // overlay
     const juce::Colour overlayBoundingBox = juce::Colour::fromRGB (66, 157, 226);
     const juce::Colour overlayLabelBackground = juce::Colour::fromRGB (20, 157, 249);
     const juce::Colour boxModelBoundingBox = juce::Colour::fromRGB (66, 157, 226);
     const juce::Colour overlayDistanceToHovered = juce::Colour::fromRGB (212, 86, 63);
+
+    static inline juce::String rgbaString (juce::Colour& color)
+    {
+        if (color.getAlpha() < 255)
+            return juce::String::formatted ("%d, %d, %d, %d",
+                color.getRed(),
+                color.getGreen(),
+                color.getBlue(),
+                color.getAlpha());
+        else
+            return juce::String::formatted ("%d, %d, %d",
+                color.getRed(),
+                color.getGreen(),
+                color.getBlue());
+    }
+
+    static inline juce::String hexString (juce::Colour& color)
+    {
+        return color.toDisplayString (true);
+    }
 
     // juce::ColourHelpers is an internal implementation, this is copied
     static inline bool areContrasting (const juce::Colour& c1, const juce::Colour& c2, float minContrast = 0.5f)
@@ -67,6 +87,6 @@ namespace melatonin::colors
             if (mapping.value == colourId)
                 return mapping.name;
 
-        return "0x" + idString.substring (6);
+        return idString;
     }
 }
