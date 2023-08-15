@@ -89,7 +89,7 @@ namespace melatonin
             }
         }
 
-        void paintItem (juce::Graphics& g, int w, int h) override
+        void paintItem (juce::Graphics& g, int w, int /*h*/) override
         {
             if (!component)
                 return;

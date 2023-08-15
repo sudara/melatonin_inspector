@@ -318,7 +318,7 @@ namespace melatonin
             }
         }
 
-        double getTimingWithChildren (juce::Component* component)
+        void getTimingWithChildren (juce::Component* component)
         {
             for (auto child : component->getChildren())
             {

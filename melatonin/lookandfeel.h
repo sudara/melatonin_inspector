@@ -63,7 +63,7 @@ namespace melatonin
 
         // For some reason this is actually *needed* which is strange.
         // But we want to adjust the color and size of triangles anyway
-        void drawTreeviewPlusMinusBox (juce::Graphics& g, const juce::Rectangle<float>& area, juce::Colour backgroundColour, bool isOpen, bool /*isMouseOver*/) override
+        void drawTreeviewPlusMinusBox (juce::Graphics& g, const juce::Rectangle<float>& area, juce::Colour /*backgroundColour*/, bool isOpen, bool /*isMouseOver*/) override
         {
             auto tickBounds = area;
 
@@ -145,7 +145,7 @@ namespace melatonin
                 false);
         }
 
-        void drawPropertyComponentLabel (juce::Graphics& g, int, int height, juce::PropertyComponent& component) override
+        void drawPropertyComponentLabel (juce::Graphics& g, int, int, juce::PropertyComponent& component) override
         {
             g.setColour (component.findColour (juce::PropertyComponent::labelTextColourId)
                              .withMultipliedAlpha (component.isEnabled() ? 1.0f : 0.6f));
@@ -195,7 +195,7 @@ namespace melatonin
             }
         }
 
-        void drawScrollbar (juce::Graphics& g, juce::ScrollBar&, int x, int y, int width, int height, bool isScrollbarVertical, int thumbStartPosition, int thumbSize, bool, bool) override
+        void drawScrollbar (juce::Graphics& g, juce::ScrollBar&, int x, int y, int /*width*/, int height, bool isScrollbarVertical, int thumbStartPosition, int thumbSize, bool, bool) override
         {
             g.fillAll (colors::scrollbarBackground);
 
@@ -209,7 +209,7 @@ namespace melatonin
             g.fillRoundedRectangle (thumbBounds.toFloat(), 2);
         }
 
-        void drawCallOutBoxBackground (juce::CallOutBox& box, juce::Graphics& g, const juce::Path& path, juce::Image& cachedImage)
+        void drawCallOutBoxBackground (juce::CallOutBox& box, juce::Graphics& g, const juce::Path& path, juce::Image& cachedImage) override
         {
             if (cachedImage.isNull())
             {

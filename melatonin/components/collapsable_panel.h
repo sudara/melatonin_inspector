@@ -11,7 +11,7 @@ namespace melatonin
     class CollapsablePanel : public juce::Component
     {
     public:
-        explicit CollapsablePanel (juce::String n, juce::Component* c, bool d = false) : name (std::move (n)), content (c), drawTopDivider (d)
+        explicit CollapsablePanel (juce::String n, juce::Component* c, bool d = false) : name (std::move (n)), drawTopDivider (d), content (c)
         {
             toggleButton.setLookAndFeel (&toggleButtonLookAndFeel);
             addAndMakeVisible (toggleButton);

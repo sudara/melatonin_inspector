@@ -37,7 +37,6 @@ namespace melatonin
 
     private:
         juce::Value value;
-        bool displayRGBA;
         void valueChanged (juce::Value&) override
         {
             refresh();

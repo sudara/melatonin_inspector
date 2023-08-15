@@ -100,4 +100,4 @@ namespace melatonin
         bool isDragging { false };
     };
 
-};
+}
