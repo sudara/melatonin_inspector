@@ -60,7 +60,8 @@ namespace melatonin
 
             colorPickerButton.onClick = [this]() {
                 // hides the text when the picker isn't active
-                if (colorPickerButton.isEnabled())
+                // uncertain why, but this must be accessed through "this"
+                if (this->colorPickerButton.enabled)
                 {
                     preview.setVisible (true);
 
@@ -70,8 +71,7 @@ namespace melatonin
                 }
                 else
                 {
-                    preview.zoom = false;
-                    preview.repaint();
+                    preview.switchToPreview();
                     selectedColor = juce::Colours::transparentBlack;
                 }
 
@@ -226,11 +226,14 @@ namespace melatonin
             resized();
         }
 
+        // close the picker if we are hidden
         void visibilityChanged() override
         {
             if (!isVisible())
+            {
                 colorPickerButton.enabled = false;
-            colorPickerButton.onClick();
+                colorPickerButton.onClick();
+            }
         }
 
     private:

@@ -135,6 +135,13 @@ namespace melatonin
             repaint();
         }
 
+        void switchToPreview ()
+        {
+            zoom = false;
+            componentModelChanged(model);
+            repaint();
+        }
+
         ComponentModel& model;
 
     private:
