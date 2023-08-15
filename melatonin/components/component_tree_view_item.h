@@ -139,8 +139,8 @@ namespace melatonin
             getOwnerView()->getLookAndFeel().drawTreeviewPlusMinusBox (g, area.translated (18, 0), colors::treeViewMinusPlusColor, isOpen(), isMouseOver);
         }
 
-        // yet another hack to make sure disclosure triangle is properly clickable
-        // even though its inset
+        // yet another hack to make sure the disclosure triangle is properly clickable
+        // even though its inset due to text indent
         bool justTogglesDisclosure (const juce::MouseEvent& event)
         {
             auto secretPadding = 18;
@@ -150,12 +150,17 @@ namespace melatonin
             for (auto* p = getParentItem(); p != nullptr; p = p->getParentItem())
                 ++numIndents;
 
-            // 12 is a magic number, originally set on the tree...
-            if (event.x < (numIndents * 12))
+            // need the disclosure to work on root level too
+            numIndents = juce::jmax (0, numIndents);
+
+            // 12 is a magic number (set on the tree view)
+            if (mightContainSubItems() && (event.x < (secretPadding + (numIndents * 12))))
             {
                 setOpen (!isOpen());
                 return true;
             }
+
+            return false;
         }
 
         void itemClicked (const juce::MouseEvent& event) override
