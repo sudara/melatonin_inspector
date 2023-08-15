@@ -3,7 +3,7 @@ BEGIN_JUCE_MODULE_DECLARATION
 
 ID:               melatonin_inspector
 vendor:           Sudara
-version:          1.2.0
+version:          1.3.0
 name:             Melatonin Inspector
 description:      A component inspector for JUCE, inspired by Figma, web inspector and Jim Credland's Component Debugger
 license:          MIT
