@@ -1,6 +1,7 @@
 #pragma once
 
 #include "helpers/colors.h"
+#include "juce_gui_extra/juce_gui_extra.h"
 
 namespace melatonin
 {

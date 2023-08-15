@@ -7,7 +7,7 @@ version:          1.2.0
 name:             Melatonin Inspector
 description:      A component inspector for JUCE, inspired by Figma, web inspector and Jim Credland's Component Debugger
 license:          MIT
-dependencies:     juce_gui_basics
+dependencies:     juce_gui_basics, juce_gui_extra
 
 END_JUCE_MODULE_DECLARATION
 */
