@@ -59,10 +59,6 @@ namespace melatonin
             model.addListener (*this);
 
             colorPickerButton.onClick = [this]() {
-                // toggle overlay as needed
-                if (togglePickerCallback)
-                    togglePickerCallback (!colorPickerButton.enabled);
-
                 // hides the text when the picker isn't active
                 if (colorPickerButton.isEnabled())
                 {
@@ -83,6 +79,10 @@ namespace melatonin
                 // or there's a change in number of colors
                 getParentComponent()->resized();
                 repaint();
+
+                // toggle overlay
+                if (togglePickerCallback)
+                    togglePickerCallback (!colorPickerButton.enabled);
             };
 
             // sets the color properties with the correct display format

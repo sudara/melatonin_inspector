@@ -44,7 +44,19 @@ namespace melatonin
             addChildComponent (clearBtn);
 
             colorPicker.setRootComponent (&root);
-            colorPicker.togglePickerCallback = [this](bool value) { if (toggleOverlayCallback) toggleOverlayCallback(value); };
+            colorPicker.togglePickerCallback = [this](bool value) {
+                if (toggleOverlayCallback)
+                {
+                    // re-enabling the color picker re-enables the overlay too quickly
+                    // resulting in an unwanted click on the overlay and selection
+                    if (value)
+                    {
+                        juce::Timer::callAfterDelay(500, [this] { toggleOverlayCallback (true); });
+                    }
+                    else
+                        toggleOverlayCallback (false);
+                }
+            };
 
             emptySelectionPrompt.setJustificationType (juce::Justification::centredTop);
             emptySearchLabel.setJustificationType (juce::Justification::centredTop);
