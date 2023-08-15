@@ -40,6 +40,7 @@ namespace melatonin::colors
     const juce::Colour propertyValueWarn = juce::Colour::fromRGB (255, 117, 117);
     const juce::Colour propertyValueError = juce::Colour::fromRGB (255, 51, 51);
     const juce::Colour propertyValueDisabled = treeItemTextDisabled;
+    const juce::Colour iconOff = juce::Colour::fromRGB (95, 82, 111);
 
     // overlay
     const juce::Colour overlayBoundingBox = juce::Colour::fromRGB (66, 157, 226);

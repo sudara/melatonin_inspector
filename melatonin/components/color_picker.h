@@ -59,15 +59,29 @@ namespace melatonin
             model.addListener (*this);
 
             colorPickerButton.onClick = [this]() {
-
-                // toggle ovelay as needed
+                // toggle overlay as needed
                 if (togglePickerCallback)
                     togglePickerCallback (!colorPickerButton.enabled);
 
                 // hides the text when the picker isn't active
-                if (!colorPickerButton.isEnabled())
-                    selectedColor = juce::Colours::transparentBlack;
+                if (colorPickerButton.isEnabled())
+                {
+                    preview.setVisible (true);
 
+                    // pick an arbitrary first position in the overlay
+                    if (root != nullptr)
+                        updatePicker ({ root->getX() + 10, root->getY() + 10 });
+                }
+                else
+                {
+                    preview.zoom = false;
+                    preview.repaint();
+                    selectedColor = juce::Colours::transparentBlack;
+                }
+
+                // might need to resize the panel if we need to toggle paint timings
+                // or there's a change in number of colors
+                getParentComponent()->resized();
                 repaint();
             };
 
@@ -84,7 +98,7 @@ namespace melatonin
 
         void paint (juce::Graphics& g) override
         {
-            if (colorPickerButton.enabled && selectedColor != juce::Colours::transparentBlack)
+            if (colorPickerButton.enabled)
             {
                 g.setColour (colors::black);
 
@@ -101,7 +115,7 @@ namespace melatonin
             {
                 g.setColour (colors::propertyName);
                 g.setFont (juce::Font ("Verdana", 15, juce::Font::FontStyleFlags::plain));
-                g.drawText ("No Color Properties", panelBounds.withTrimmedLeft (5), juce::Justification::centredLeft);
+                g.drawText ("No Color Properties", panelBounds.withTrimmedLeft (5), juce::Justification::topLeft);
             }
         }
 
@@ -163,7 +177,6 @@ namespace melatonin
                 model.pickedColor.setValue ((int) selectedColor.getARGB());
                 colorPickerButton.enabled = false;
                 colorPickerButton.onClick();
-                getParentComponent()->repaint(); // might need to resize the panel
             }
         }
 
@@ -213,6 +226,13 @@ namespace melatonin
             resized();
         }
 
+        void visibilityChanged() override
+        {
+            if (!isVisible())
+                colorPickerButton.enabled = false;
+            colorPickerButton.onClick();
+        }
+
     private:
         ComponentModel& model;
         Preview& preview;
@@ -231,7 +251,7 @@ namespace melatonin
 
         juce::Component* root {};
 
-        void updatePicker (juce::Point<int>& point)
+        void updatePicker (juce::Point<int> point)
         {
             if (!colorPickerButton.enabled)
                 return;
@@ -248,7 +268,6 @@ namespace melatonin
                 maxNumOfFullHorizontalPixels -= 1;
             }
             int xRadius = (maxNumOfFullHorizontalPixels + extraBleed - 1) / 2;
-            preview.setVisible (true);
             preview.setZoomedImage (image->getClippedImage ({ point.x - xRadius, point.y - 2, maxNumOfFullHorizontalPixels + extraBleed, 5 }));
             repaint();
         }

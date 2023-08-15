@@ -21,8 +21,8 @@ namespace melatonin
         juce::Value visibleValue, wantsFocusValue, interceptsMouseValue, childrenInterceptsMouseValue;
         juce::Value lookAndFeelValue, typeValue, fontValue, alphaValue;
         juce::Value pickedColor;
-        juce::Value timing1, timing2, timing3, hasChildren;
-        double timingWithChildren1, timingWithChildren2, timingWithChildren3;
+        juce::Value timing1, timing2, timing3, timingMax, hasChildren;
+        double timingWithChildren1, timingWithChildren2, timingWithChildren3, timingWithChildrenMax;
 
         ComponentModel() = default;
 
@@ -71,6 +71,11 @@ namespace melatonin
         std::vector<NamedProperty> colors;
 
         void displayComponent (juce::Component*)
+        {
+            updateModel();
+        }
+
+        void refresh()
         {
             updateModel();
         }
@@ -286,10 +291,12 @@ namespace melatonin
                 timing1 = props["timing1"];
                 timing2 = props["timing2"];
                 timing3 = props["timing3"];
+                timingMax = props["timingMax"];
 
                 timingWithChildren1 = timing1.getValue();
                 timingWithChildren2 = timing2.getValue();
                 timingWithChildren3 = timing3.getValue();
+                timingWithChildrenMax = timingMax.getValue();
                 getTimingWithChildren (selectedComponent);
             }
         }
@@ -303,6 +310,7 @@ namespace melatonin
                     timingWithChildren1 += (double) child->getProperties()["timing1"];
                     timingWithChildren2 += (double) child->getProperties()["timing2"];
                     timingWithChildren3 += (double) child->getProperties()["timing3"];
+                    timingWithChildrenMax += (double) child->getProperties()["timingMax"];
                     getTimingWithChildren (child);
                 }
             }

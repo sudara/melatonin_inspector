@@ -8,9 +8,15 @@ namespace melatonin
     class Preview : public juce::Component, public ComponentModel::Listener
     {
     public:
+        bool zoom = false; // allow parent to ask about our state
+
         explicit Preview (ComponentModel& _model) : model (_model)
         {
             model.addListener (*this);
+            addAndMakeVisible (maxLabel);
+            maxLabel.setFont (juce::Font (20, juce::Font::FontStyleFlags::plain));
+            maxLabel.setColour (juce::Label::textColourId, colors::iconOff);
+            maxLabel.setJustificationType (juce::Justification::centredTop);
         }
 
         ~Preview() override
@@ -24,26 +30,32 @@ namespace melatonin
 
             if (hasPerformanceTiming())
             {
+                // background for the max section
+                g.setColour (colors::propertyValueError.withAlpha (0.17f));
+                g.fillRoundedRectangle (maxBounds.toFloat(), 3);
+
                 g.setFont (g.getCurrentFont().withHeight (15.0f));
                 double exclusiveSum = (double) model.timing1.getValue() + (double) model.timing2.getValue() + (double) model.timing3.getValue();
                 bool hasExclusive = exclusiveSum * 1000 * 1000 > 1; // at least 1 microsecond
                 bool hasChildren = model.hasChildren.getValue();
 
-                auto exclusiveBounds = performanceBounds.withHeight (25);
+                auto exclusiveBounds = performanceBounds.withHeight (23).withTrimmedBottom (2);
 
                 g.setColour (hasExclusive ? colors::propertyName : colors::propertyValueDisabled);
                 g.drawText ("Exclusive", exclusiveBounds.removeFromLeft (100), juce::Justification::topLeft);
                 drawTimingText (g, exclusiveBounds.removeFromLeft (60), model.timing1.getValue(), !hasExclusive);
                 drawTimingText (g, exclusiveBounds.removeFromLeft (60), model.timing2.getValue(), !hasExclusive);
                 drawTimingText (g, exclusiveBounds.removeFromLeft (60), model.timing3.getValue(), !hasExclusive);
+                drawTimingText (g, exclusiveBounds.removeFromLeft (60), model.timingMax.getValue(), !hasExclusive);
 
-                auto withChildrenBounds = performanceBounds.withTop (125);
+                auto withChildrenBounds = performanceBounds.withTop (123);
 
                 g.setColour (hasChildren ? colors::propertyName : colors::propertyValueDisabled);
                 g.drawText ("With Children", withChildrenBounds.removeFromLeft (100), juce::Justification::topLeft);
                 drawTimingText (g, withChildrenBounds.removeFromLeft (60), model.timingWithChildren1, !hasChildren);
                 drawTimingText (g, withChildrenBounds.removeFromLeft (60), model.timingWithChildren2, !hasChildren);
                 drawTimingText (g, withChildrenBounds.removeFromLeft (60), model.timingWithChildren3, !hasChildren);
+                drawTimingText (g, withChildrenBounds.removeFromLeft (60), model.timingWithChildrenMax, !hasChildren);
             }
 
             if (zoom)
@@ -81,11 +93,40 @@ namespace melatonin
         {
             auto area = getLocalBounds();
             if (hasPerformanceTiming())
+            {
                 performanceBounds = area.removeFromBottom (50).withLeft (32);
+                maxBounds = performanceBounds.withLeft (304).withWidth (80).translated (0, -4).withTrimmedBottom (4);
+                auto pivot = maxBounds.getTopRight().toFloat();
+                maxLabel.setBounds (maxBounds.withLeft ((int) pivot.getX() - 50));
+                maxLabel.setTransform (juce::AffineTransform().rotated (-juce::MathConstants<float>::halfPi, pivot.getX(), pivot.getY()).translated (-22, -2));
+            }
             else
                 performanceBounds = juce::Rectangle<int>();
 
             previewBounds = area;
+        }
+
+        void mouseDoubleClick (const juce::MouseEvent&) override
+        {
+            if (model.getSelectedComponent())
+            {
+                // clear timings
+                // TODO: these should be settable from model
+                auto props = model.getSelectedComponent()->getProperties();
+                if (hasPerformanceTiming())
+                {
+                    juce::StringArray items = { "timing1", "timing2", "timing3", "timingMax", "timingWithChildren1", "timingWithChildren2", "timingWithChildren3", "timingWithChildrenMax" };
+                    for (auto& item : items)
+                        props.set (item, 0.0);
+                    model.refresh();
+                }
+
+                // force repaint to grab new timings
+                model.getSelectedComponent()->repaint();
+
+                // update the UI
+                repaint();
+            }
         }
 
         // called by color picker
@@ -105,10 +146,11 @@ namespace melatonin
 
     private:
         juce::Image previewImage;
-        bool zoom = false;
         juce::Path parentRectanglePath;
         juce::Rectangle<int> performanceBounds;
         juce::Rectangle<int> previewBounds;
+        juce::Rectangle<int> maxBounds;
+        juce::Label maxLabel { "max", "MAX" };
 
         void componentModelChanged (ComponentModel&) override
         {

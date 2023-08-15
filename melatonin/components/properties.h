@@ -13,7 +13,8 @@ namespace melatonin
             "paddingBottom",
             "timing1",
             "timing2",
-            "timing3" };
+            "timing3",
+            "timingMax" };
 
         explicit Properties (ComponentModel& _model) : model (_model)
         {
@@ -83,10 +84,10 @@ namespace melatonin
                     props.add (new juce::BooleanPropertyComponent (nv.value, nv.name, ""));
                 else if (nv.value.getValue().isInt64() && nv.name.getLastCharacters (2) == "At")
                 {
-                    auto datetime = juce::Value(juce::Time (nv.value.getValue()).toString(false, true, true, true));
+                    auto datetime = juce::Value (juce::Time (nv.value.getValue()).toString (false, true, true, true));
                     auto datetimeProp = new juce::TextPropertyComponent (datetime, nv.name, 200, false, false);
-                    datetimeProp->setEnabled(false);
-                    props.add(datetimeProp);
+                    datetimeProp->setEnabled (false);
+                    props.add (datetimeProp);
                 }
                 else if (!propertiesToIgnore.contains (nv.name))
                 {
