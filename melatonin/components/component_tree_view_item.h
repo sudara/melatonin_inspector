@@ -104,8 +104,20 @@ namespace melatonin
                 g.fillRect (itemArea);
             }
 
-            // instead of adding padding to the viewport, we have to add indent here + close/open
-            auto textIndent = 18 + (mightContainSubItems() ? 7 : 5);
+            // we can't add padding to the viewport
+            // without screwing up the highlight style
+            // so we have to add to indent to make sure close/open still works
+            int textIndent = 18 + (mightContainSubItems() ? 7 : 5);
+
+            if (component->hasKeyboardFocus (false))
+            {
+                auto iconBounds = juce::Rectangle<int> (textIndent, itemArea.getY(), 18, itemArea.getHeight()).toFloat();
+
+                auto p = getKeyboardIcon();
+                g.setColour (colors::highlight);
+                g.fillPath (p, p.getTransformToScaleToFit (iconBounds, true));
+                textIndent += int (iconBounds.getWidth()) + 3;
+            }
 
             g.setColour (colors::text);
 
@@ -119,15 +131,6 @@ namespace melatonin
             auto font = juce::Font ("Verdana", 15, juce::Font::FontStyleFlags::plain);
 
             g.setFont (font);
-
-            if (component->hasKeyboardFocus (false))
-            {
-                auto rc = juce::Rectangle<float> ((float) textIndent - 4.0f, 6.0f, h - 12.0f, h - 12.0f);
-
-                auto p = getKeyboardIcon();
-                g.fillPath (p, p.getTransformToScaleToFit (rc, true));
-                textIndent += int (rc.getWidth());
-            }
 
             g.drawText (name, textIndent, itemArea.getY(), w - textIndent, itemArea.getHeight(), juce::Justification::left, true);
         }
