@@ -173,7 +173,7 @@ namespace melatonin
             boxModel.setBounds (mainCol.removeFromTop (300));
 
             previewComponentPanel.setBounds (mainCol.removeFromTop (32));
-            auto previewExpandedBounds = (previewComponent.hasPerformanceTiming() && !previewComponent.zoom) ? 150 : 100;
+            auto previewExpandedBounds = (model.hasPerformanceTiming() && !previewComponent.zoom) ? 150 : 100;
             previewComponent.setBounds (mainCol.removeFromTop ( previewComponent.isVisible() ? previewExpandedBounds : 0));
 
 

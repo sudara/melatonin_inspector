@@ -96,6 +96,11 @@ namespace melatonin
             return selectedComponent;
         }
 
+        [[nodiscard]] bool hasPerformanceTiming()
+        {
+            return timing1.getValue().isDouble();
+        }
+
     private:
         juce::ListenerList<Listener> listenerList;
         juce::Component::SafePointer<juce::Component> selectedComponent;
@@ -299,6 +304,18 @@ namespace melatonin
                 timingWithChildrenMax = timingMax.getValue();
                 getTimingWithChildren (selectedComponent);
             }
+            else
+            {
+                timing1 = juce::var();
+                timing2 = juce::var();
+                timing3 = juce::var();
+                timingMax = juce::var();
+
+                timingWithChildren1 = juce::var();
+                timingWithChildren2 = juce::var();
+                timingWithChildren3 = juce::var();
+                timingWithChildrenMax = juce::var();
+            }
         }
 
         double getTimingWithChildren (juce::Component* component)
@@ -315,5 +332,6 @@ namespace melatonin
                 }
             }
         }
+
     };
 }
