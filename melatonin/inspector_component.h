@@ -30,13 +30,13 @@ namespace melatonin
             addChildComponent (emptySearchLabel);
 
             addAndMakeVisible (colorPickerPanel);
-            addAndMakeVisible (previewComponentPanel);
+            addAndMakeVisible (previewPanel);
             addAndMakeVisible (propertiesPanel);
 
             // visibility of everything but boxModel is managed by the toggle in the above panels
             addAndMakeVisible (boxModel);
             addChildComponent (colorPicker);
-            addChildComponent (previewComponent);
+            addChildComponent (preview);
             addChildComponent (properties);
 
             addAndMakeVisible (searchBox);
@@ -44,14 +44,14 @@ namespace melatonin
             addChildComponent (clearBtn);
 
             colorPicker.setRootComponent (&root);
-            colorPicker.togglePickerCallback = [this](bool value) {
+            colorPicker.togglePickerCallback = [this] (bool value) {
                 if (toggleOverlayCallback)
                 {
                     // re-enabling the color picker re-enables the overlay too quickly
                     // resulting in an unwanted click on the overlay and selection
                     if (value)
                     {
-                        juce::Timer::callAfterDelay(500, [this] { toggleOverlayCallback (true); });
+                        juce::Timer::callAfterDelay (500, [this] { toggleOverlayCallback (true); });
                     }
                     else
                         toggleOverlayCallback (false);
@@ -184,10 +184,9 @@ namespace melatonin
             mainCol.removeFromTop (10);
             boxModel.setBounds (mainCol.removeFromTop (300));
 
-            previewComponentPanel.setBounds (mainCol.removeFromTop (32));
-            auto previewExpandedBounds = (model.hasPerformanceTiming() && !previewComponent.zoom) ? 150 : 100;
-            previewComponent.setBounds (mainCol.removeFromTop ( previewComponent.isVisible() ? previewExpandedBounds : 0));
-
+            previewPanel.setBounds (mainCol.removeFromTop (32));
+            auto previewExpandedBounds = (model.hasPerformanceTiming() && !preview.zoom) ? 150 : 100;
+            preview.setBounds (mainCol.removeFromTop (preview.isVisible() ? previewExpandedBounds : 0));
 
             // the picker icon overlays the panel header, so we overlap it
             auto colorPickerHeight = 72;
@@ -288,7 +287,7 @@ namespace melatonin
             toggleButton.setToggleState (enabled, juce::dontSendNotification);
 
             // content visibility is handled by the panel
-            previewComponentPanel.setVisible (enabled);
+            previewPanel.setVisible (enabled);
             colorPickerPanel.setVisible (enabled);
             propertiesPanel.setVisible (enabled);
             tree.setVisible (enabled);
@@ -325,10 +324,10 @@ namespace melatonin
 
         BoxModel boxModel { model };
 
-        Preview previewComponent { model };
-        CollapsablePanel previewComponentPanel { "PREVIEW", &previewComponent };
+        Preview preview { model };
+        CollapsablePanel previewPanel { "PREVIEW", &preview };
 
-        ColorPicker colorPicker { model, previewComponent };
+        ColorPicker colorPicker { model, preview };
         CollapsablePanel colorPickerPanel { "COLORS", &colorPicker };
 
         Properties properties { model };
@@ -353,10 +352,11 @@ namespace melatonin
             selectedComponent = nullptr;
             tree.clearSelectedItems();
 
-            colorPicker.reset();
-
             model.deselectComponent();
             tree.setRootItem (getRoot());
+
+            preview.repaint();
+            colorPicker.reset();
 
             resized();
         }

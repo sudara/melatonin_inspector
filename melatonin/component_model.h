@@ -51,8 +51,7 @@ namespace melatonin
                 selectedComponent->removeComponentListener (this);
 
             selectedComponent = nullptr;
-
-            removeListeners();
+            updateModel();
         }
 
         struct NamedProperty
@@ -110,7 +109,11 @@ namespace melatonin
             removeListeners();
 
             if (!selectedComponent)
+            {
+                // if not manually removed, it'll linger in the model...
+                removePerformanceData();
                 return;
+            }
 
             lookAndFeelValue = lnfString (selectedComponent);
             visibleValue = selectedComponent->isVisible();
@@ -306,16 +309,20 @@ namespace melatonin
             }
             else
             {
-                timing1 = juce::var();
-                timing2 = juce::var();
-                timing3 = juce::var();
-                timingMax = juce::var();
-
-                timingWithChildren1 = juce::var();
-                timingWithChildren2 = juce::var();
-                timingWithChildren3 = juce::var();
-                timingWithChildrenMax = juce::var();
+                removePerformanceData();
             }
+        }
+
+        void removePerformanceData()
+        {
+            timing1 = juce::var();
+            timing2 = juce::var();
+            timing3 = juce::var();
+            timingMax = juce::var();
+            timingWithChildren1 = juce::var();
+            timingWithChildren2 = juce::var();
+            timingWithChildren3 = juce::var();
+            timingWithChildrenMax = juce::var();
         }
 
         void getTimingWithChildren (juce::Component* component)
@@ -332,6 +339,5 @@ namespace melatonin
                 }
             }
         }
-
     };
 }
