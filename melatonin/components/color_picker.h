@@ -263,16 +263,22 @@ namespace melatonin
             selectedColor = image->getPixelAt (point.x, point.y);
 
             // we are creating a 20x zoom
-            // at minimum width of 380, that's 19 pixels total
-            // we want an odd number of zoomed in width/height pixels so our selected pixel is always centered
-            int maxNumOfFullHorizontalPixels = int (getWidth() / 20);
-            int extraBleed = 2; // 1 extra pixel for bleed on each side
-            if (maxNumOfFullHorizontalPixels % 2 == 0)
-            {
-                maxNumOfFullHorizontalPixels -= 1;
-            }
-            int xRadius = (maxNumOfFullHorizontalPixels + extraBleed - 1) / 2;
-            preview.setZoomedImage (image->getClippedImage ({ point.x - xRadius, point.y - 2, maxNumOfFullHorizontalPixels + extraBleed, 5 }));
+            // (for example at the minimum width of 380, it's 19 pixels total)
+            int numberOfPixelsWidth = int (preview.getWidth() / preview.zoomScale);
+
+            // add 1 extra pixel to ensure odd number of pixels
+            if (numberOfPixelsWidth % 2 == 0)
+                numberOfPixelsWidth -= 1;
+
+            // we want 1 extra pixel for bleed on each side
+            int extraBleed = 2;
+
+            // a width of 13 pixels results in 7 pixel radius
+            // a width of 14 pixels ALSO results in a 7 pixel radius
+            int xRadius = (numberOfPixelsWidth + extraBleed - 1) / 2;
+
+            // zoomed, the resulting image will be larger than the preview panel (due to the bleed)
+            preview.setZoomedImage (image->getClippedImage ({ point.x - xRadius, point.y - 2, numberOfPixelsWidth + extraBleed, 5 }));
             repaint();
         }
 

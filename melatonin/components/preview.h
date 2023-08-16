@@ -9,11 +9,12 @@ namespace melatonin
     {
     public:
         bool zoom = false; // allow parent to ask about our state
+        int zoomScale = 20;
 
         explicit Preview (ComponentModel& _model) : model (_model)
         {
             model.addListener (*this);
-            addChildComponent(maxLabel);
+            addChildComponent (maxLabel);
             maxLabel.setColour (juce::Label::textColourId, colors::iconOff);
             maxLabel.setJustificationType (juce::Justification::centredTop);
             maxLabel.setFont (juce::Font ("Verdana", 18, juce::Font::FontStyleFlags::bold));
@@ -66,22 +67,36 @@ namespace melatonin
                 // lets see them pixels!
                 g.setImageResamplingQuality (juce::Graphics::ResamplingQuality::lowResamplingQuality);
 
-                // place image in center, zoomed 20x
-                int numberOfVerticalLines = getWidth() / 20;
-                int offsetX = (getWidth() - numberOfVerticalLines * 20) / 2;
-                g.drawImageTransformed (previewImage, juce::AffineTransform::scale (20.f, 20.f).translated ((float) offsetX, 0));
+                /* the zoomed snapshot is always *larger* than our preview area
+
+                  bleed
+                     │
+                    ┌▼┌────────────────────┬─┐
+                    │ │                   │ │
+                    │ │                   │ │
+                    │ │                   │ │
+                    │ │                   │ │
+                    └─┴────────────────────┴─┘
+                 */
+                int bleedPerSide = (previewImage.getWidth() * zoomScale - getWidth()) / 2;
+                g.drawImageTransformed (previewImage, juce::AffineTransform::scale ((float) zoomScale, (float) zoomScale).translated ((float) -bleedPerSide, 0));
 
                 // draw grid
                 g.setColour (juce::Colours::grey.withAlpha (0.3f));
-                for (auto i = 0; i < getHeight() / 20; i++)
-                    g.drawHorizontalLine (i * 20, 0, (float) getWidth());
-                for (auto i = 0; i < numberOfVerticalLines; i++)
-                    g.drawVerticalLine (offsetX + i * 20, 0, (float) getHeight());
+                for (auto i = 0; i < getHeight() / zoomScale; i++)
+                    g.drawHorizontalLine (i * zoomScale, 0, (float) getWidth());
 
-                // highlight the center pixel in both black and white boxes
+                int numberOfVerticalLines = previewImage.getWidth() - 1;
+                auto inset = zoomScale - bleedPerSide;
+                for (auto i = 0; i < numberOfVerticalLines; i++)
+                    g.drawVerticalLine (inset + i * zoomScale, 0, (float) getHeight());
+
+                // highlight the center pixel in first black, then white boxes
                 g.setColour (juce::Colours::black);
-                int highlightedPixelX = offsetX + numberOfVerticalLines / 2 * 20;
-                g.drawRect (highlightedPixelX, getHeight() / 2 - 10, 20, 20);
+
+                // grab the top left of the center pixel
+                int highlightedPixelX = inset + (numberOfVerticalLines - 1) / 2 * zoomScale;
+                g.drawRect (highlightedPixelX, getHeight() / 2 - 10, zoomScale, zoomScale);
                 g.setColour (juce::Colours::white);
                 g.drawRect (highlightedPixelX - 2, getHeight() / 2 - 12, 24, 24, 2);
             }
@@ -140,10 +155,10 @@ namespace melatonin
             repaint();
         }
 
-        void switchToPreview ()
+        void switchToPreview()
         {
             zoom = false;
-            componentModelChanged(model);
+            componentModelChanged (model);
             repaint();
         }
 
