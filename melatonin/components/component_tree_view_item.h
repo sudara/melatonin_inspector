@@ -136,25 +136,21 @@ namespace melatonin
         void paintOpenCloseButton (juce::Graphics& g, const juce::Rectangle<float>& area, juce::Colour /*backgroundColour*/, bool isMouseOver) override
         {
             // need to add 18px of indent here too since we can't add viewport padding
-            getOwnerView()->getLookAndFeel().drawTreeviewPlusMinusBox (g, area.translated (additionalTextIndent, 0), colors::treeViewMinusPlusColor, isOpen(), isMouseOver);
+            disclosureRect = area.translated (additionalTextIndent, 0);
+            getOwnerView()->getLookAndFeel().drawTreeviewPlusMinusBox (g, disclosureRect, colors::treeViewMinusPlusColor, isOpen(), isMouseOver);
         }
 
         // yet another hack to make sure the disclosure triangle is properly clickable
         // even though it's inset due to text indent
-        bool onlyTogglesDisclosure (const juce::MouseEvent& event)
+        bool onlyTogglesDisclosure (const juce::MouseEvent& e)
         {
-            // getIndentX is private... yet another hurdle preventing proper skinning
-            int numIndents = -1;
-            for (auto* p = getParentItem(); p != nullptr; p = p->getParentItem())
-                ++numIndents;
+            // Convert the event back to its original form and then relative to our component
+            auto originalEvent = e.withNewPosition (e.position + getItemPosition (false).getPosition().toFloat());
+            auto localEvent = originalEvent.getEventRelativeTo (getOwnerView()->getItemComponent (this));
 
-            // need the disclosure to work on root level too
-            numIndents = juce::jmax (0, numIndents);
-
-            // 12 is a magic number (set on the tree view)
-            if (mightContainSubItems() && (event.x < (additionalTextIndent + (numIndents * 12))))
+            if (mightContainSubItems() && localEvent.position.x < disclosureRect.getRight() + 7)
             {
-                setOpen (!isOpen());
+                setOpen (! isOpen());
                 return true;
             }
 
@@ -264,6 +260,7 @@ namespace melatonin
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentTreeViewItem)
         constexpr static int additionalTextIndent = 18;
         bool selectable = false;
+        juce::Rectangle<float> disclosureRect;
 
         void recursivelyAddChildrenFor (juce::Component* child)
         {
