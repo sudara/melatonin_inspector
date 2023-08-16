@@ -6,6 +6,16 @@ namespace melatonin
     class Properties : public juce::Component, private ComponentModel::Listener
     {
     public:
+        // Used internally by the inspector and shouldn't be redundantly displayed
+        static inline juce::StringArray propertiesToIgnore { "paddingLeft",
+            "paddingRight",
+            "paddingTop",
+            "paddingBottom",
+            "timing1",
+            "timing2",
+            "timing3",
+            "timingMax" };
+
         explicit Properties (ComponentModel& _model) : model (_model)
         {
             reset();
@@ -22,7 +32,13 @@ namespace melatonin
         void resized() override
         {
             // let the property panel know what total height we need to be
-            panel.setBounds (getLocalBounds());
+            panel.setBounds (getLocalBounds().withTrimmedTop (padding));
+        }
+
+        void reset()
+        {
+            updateProperties();
+            resized();
         }
 
     private:
@@ -30,77 +46,75 @@ namespace melatonin
         juce::PropertyPanel panel { "Properties" };
 
         int padding = 5;
-        int propsSize = 0;
 
         void componentModelChanged (ComponentModel&) override
         {
             updateProperties();
         }
 
-        void reset()
-        {
-            panel.clear();
-
-            resized();
-        }
-
         void updateProperties()
         {
             panel.clear();
-            auto props = createTextEditors();
+
+            if (!model.getSelectedComponent())
+                return;
+
+            auto props = createPropertyComponents();
             for (auto* p : props)
             {
                 p->setLookAndFeel (&getLookAndFeel());
             }
             panel.addProperties (props, padding);
 
-            // don't see any method to get num of properties inside PropertyPanel
-            propsSize = props.size();
-
             resized();
         }
 
-        [[nodiscard]] juce::Array<juce::PropertyComponent*> createTextEditors() const
+        [[nodiscard]] juce::Array<juce::PropertyComponent*> createPropertyComponents() const
         {
-            auto opaque = new juce::BooleanPropertyComponent (model.opaqueValue, "Opaque", "");
             // we can't actually set these values from the front end, so disable them
-            opaque->setEnabled (false);
-
             auto cachedImage = new juce::BooleanPropertyComponent (model.hasCachedImageValue, "CachedToImage", "");
             cachedImage->setEnabled (false);
 
-            auto focused = new juce::BooleanPropertyComponent (model.focusedValue, "Focused", "");
-            focused->setEnabled (false);
-
-            auto accessibilityHandled = new juce::BooleanPropertyComponent (model.accessibilityHandledValue, "Accessibility", "");
-            accessibilityHandled->setEnabled (false);
-
-            auto interceptsMouse = new juce::BooleanPropertyComponent (model.interceptsMouseValue, "Intercepts Mouse", "");
-            interceptsMouse->setEnabled (false);
-
-            auto childrenInterceptsMouse = new juce::BooleanPropertyComponent (model.childrenInterceptsMouseValue, "Children Intercepts", "");
-            childrenInterceptsMouse->setEnabled (false);
-
-            auto enabled = new juce::BooleanPropertyComponent (model.enabledValue, "Enabled", "");
-            enabled->setEnabled (false);
-
-            return {
+            // Always have class up top
+            juce::Array<juce::PropertyComponent*> props = {
                 new juce::TextPropertyComponent (model.typeValue, "Class", 200, false, false),
-                new juce::TextPropertyComponent (model.lookAndFeelValue, "LookAndFeel", 200, false, false),
-                new juce::TextPropertyComponent (model.xValue, "X", 5, false),
-                new juce::TextPropertyComponent (model.yValue, "Y", 5, false),
-                new juce::TextPropertyComponent (model.widthValue, "Width", 5, false),
-                new juce::TextPropertyComponent (model.heightValue, "Height", 5, false),
-                new juce::TextPropertyComponent (juce::Value (model.fontValue), "Font", 5, false, false),
-                new juce::TextPropertyComponent (juce::Value (model.alphaValue), "Alpha", 5, false, false),
-                enabled,
-                opaque,
-                focused,
-                accessibilityHandled,
-                cachedImage,
-                interceptsMouse,
-                childrenInterceptsMouse
             };
+
+            // Then prioritize model properties
+            for (auto& nv : model.namedProperties)
+            {
+                if (nv.value.getValue().isBool())
+                    props.add (new juce::BooleanPropertyComponent (nv.value, nv.name, ""));
+                else if (nv.value.getValue().isInt64() && nv.name.getLastCharacters (2) == "At")
+                {
+                    auto datetime = juce::Value (juce::Time (nv.value.getValue()).toString (false, true, true, true));
+                    auto datetimeProp = new juce::TextPropertyComponent (datetime, nv.name, 200, false, false);
+                    datetimeProp->setEnabled (false);
+                    props.add (datetimeProp);
+                }
+                else if (!propertiesToIgnore.contains (nv.name))
+                {
+                    auto customProperty = new juce::TextPropertyComponent (nv.value, nv.name, 200, false);
+                    customProperty->getProperties().set ("isUserProperty", true);
+                    props.add (customProperty);
+                }
+            }
+
+            // then the rest of the component flags
+            props.addArray (juce::Array<juce::PropertyComponent*> {
+                new juce::TextPropertyComponent (model.lookAndFeelValue, "LookAndFeel", 200, false, false),
+                new juce::BooleanPropertyComponent (model.visibleValue, "Visible", ""),
+                new juce::BooleanPropertyComponent (model.enabledValue, "Enabled", ""),
+                new juce::TextPropertyComponent (model.alphaValue, "Alpha", 5, false),
+                new juce::BooleanPropertyComponent (model.opaqueValue, "Opaque", ""),
+                new juce::TextPropertyComponent (model.fontValue, "Font", 5, false, false),
+                new juce::BooleanPropertyComponent (model.wantsFocusValue, "Wants Keyboard Focus", ""),
+                new juce::BooleanPropertyComponent (model.accessibilityHandledValue, "Accessibility", ""),
+                cachedImage,
+                new juce::BooleanPropertyComponent (model.interceptsMouseValue, "Intercepts Mouse", ""),
+                new juce::BooleanPropertyComponent (model.childrenInterceptsMouseValue, "Children Intercepts", "") });
+
+            return props;
         }
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Properties)

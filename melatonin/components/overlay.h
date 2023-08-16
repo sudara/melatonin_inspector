@@ -39,7 +39,7 @@ namespace melatonin
 
         void paint (juce::Graphics& g) override
         {
-            g.setColour (colors::blueLineColor);
+            g.setColour (colors::overlayBoundingBox);
 
             // draws inwards as the line thickens
             if (outlinedComponent)
@@ -66,14 +66,14 @@ namespace melatonin
                 g.fillRect (juce::Rectangle<int> (selectedBounds.getBottomRight().translated (-3, -3), selectedBounds.getBottomRight().translated (3, 3)));
                 g.fillRect (juce::Rectangle<int> (selectedBounds.getBottomLeft().translated (-3, -3), selectedBounds.getBottomLeft().translated (3, 3)));
 
-                g.setColour (colors::blueLabelBackgroundColor);
+                g.setColour (colors::overlayLabelBackground);
                 // text doesn't vertically center very nicely without manual offset
                 g.fillRoundedRectangle (dimensionsLabelBounds.toFloat().withBottom (dimensionsLabelBounds.getBottom()), 2.0f);
             }
 
             if (!hoveredBounds.isEmpty())
             {
-                g.setColour (colors::redLineColor);
+                g.setColour (colors::overlayDistanceToHovered);
                 g.drawRect (hoveredBounds.reduced (1.0f));
                 g.drawRect (selectedBounds.reduced (1.0f));
 
@@ -135,7 +135,7 @@ namespace melatonin
             distanceToLeftHoveredLabel.setVisible (false);
             distanceToRightHoveredLabel.setVisible (false);
         }
-        //draws a disatances line when component is selected shows distance to parent or hovered element
+        // draws a disatances line when component is selected shows distance to parent or hovered element
         void outlineDistanceCallback (Component* hovComponent)
         {
             hoveredComponent = hovComponent;
@@ -184,7 +184,7 @@ namespace melatonin
             if (selectedComponent)
             {
                 constrainer.setMinimumOnscreenAmounts (selectedComponent->getHeight(), selectedComponent->getWidth(), selectedComponent->getHeight(), selectedComponent->getWidth());
-                //reset previous selection and update mouse cursor
+                // reset previous selection and update mouse cursor
                 selectedComponent->setMouseCursor (juce::MouseCursor::DraggingHandCursor);
             }
         }
@@ -237,7 +237,7 @@ namespace melatonin
 
         void startDraggingComponent (const juce::MouseEvent& e)
         {
-            //only allow dragging if the mouse is inside the selected component
+            // only allow dragging if the mouse is inside the selected component
             if (selectedComponent && selectedComponent->getLocalBounds().contains (e.getEventRelativeTo (selectedComponent).getPosition()))
             {
                 componentDragger.startDraggingComponent (selectedComponent, e);
@@ -247,7 +247,7 @@ namespace melatonin
 
         void dragSelectedComponent (const juce::MouseEvent& e)
         {
-            //only allow dragging if the mouse is inside the selected component
+            // only allow dragging if the mouse is inside the selected component
             bool isInside = selectedComponent && selectedComponent->getLocalBounds().contains (e.getEventRelativeTo (selectedComponent).getPosition());
 
             if (isInside || (selectedComponent && isDragging))
@@ -324,7 +324,7 @@ namespace melatonin
 
         void calculateLinesToParent()
         {
-            //Todo(Investigate why this is happening)
+            // Todo(Investigate why this is happening)
             if (selectedComponent == nullptr)
             {
                 jassertfalse;
@@ -354,18 +354,18 @@ namespace melatonin
 
         void drawDistanceLabel()
         {
-            //todo avoid overlapping of labels with dimensions label
+            // todo avoid overlapping of labels with dimensions label
             if (selectedComponent && hoveredComponent)
             {
                 int labelHeight = 15;
                 auto paddingToLabel = 4;
 
-                //top
+                // top
                 if (lineToTopHoveredComponent.getLength() > 0)
                 {
                     int labelWidth = (int) distanceToTopHoveredLabel.getFont().getStringWidthFloat (distanceString (lineToTopHoveredComponent)) + 15;
 
-                    //todo draw on left or right side of line
+                    // todo draw on left or right side of line
                     auto labelCenterY = lineToTopHoveredComponent.getPointAlongLineProportionally (0.5f).getY();
                     distanceToTopLabelBounds = juce::Rectangle<int> ((int) (lineToTopHoveredComponent.getStartX() + paddingToLabel),
                         (int) labelCenterY - labelHeight / 2,
@@ -376,12 +376,12 @@ namespace melatonin
                     distanceToTopHoveredLabel.setBounds (distanceToTopLabelBounds);
                 }
 
-                //bottom
+                // bottom
                 if (lineToBottomHoveredComponent.getLength() > 0)
                 {
                     int labelWidth = (int) distanceToBottomHoveredLabel.getFont().getStringWidthFloat (distanceString (lineToBottomHoveredComponent)) + 15;
 
-                    //todo draw on left or right side of line
+                    // todo draw on left or right side of line
                     auto labelCenterY = lineToBottomHoveredComponent.getPointAlongLineProportionally (0.5f).getY();
                     distanceToBottomLabelBounds = juce::Rectangle<int> ((int) (lineToBottomHoveredComponent.getStartX() + paddingToLabel),
                         (int) labelCenterY - labelHeight / 2,
@@ -392,12 +392,12 @@ namespace melatonin
                     distanceToBottomHoveredLabel.setBounds (distanceToBottomLabelBounds);
                 }
 
-                //right
+                // right
                 if (lineToRightHoveredComponent.getLength() > 0)
                 {
                     int labelWidth = (int) distanceToRightHoveredLabel.getFont().getStringWidthFloat (distanceString (lineToRightHoveredComponent)) + 15;
 
-                    //todo draw on top or bottom side of line
+                    // todo draw on top or bottom side of line
                     auto labelCenterX = lineToRightHoveredComponent.getPointAlongLineProportionally (0.5f).getX();
                     distanceToRightLabelBounds = juce::Rectangle<int> ((int) labelCenterX - labelWidth / 2,
                         (int) (lineToRightHoveredComponent.getStartY() + paddingToLabel),
@@ -408,12 +408,12 @@ namespace melatonin
                     distanceToRightHoveredLabel.setBounds (distanceToRightLabelBounds);
                 }
 
-                //left
+                // left
                 if (lineToLeftHoveredComponent.getLength() > 0)
                 {
                     int labelWidth = (int) distanceToLeftHoveredLabel.getFont().getStringWidthFloat (distanceString (lineToLeftHoveredComponent)) + 15;
 
-                    //todo draw on top or bottom side of line
+                    // todo draw on top or bottom side of line
                     auto labelCenterX = lineToLeftHoveredComponent.getPointAlongLineProportionally (0.5f).getX();
                     distanceToLeftLabelBounds = juce::Rectangle<int> ((int) labelCenterX - labelWidth / 2,
                         (int) (lineToLeftHoveredComponent.getStartY() + paddingToLabel),
@@ -445,16 +445,16 @@ namespace melatonin
                 bool hovOnLeft = selectedBounds.getCentreX() > hoveredBounds.getCentreX();
                 bool hovOnTop = selectedBounds.getCentreY() > hoveredBounds.getCentreY();
 
-                //if the hovered component is above the selected component
+                // if the hovered component is above the selected component
                 if (hovOnTop)
                 {
-                    //if the hovered component is left of the selected component
+                    // if the hovered component is left of the selected component
                     if (hovOnLeft)
                     {
                         auto p1 = selectedBounds.getTopLeft().translated (0, selectedBounds.getHeight() / 2);
                         lineToRightHoveredComponent = juce::Line<int> (p1, p1.withX (hoveredBounds.getRight())).toFloat();
                     }
-                    //if the hovered component is right of the selected component
+                    // if the hovered component is right of the selected component
                     else
                     {
                         auto p1 = selectedBounds.getTopRight().translated (0, selectedBounds.getHeight() / 2);
@@ -463,23 +463,23 @@ namespace melatonin
 
                     auto p1 = selectedBounds.getTopLeft().translated (selectedBounds.getWidth() / 2, 0);
 
-                    //avoid drawing of top line if the hovered component is left or right of the selected component
-                    //if(selectedBounds.getY() > hoveredBounds.getBottom() || selectedBounds.getBottom() < hoveredBounds.getY())
+                    // avoid drawing of top line if the hovered component is left or right of the selected component
+                    // if(selectedBounds.getY() > hoveredBounds.getBottom() || selectedBounds.getBottom() < hoveredBounds.getY())
                     lineToBottomHoveredComponent = juce::Line<int> (p1, p1.withY (hoveredBounds.getBottom())).toFloat();
 
-                    //avoid drawing horizontal line and if line is going into component
+                    // avoid drawing horizontal line and if line is going into component
                     if (lineToBottomHoveredComponent.isHorizontal() || lineToBottomHoveredComponent.getStartY() < lineToBottomHoveredComponent.getEndY())
                         lineToBottomHoveredComponent = juce::Line<float>();
-                    //avoid drawing stricly vertical line lineToLeftHoveredComponent
+                    // avoid drawing strictly vertical line lineToLeftHoveredComponent
                     if (lineToLeftHoveredComponent.isVertical() || lineToLeftHoveredComponent.getStartX() > lineToLeftHoveredComponent.getEndX())
                         lineToLeftHoveredComponent = juce::Line<float>();
-                    //avoid drawing stricly vertical line lineToRightHoveredComponent
+                    // avoid drawing strictly vertical line lineToRightHoveredComponent
                     if (lineToRightHoveredComponent.isVertical() || lineToRightHoveredComponent.getStartX() < lineToRightHoveredComponent.getEndX())
                         lineToRightHoveredComponent = juce::Line<float>();
                 }
                 else
                 {
-                    //if the hovered component is left of the selected component
+                    // if the hovered component is left of the selected component
                     if (hovOnLeft)
                     {
                         auto p1 = selectedBounds.getBottomLeft().translated (0, -selectedBounds.getHeight() / 2);
@@ -494,19 +494,19 @@ namespace melatonin
                     auto p1 = selectedBounds.getBottomLeft().translated (selectedBounds.getWidth() / 2, 0);
                     lineToTopHoveredComponent = juce::Line<int> (p1, p1.withY (hoveredBounds.getY())).toFloat();
 
-                    //avoid drawing horizontal line and if line is going into component
+                    // avoid drawing horizontal line and if line is going into component
                     if (lineToTopHoveredComponent.isHorizontal() || lineToTopHoveredComponent.getStartY() > lineToTopHoveredComponent.getEndY())
                         lineToTopHoveredComponent = juce::Line<float>();
 
-                    //avoid drawing stricly vertical line lineToLeftHoveredComponent
+                    // avoid drawing stricly vertical line lineToLeftHoveredComponent
                     if (lineToLeftHoveredComponent.isVertical() || lineToLeftHoveredComponent.getStartX() > lineToLeftHoveredComponent.getEndX())
                         lineToLeftHoveredComponent = juce::Line<float>();
-                    //avoid drawing stricly vertical line lineToRightHoveredComponent
+                    // avoid drawing stricly vertical line lineToRightHoveredComponent
                     if (lineToRightHoveredComponent.isVertical() || lineToRightHoveredComponent.getStartX() < lineToRightHoveredComponent.getEndX())
                         lineToRightHoveredComponent = juce::Line<float>();
                 }
 
-                //adding missing lines to connect to hovered component
+                // adding missing lines to connect to hovered component
                 if (!hoveredBounds.contains (lineToRightHoveredComponent.getEnd().toInt().translated (-2, 0)) && lineToRightHoveredComponent.getLength() > 0)
                 {
                     juce::Point<int> hoveredPoint;
@@ -557,80 +557,4 @@ namespace melatonin
         }
     };
 
-    // Unfortunately the DocumentWindow cannot behave as our root component mouse listener
-    // without some strange side effects. That's why we are doing the lambda dance...
-    class MouseInspector : public juce::MouseListener
-    {
-    public:
-        MouseInspector (juce::Component& c) : root (c)
-        {
-            // Listen to all mouse movements for all children of the root
-            root.addMouseListener (this, true);
-        }
-
-        ~MouseInspector() override
-        {
-            root.removeMouseListener (this);
-        }
-
-        void mouseEnter (const juce::MouseEvent& event) override
-        {
-            outlineComponentCallback (event.originalComponent);
-        }
-
-        void mouseMove (const juce::MouseEvent& event) override
-        {
-            if (outlineDistanceCallback && event.mods.isAltDown())
-                outlineDistanceCallback (event.originalComponent);
-            else
-                outlineDistanceCallback (nullptr);
-        }
-
-        void mouseUp (const juce::MouseEvent& event) override
-        {
-            if (event.mods.isLeftButtonDown() && !isDragging)
-            {
-                selectComponentCallback (event.originalComponent);
-            }
-            isDragging = false;
-        }
-
-        void mouseDown (const juce::MouseEvent& event) override
-        {
-            if (event.mods.isLeftButtonDown() && event.originalComponent->isMouseOverOrDragging())
-            {
-                componentStartDraggingCallback (event.originalComponent, event);
-            }
-        }
-
-        void mouseDrag (const juce::MouseEvent& event) override
-        {
-            //takes care of small mouse position drift on selection
-            if (event.getDistanceFromDragStart() > 3 && event.originalComponent->isMouseOverOrDragging())
-            {
-                isDragging = true;
-                componentDraggedCallback (event.originalComponent, event);
-            }
-        }
-
-        void mouseExit (const juce::MouseEvent& event) override
-        {
-            if (event.originalComponent == &root)
-            {
-                mouseExitCallback();
-            }
-        }
-
-        std::function<void (juce::Component* c)> outlineComponentCallback;
-        std::function<void (juce::Component* c)> outlineDistanceCallback;
-        std::function<void (juce::Component* c)> selectComponentCallback;
-        std::function<void (juce::Component* c, const juce::MouseEvent& e)> componentStartDraggingCallback;
-        std::function<void (juce::Component* c, const juce::MouseEvent& e)> componentDraggedCallback;
-        std::function<void()> mouseExitCallback;
-
-    private:
-        juce::Component& root;
-
-        bool isDragging { false };
-    };
 }

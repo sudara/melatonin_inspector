@@ -5,16 +5,25 @@
 
 namespace melatonin
 {
-    class TreeComponent : public juce::Component, private ComponentModel::Listener
+    class TreeComponent : public juce::Component, private ComponentModel::Listener, private juce::FocusChangeListener
     {
     public:
 
-        TreeComponent(ComponentModel& _model): model(_model){
-            model.addListener(*this);
+        TreeComponent (ComponentModel& _model): model(_model)
+        {
+            juce::Desktop::getInstance ().addFocusListener (this);
+            model.addListener (*this);
         }
 
-        ~TreeComponent(){
-            model.removeListener(*this);
+        ~TreeComponent() override
+        {
+            juce::Desktop::getInstance ().removeFocusListener (this);
+            model.removeListener (*this);
+        }
+
+        void globalFocusChanged (juce::Component*) override
+        {
+            repaint();
         }
 
         void resized() override

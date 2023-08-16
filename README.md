@@ -1,11 +1,10 @@
 ## Melatonin Component Inspector
 
-
 A JUCE module that gives you the ability to inspect and visually edit (non-destructively) components in your UI.
 
-It's inspired by [Figma](https://figma.com) (where I prefer to design UI), browser web inspectors and Jim Credland's [Component Debugger](https://github.com/jcredland/juce-toys/blob/master/jcf_debug/source/component_debugger.cpp) [juce-toys](https://github.com/jcredland/juce-toys). 
+It's inspired by [Figma](https://figma.com) (where I prefer to design UI), web browser web inspectors and Jim Credland's [Component Debugger](https://github.com/jcredland/juce-toys/blob/master/jcf_debug/source/component_debugger.cpp) [juce-toys](https://github.com/jcredland/juce-toys). 
 
-A big hearty thanks to [Dmytro Kiro](https://github.com/dikadk) for many of the current features.
+A big hearty thanks to [Dmytro Kiro](https://github.com/dikadk) and [Roland Rabien (aka FigBug)](https://github.com/figbug) for contributing some great features!
 
 <p align="center">
 <img src="https://user-images.githubusercontent.com/472/213710642-389d4313-5b5a-4656-859e-ea014c859021.jpg" width="500"/>
@@ -31,29 +30,29 @@ Point n' click to inspect a component, see its size and distance to parent.
 </p>
 
 
-## Explore the component heirarchy and see what's visible
+## Explore the component hierarchy
+
+Immediately gain clarity over parent/child relationships and see what components are currently visible.
 
 <p align="center">
 <img src="https://user-images.githubusercontent.com/472/213709528-b0f4d3dc-61bb-4e72-aae5-7c414ee5e798.gif" width="400"/>
 </p>
 
-
-## Preview Component
-
-See what exactly is drawing on a per-component basis, even if it's hidden.
-
-
-<p align="center">
-<img src="https://user-images.githubusercontent.com/472/213702194-c3c586e1-981f-4760-b095-5d7a13f322b7.gif" width="600"/>
-</p>
-
-## Filter and find components by name
-
-Names are derived from stock components, label/button text, or demangled class names.
+Filter components by name. Names are derived from stock components, label/button text, or demangled class names.
 
 
 <p align="center">
 <img src="https://user-images.githubusercontent.com/472/213702600-2e479677-8a6e-459b-ba38-1db93be689e3.gif" width="400"/>
+</p>
+
+
+## Preview Component
+
+See what exactly is drawing on a per-component basis, even when hidden.
+
+
+<p align="center">
+<img src="https://user-images.githubusercontent.com/472/213702194-c3c586e1-981f-4760-b095-5d7a13f322b7.gif" width="600"/>
 </p>
 
 
@@ -65,23 +64,24 @@ There's like...4 different ways to do this, visually and numerically...
 <img src="https://user-images.githubusercontent.com/472/213701508-eaf1dfc6-4465-4581-915e-7d788d47e08c.gif" width="600"/>
 </p>
 
-## View and edit a components *padding*
-
-This requires that padding is stored as component properties (e.g. `paddingLeft`, `paddingTop`, etc), see my `PaddedComponent` [base class as an example](https://gist.github.com/sudara/eed6b8bb3b960b4c2156a0883913ea15).
+We also display component *padding* if you follow the convention of storing them as the component properties  `paddingLeft`, `paddingTop`, `paddingRight`, `paddingBottom`. See my `PaddedComponent` [base class as an example](https://gist.github.com/sudara/eed6b8bb3b960b4c2156a0883913ea15).
 
 <p align="center">
 <img src="https://user-images.githubusercontent.com/472/213940575-0f9fa289-6b00-4899-b07e-9c9ae9e500c9.gif" width="600"/>
 </p>
 
+## Inspect and modify component flags and properties
 
-## Inspect component properties
-
-See the most important component properties at a glance, including look and feels, fonts for labels, etc.
+See the most important component properties at a glance, including look and feels, fonts for labels, etc. Where applicable, flags are editable! 
 
 <p align="center">
 <img src="https://user-images.githubusercontent.com/472/213707219-dc8619c1-8800-4267-b3f3-0c9911817a63.jpg" width="600"/>
 </p>
 
+
+Any custom properties you've added the component will also show up here and be editable. 
+
+![AudioPluginHost - 2023-08-14 01](https://github.com/sudara/melatonin_inspector/assets/472/3c69c652-5468-409b-9e3c-134868f4db9c)
 
 ## Nudge components around 
 
@@ -91,7 +91,7 @@ Verify new values, get things pixel perfect.
 <img src="https://user-images.githubusercontent.com/472/213701074-a48414e8-a86c-4881-a911-392710078ce7.gif" width="600"/>
 </p>
 
-### View spacing relative to siblings/neighbors
+## View spacing relative to siblings/neighbors
 
 Hold "alt" while component is selected. A Figma inspired feature.
 
@@ -99,13 +99,34 @@ Hold "alt" while component is selected. A Figma inspired feature.
 <img src="https://user-images.githubusercontent.com/472/213705531-d9887c7b-15a7-4b78-bab4-6868765d45a5.gif" width="450"/>
 </p>
 
-### Basic color picker
+## Display and modify JUCE widget colors
 
-Displays simple RGB values.
+No, it's not a christmas miracle, but we do [magically](https://github.com/sudara/melatonin_inspector/blob/main/update_juce_colours.rb) display JUCE's friendly `enum ColourIds` names from the stock widgets. 
 
-<p align="center">
-<img src="https://user-images.githubusercontent.com/472/213706422-42c5eb90-c41f-45f8-9a0c-0125b125a622.gif" width="600"/>
-</p>
+See what that Slider's `trackColourId` is set to, and hey, go ahead and try out a new theme in real time.
+
+(Just to be clear: The color changes are temporary, no code is edited!)
+
+
+![AudioPluginHost - 2023-08-14 38](https://github.com/sudara/melatonin_inspector/assets/472/09e0fdd7-1e31-4956-8808-781920c64a66)
+
+## Color picker
+
+Accurately pinpoint colors. Click to pick and store one. Toggle between RGBA and HEX values.
+
+![AudioPluginHost - 2023-08-14 25](https://github.com/sudara/melatonin_inspector/assets/472/765064d8-b35d-4549-84b4-bfe7d5eb2185)
+
+
+## Display component performance in real time
+
+A life saving feature. 
+
+See time spent exclusively in a component's `paint` method as well as conveniently provide you with a sum with all children.
+
+Keep track of the max. Double click to `repaint` and get fresh timings. See [setup paint timing](#7-optional-setup-component-timing).
+
+![AudioPluginHost - 2023-08-16 57](https://github.com/sudara/melatonin_inspector/assets/472/7b08ea30-ebd1-4900-bb67-02bb8393211b)
+
 
 
 ## How to install
@@ -144,7 +165,7 @@ git submodule update --remote --merge modules/melatonin_inspector
 
 ### Tell JUCE about the module
 
-After your `juce_add_plugin` call, you'll need to link the module to your plugin, for example:
+After your `juce_add_plugin` call, you'll need to link the  your plugin to this module's target, for example:
 
 ```
 target_link_libraries("YourProject" PRIVATE melatonin_inspector)
@@ -152,8 +173,7 @@ target_link_libraries("YourProject" PRIVATE melatonin_inspector)
 
 Note: you don't have to call `juce_add_module`, that's handled by CMake automatically.
 
-
-If you use projucer, add the module manually.
+If you use Projucer, add the module manually.
  
 ## 3. Add an include to your Plugin Editor
 
@@ -217,6 +237,27 @@ inspector->setVisible (true);
 ```
 Thanks to @FigBug for this feature.
 
+## 7. Optional: Setup component timing
+
+Just `#include modules/melatonin_inspector/melatonin/helpers/timing.h` and then call the RAII helper ***at the top*** of a component's paint method:
+
+```c++
+void paint (juce::Graphics& g) override
+{
+    melatonin::ComponentTimer timer { this };
+
+    // Call derived class paintContent method
+    timedPaint (g);
+ ```
+
+This simply times the method and stores it in the component's own properties. It will store up to 3 values named `timing1`, `timing2`, `timing3`.
+
+Want automatic timings for every JUCE component, including stock widgets? [Upvote this FR](https://forum.juce.com/t/fr-callback-or-other-mechanism-for-exposing-component-debugging-timing/54481/1).
+
+Want timings for your custom components ***right now***? Do what I do and derive all your components from a `juce::Component` subclass which wraps the `paint` call and adds the helper before `paint` is called. 
+
+Check out [the forum post for detail](https://forum.juce.com/t/fr-callback-or-other-mechanism-for-exposing-component-debugging-timing/54481/11?u=sudara). Or, if you run a JUCE fork, you might prefer [Roland's solution](https://forum.juce.com/t/fr-callback-or-other-mechanism-for-exposing-component-debugging-timing/54481/6?u=sudara).
+
 ## FAQ
 
 ### Can I save my component resizes or edits?
@@ -230,3 +271,7 @@ For that, one would need a component system relying on data for placement and si
 It traverses components from the root, building a `TreeView`. 
 
 In the special case of `TabbedComponent`, each tab is added as a child. 
+
+### I have a problem / feature request
+
+Please do submit an Issue or PR on the repository! Or visit the [official thread on the JUCE forum](https://forum.juce.com/t/melatonin-inspector-a-web-inspector-ish-module-for-juce-components/45672).
