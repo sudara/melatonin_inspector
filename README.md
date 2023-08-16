@@ -114,7 +114,7 @@ See what that Slider's `trackColourId` is set to, and hey, go ahead and try out 
 
 Accurately pinpoint colors. Click to pick and store one. Toggle between RGBA and HEX values.
 
-![AudioPluginHost - 2023-08-14 25](https://github.com/sudara/melatonin_inspector/assets/472/765064d8-b35d-4549-84b4-bfe7d5eb2185)
+![AudioPluginHost - 2023-08-16 27](https://github.com/sudara/melatonin_inspector/assets/472/9d9d1fe8-b34a-4e1f-a71c-26f0a0ef5169)
 
 
 ## Display component performance in real time
