@@ -6,7 +6,6 @@ namespace melatonin
 
     class ComponentTreeViewItem
         : public juce::TreeViewItem,
-          public juce::Component,
           public juce::ComponentListener
     {
     public:
@@ -17,8 +16,6 @@ namespace melatonin
             std::function<void (juce::Component* c)> select)
             : outlineComponentCallback (outline), selectComponentCallback (select), component (c)
         {
-            setInterceptsMouseClicks (true, false);
-
             // A few JUCE component types need massaging to get their child components
             if (auto multiPanel = dynamic_cast<juce::MultiDocumentPanel*> (c))
             {
@@ -107,11 +104,11 @@ namespace melatonin
             // we can't add padding to the viewport
             // without screwing up the highlight style
             // so we have to add to indent to make sure close/open still works
-            int textIndent = 18 + (mightContainSubItems() ? 7 : 5);
+            int textIndent = additionalTextIndent + (mightContainSubItems() ? 7 : 5);
 
             if (component->hasKeyboardFocus (false))
             {
-                auto iconBounds = juce::Rectangle<int> (textIndent, itemArea.getY(), 18, itemArea.getHeight()).toFloat();
+                auto iconBounds = juce::Rectangle<int> (textIndent, itemArea.getY(), additionalTextIndent, itemArea.getHeight()).toFloat();
 
                 auto p = getKeyboardIcon();
                 g.setColour (colors::highlight);
@@ -139,15 +136,13 @@ namespace melatonin
         void paintOpenCloseButton (juce::Graphics& g, const juce::Rectangle<float>& area, juce::Colour /*backgroundColour*/, bool isMouseOver) override
         {
             // need to add 18px of indent here too since we can't add viewport padding
-            getOwnerView()->getLookAndFeel().drawTreeviewPlusMinusBox (g, area.translated (18, 0), colors::treeViewMinusPlusColor, isOpen(), isMouseOver);
+            getOwnerView()->getLookAndFeel().drawTreeviewPlusMinusBox (g, area.translated (additionalTextIndent, 0), colors::treeViewMinusPlusColor, isOpen(), isMouseOver);
         }
 
         // yet another hack to make sure the disclosure triangle is properly clickable
-        // even though its inset due to text indent
-        bool justTogglesDisclosure (const juce::MouseEvent& event)
+        // even though it's inset due to text indent
+        bool onlyTogglesDisclosure (const juce::MouseEvent& event)
         {
-            auto secretPadding = 18;
-
             // getIndentX is private... yet another hurdle preventing proper skinning
             int numIndents = -1;
             for (auto* p = getParentItem(); p != nullptr; p = p->getParentItem())
@@ -157,7 +152,7 @@ namespace melatonin
             numIndents = juce::jmax (0, numIndents);
 
             // 12 is a magic number (set on the tree view)
-            if (mightContainSubItems() && (event.x < (secretPadding + (numIndents * 12))))
+            if (mightContainSubItems() && (event.x < (additionalTextIndent + (numIndents * 12))))
             {
                 setOpen (!isOpen());
                 return true;
@@ -166,20 +161,30 @@ namespace melatonin
             return false;
         }
 
+
+        // overriding this lets us decide when to select/note
+        // we modify the positioning of disclosure/item
+        // so we need manually handle to toggle disclosure without setting selected
+        // this is queried by TreeViewItem's setSelected
+        [[nodiscard]] bool canBeSelected() const override
+        {
+            return selectable;
+        }
+
         void itemClicked (const juce::MouseEvent& event) override
         {
-            if (justTogglesDisclosure (event))
+            if (onlyTogglesDisclosure (event))
                 return;
+
+            // ok, we're allowed to select now
+            selectable = true;
+            setSelected (true, true);
+            selectable = false;
 
             selectComponentCallback (component);
             selectTabbedComponentChildIfNeeded();
             if (mightContainSubItems())
                 setOpen (true);
-        }
-
-        void mouseEnter (const juce::MouseEvent& /*event*/) override
-        {
-            outlineComponentCallback (component);
         }
 
         void recursivelyCloseSubItems()
@@ -257,6 +262,8 @@ namespace melatonin
     private:
         juce::Component::SafePointer<juce::Component> component;
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentTreeViewItem)
+        constexpr static int additionalTextIndent = 18;
+        bool selectable = false;
 
         void recursivelyAddChildrenFor (juce::Component* child)
         {
