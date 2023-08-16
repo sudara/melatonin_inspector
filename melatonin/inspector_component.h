@@ -352,6 +352,7 @@ namespace melatonin
             selectedComponent = nullptr;
             tree.clearSelectedItems();
 
+            properties.reset();
             model.deselectComponent();
             tree.setRootItem (getRoot());
 

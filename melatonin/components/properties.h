@@ -35,6 +35,12 @@ namespace melatonin
             panel.setBounds (getLocalBounds().withTrimmedTop (padding));
         }
 
+        void reset()
+        {
+            updateProperties();
+            resized();
+        }
+
     private:
         ComponentModel& model;
         juce::PropertyPanel panel { "Properties" };
@@ -46,16 +52,13 @@ namespace melatonin
             updateProperties();
         }
 
-        void reset()
-        {
-            panel.clear();
-
-            resized();
-        }
-
         void updateProperties()
         {
             panel.clear();
+
+            if (!model.getSelectedComponent())
+                return;
+
             auto props = createPropertyComponents();
             for (auto* p : props)
             {

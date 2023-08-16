@@ -124,7 +124,6 @@ namespace melatonin
             fontValue = componentFontValue (selectedComponent);
             hasCachedImageValue = selectedComponent->getCachedComponentImage() != nullptr;
             typeValue = type (*selectedComponent);
-
             accessibilityHandledValue = selectedComponent->isAccessible();
 
             widthValue.addListener (this);
