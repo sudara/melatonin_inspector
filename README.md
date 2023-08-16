@@ -123,7 +123,7 @@ A life saving feature.
 
 See time spent exclusively in a component's `paint` method as well as conveniently provide you with a sum with all children.
 
-Keep track of the max. Double click to `repaint` and get fresh timings. See [install instructions](#)
+Keep track of the max. Double click to `repaint` and get fresh timings. See [setup paint timing](#7-optional-setup-component-timing).
 
 ![AudioPluginHost - 2023-08-16 57](https://github.com/sudara/melatonin_inspector/assets/472/7b08ea30-ebd1-4900-bb67-02bb8393211b)
 
@@ -165,7 +165,7 @@ git submodule update --remote --merge modules/melatonin_inspector
 
 ### Tell JUCE about the module
 
-After your `juce_add_plugin` call, you'll need to link the module to your plugin, for example:
+After your `juce_add_plugin` call, you'll need to link the  your plugin to this module's target, for example:
 
 ```
 target_link_libraries("YourProject" PRIVATE melatonin_inspector)
@@ -173,8 +173,7 @@ target_link_libraries("YourProject" PRIVATE melatonin_inspector)
 
 Note: you don't have to call `juce_add_module`, that's handled by CMake automatically.
 
-
-If you use projucer, add the module manually.
+If you use Projucer, add the module manually.
  
 ## 3. Add an include to your Plugin Editor
 
@@ -243,14 +242,21 @@ Thanks to @FigBug for this feature.
 Just `#include modules/melatonin_inspector/melatonin/helpers/timing.h` and then call the RAII helper ***at the top*** of a component's paint method:
 
 ```c++
-melatonin::ComponentTimer timer { this };
-```
+void paint (juce::Graphics& g) override
+{
+    melatonin::ComponentTimer timer { this };
+
+    // Call derived class paintContent method
+    timedPaint (g);
+ ```
 
 This simply times the method and stores it in the component's own properties. It will store up to 3 values named `timing1`, `timing2`, `timing3`.
 
 Want automatic timings for every JUCE component, including stock widgets? [Upvote this FR](https://forum.juce.com/t/fr-callback-or-other-mechanism-for-exposing-component-debugging-timing/54481/1).
 
-Want timings for your custom components ***right now***? Do what I do and derive all your components from a `juce::Component` subclass which wraps the `paint` call and adds the helper before `paint` is called. Check out [the forum post for detail](https://forum.juce.com/t/fr-callback-or-other-mechanism-for-exposing-component-debugging-timing/54481/11?u=sudara).
+Want timings for your custom components ***right now***? Do what I do and derive all your components from a `juce::Component` subclass which wraps the `paint` call and adds the helper before `paint` is called. 
+
+Check out [the forum post for detail](https://forum.juce.com/t/fr-callback-or-other-mechanism-for-exposing-component-debugging-timing/54481/11?u=sudara). Or, if you run a JUCE fork, you might prefer [Roland's solution](https://forum.juce.com/t/fr-callback-or-other-mechanism-for-exposing-component-debugging-timing/54481/6?u=sudara).
 
 ## FAQ
 
