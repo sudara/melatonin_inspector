@@ -175,6 +175,7 @@ namespace melatonin
             if (colorPickerButton.enabled && selectedColor != juce::Colours::transparentBlack)
             {
                 model.pickedColor.setValue ((int) selectedColor.getARGB());
+                model.refresh(); // update Last Picked
                 colorPickerButton.enabled = false;
                 colorPickerButton.onClick();
             }
