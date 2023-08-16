@@ -13,7 +13,7 @@ namespace melatonin
         explicit Preview (ComponentModel& _model) : model (_model)
         {
             model.addListener (*this);
-            addAndMakeVisible (maxLabel);
+            addChildComponent(maxLabel);
             maxLabel.setColour (juce::Label::textColourId, colors::iconOff);
             maxLabel.setJustificationType (juce::Justification::centredTop);
             maxLabel.setFont (juce::Font ("Verdana", 18, juce::Font::FontStyleFlags::bold));
@@ -31,6 +31,7 @@ namespace melatonin
             if (!zoom && model.hasPerformanceTiming())
             {
                 // background for the max section
+                maxLabel.setVisible (true);
                 g.setColour (colors::propertyValueError.withAlpha (0.17f));
                 g.fillRoundedRectangle (maxBounds.toFloat(), 3);
 
@@ -54,6 +55,10 @@ namespace melatonin
                 drawTimingText (g, withChildrenBounds.removeFromLeft (60), model.timingWithChildren2, !hasChildren);
                 drawTimingText (g, withChildrenBounds.removeFromLeft (60), model.timingWithChildren3, !hasChildren);
                 drawTimingText (g, withChildrenBounds.removeFromLeft (60), model.timingWithChildrenMax, !hasChildren);
+            }
+            else
+            {
+                maxLabel.setVisible (false);
             }
 
             if (zoom)
