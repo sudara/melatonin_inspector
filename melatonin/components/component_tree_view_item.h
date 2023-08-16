@@ -148,7 +148,7 @@ namespace melatonin
             auto originalEvent = e.withNewPosition (e.position + getItemPosition (false).getPosition().toFloat());
             auto localEvent = originalEvent.getEventRelativeTo (getOwnerView()->getItemComponent (this));
 
-            if (mightContainSubItems() && disclosureRect.contains (localEvent.position))
+            if (mightContainSubItems() && localEvent.position.x < disclosureRect.getRight() + 7)
             {
                 setOpen (! isOpen());
                 return true;
