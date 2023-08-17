@@ -71,8 +71,7 @@ namespace melatonin
             // don't let us select something already selected
             if (component == target && !isSelected())
             {
-                setSelected (true, true, juce::dontSendNotification);
-                setOpen (true);
+                forceSelectAndOpen (juce::dontSendNotification);
             }
             else if (component->isParentOf (target))
             {
@@ -150,13 +149,12 @@ namespace melatonin
 
             if (mightContainSubItems() && localEvent.position.x < disclosureRect.getRight() + 7)
             {
-                setOpen (! isOpen());
+                setOpen (!isOpen());
                 return true;
             }
 
             return false;
         }
-
 
         // overriding this lets us decide when to select/note
         // we modify the positioning of disclosure/item
@@ -167,16 +165,21 @@ namespace melatonin
             return selectable;
         }
 
+        // by default we guard selection to be precise about hit boxes in the UI
+        void forceSelectAndOpen (juce::NotificationType notificationType = juce::sendNotification)
+        {
+            selectable = true;
+            setSelected (true, notificationType);
+            selectable = false;
+            setOpen (true);
+        }
+
         void itemClicked (const juce::MouseEvent& event) override
         {
             if (onlyTogglesDisclosure (event))
                 return;
 
-            // ok, we're allowed to select now
-            selectable = true;
-            setSelected (true, true);
-            selectable = false;
-
+            forceSelectAndOpen();
             selectComponentCallback (component);
             selectTabbedComponentChildIfNeeded();
             if (mightContainSubItems())
@@ -217,7 +220,7 @@ namespace melatonin
             else if (getComponentName().startsWithIgnoreCase (searchString))
             {
                 outlineComponentCallback (component);
-                setSelected (true, true);
+                forceSelectAndOpen();
                 setOpen (true);
             }
             else
