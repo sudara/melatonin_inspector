@@ -103,7 +103,7 @@ namespace melatonin
             // we can't add padding to the viewport
             // without screwing up the highlight style
             // so we have to add to indent to make sure close/open still works
-            int textIndent = additionalTextIndent + (mightContainSubItems() ? 7 : 5);
+            int textIndent = additionalTextIndent + 7;
 
             if (component->hasKeyboardFocus (false))
             {
