@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  workflow_dispatch:
+  push:
+
+env:
+  CMAKE_BUILD_PARALLEL_LEVEL: 3 # Use up to 3 cpus to build juceaide, etc
+
+concurrency:
+  group: ${{ github.workflow }}.${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+permissions:
+  contents: read
+
+jobs:
+
+  BuildAndTest:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS
+            os: macos-latest
+          - name: Windows
+            os: windows-latest
+
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
+      - name: Configure
+        shell: bash
+        run: cmake -B Builds
+
+      - name: Build
+        shell: bash
+        run: cmake --build Builds --parallel 4
