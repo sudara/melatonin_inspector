@@ -43,11 +43,11 @@ namespace melatonin
 
             // draws inwards as the line thickens
             if (outlinedComponent)
-                g.drawRect (outlinedBounds, 2.0f);
+                g.drawRect (outlinedBounds, 2);
             if (selectedComponent)
             {
                 // Thinner border than hover (draws inwards)
-                g.drawRect (selectedBounds, 1.0f);
+                g.drawRect (selectedBounds, 1);
 
                 const float dashes[] { 2.0f, 2.0f };
                 g.drawDashedLine (lineFromTopToParent, dashes, 2, 1.0f);
@@ -68,14 +68,14 @@ namespace melatonin
 
                 g.setColour (colors::overlayLabelBackground);
                 // text doesn't vertically center very nicely without manual offset
-                g.fillRoundedRectangle (dimensionsLabelBounds.toFloat().withBottom (dimensionsLabelBounds.getBottom()), 2.0f);
+                g.fillRoundedRectangle (dimensionsLabelBounds.withBottom (dimensionsLabelBounds.getBottom()).toFloat(), 2.0f);
             }
 
             if (!hoveredBounds.isEmpty())
             {
                 g.setColour (colors::overlayDistanceToHovered);
-                g.drawRect (hoveredBounds.reduced (1.0f));
-                g.drawRect (selectedBounds.reduced (1.0f));
+                g.drawRect (hoveredBounds.reduced (1));
+                g.drawRect (selectedBounds.reduced (1));
 
                 const float dashes[] { 2.0f, 2.0f };
                 g.drawLine (lineToTopHoveredComponent, 2);
@@ -88,13 +88,13 @@ namespace melatonin
 
                 // text doesn't vertically center very nicely without manual offset
                 if (distanceToTopHoveredLabel.isVisible())
-                    g.fillRoundedRectangle (distanceToTopLabelBounds.toFloat().withBottom (distanceToTopLabelBounds.getBottom()), 2.0f);
+                    g.fillRoundedRectangle (distanceToTopLabelBounds.withBottom (distanceToTopLabelBounds.getBottom()).toFloat(), 2.0f);
                 if (distanceToBottomHoveredLabel.isVisible())
-                    g.fillRoundedRectangle (distanceToBottomLabelBounds.toFloat().withBottom (distanceToBottomLabelBounds.getBottom()), 2.0f);
+                    g.fillRoundedRectangle (distanceToBottomLabelBounds.withBottom (distanceToBottomLabelBounds.getBottom()).toFloat(), 2.0f);
                 if (distanceToLeftHoveredLabel.isVisible())
-                    g.fillRoundedRectangle (distanceToLeftLabelBounds.toFloat().withBottom (distanceToLeftLabelBounds.getBottom()), 2.0f);
+                    g.fillRoundedRectangle (distanceToLeftLabelBounds.withBottom (distanceToLeftLabelBounds.getBottom()).toFloat(), 2.0f);
                 if (distanceToRightHoveredLabel.isVisible())
-                    g.fillRoundedRectangle (distanceToRightLabelBounds.toFloat().withBottom (distanceToRightLabelBounds.getBottom()), 2.0f);
+                    g.fillRoundedRectangle (distanceToRightLabelBounds.withBottom (distanceToRightLabelBounds.getBottom()).toFloat(), 2.0f);
             }
         }
 

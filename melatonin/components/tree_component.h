@@ -57,20 +57,5 @@ namespace melatonin
         juce::TextButton clearBtn { "clear" };
         std::unique_ptr<ComponentTreeViewItem> rootItem;
 
-        void componentChanged (ComponentModel& componentModel) override
-        {
-            if(auto component = componentModel.getSelectedComponent()){
-                /*if (collapseTreeBeforeSelection)
-                {
-                    getRoot()->recursivelyCloseSubItems();
-                }
-                getRoot()->openTreeAndSelect (component);
-
-                tree.scrollToKeepItemVisible (tree.getSelectedItem (0));*/
-            }
-            else {
-                //tree.setRootItem (getRoot());
-            }
-        }
     };
 }

@@ -165,7 +165,6 @@ namespace melatonin
         void resized() override
         {
             auto area = getLocalBounds();
-            int padding = 8;
 
             if (!inspectorEnabled)
                 mainColumnBounds = area.removeFromLeft (380);
@@ -350,11 +349,6 @@ namespace melatonin
             colorPicker.reset();
 
             resized();
-        }
-
-        [[nodiscard]] bool shouldShowPanel (CollapsablePanel& panel)
-        {
-            return settings->props->getBoolValue (panel.getName(), true);
         }
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InspectorComponent)

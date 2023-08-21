@@ -287,18 +287,14 @@ namespace melatonin
 
         void validateSubItems()
         {
-            for (int i = 0; i < getNumSubItems(); ++i)
-            {
-                // Ideally we'd just re-render the sub-items branch:
-                // auto subItemToValidate = dynamic_cast<ComponentTreeViewItem*> (getSubItem (i));
+            // Ideally we'd just re-render the sub-items branch:
+            // auto subItemToValidate = dynamic_cast<ComponentTreeViewItem*> (getSubItem (i));
 
-                // However, that wasn't working so the scorched earth strategy is
-                // if any child has a deleted component, we re-render the whole branch
-                // (we don't explicitly know if things were added or removed)
-                clearSubItems();
-                addItemsForChildComponents();
-                break;
-            }
+            // However, that wasn't working so the scorched earth strategy is
+            // if any child has a deleted component, we re-render the whole branch
+            // (we don't explicitly know if things were added or removed)
+            clearSubItems();
+            addItemsForChildComponents();
         }
 
         void selectTabbedComponentChildIfNeeded()

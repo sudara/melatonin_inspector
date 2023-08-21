@@ -45,10 +45,10 @@ namespace melatonin
         class ColorSelector : public juce::ColourSelector, private juce::ChangeListener
         {
         public:
-            explicit ColorSelector (int flags = (showAlphaChannel | showColourAtTop | showSliders | showColourspace),
+            explicit ColorSelector (int selectorFlags = (showAlphaChannel | showColourAtTop | showSliders | showColourspace),
                 int edgeGap = 4,
                 int gapAroundColourSpaceComponent = 7)
-                : juce::ColourSelector (flags, edgeGap, gapAroundColourSpaceComponent)
+                : juce::ColourSelector (selectorFlags, edgeGap, gapAroundColourSpaceComponent)
             {
                 addChangeListener (this);
             }
