@@ -7,12 +7,14 @@ namespace melatonin
     class InspectorImageButton : public juce::Component
     {
     public:
-        bool enabled = false;
+        bool on = false;
         std::function<void()> onClick;
         std::function<void()> onDoubleClick;
 
         explicit InspectorImageButton (const juce::String& filename, juce::Point<int> o = { 0, 0 }, bool toggleable = false) : offset (o)
         {
+            setInterceptsMouseClicks (true, false);
+            setName (filename);
             if (!toggleable)
                 imageOn = getIcon (filename);
             else
@@ -27,7 +29,7 @@ namespace melatonin
         void paint (juce::Graphics& g) override
         {
             // Assumes exported at 2x
-            if (enabled || imageOff.isNull())
+            if (on || imageOff.isNull())
                 g.drawImageTransformed (imageOn, juce::AffineTransform::scale (0.5f).translated (offset).translated ((float) offset.getX(), (float) offset.getY()));
             else
                 g.drawImageTransformed (imageOff, juce::AffineTransform::scale (0.5f).translated (offset).translated ((float) offset.getX(), (float) offset.getY()));
@@ -35,7 +37,7 @@ namespace melatonin
 
         void mouseDown (const juce::MouseEvent& /*event*/) override
         {
-            enabled = !enabled;
+            on = !on;
             if (onClick != nullptr)
                 onClick();
             repaint();

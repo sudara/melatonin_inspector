@@ -175,7 +175,7 @@ namespace melatonin
             paddingBottomLabel,
             paddingLeftLabel;
 
-        int padding = 32;
+        int padding = 34;
         int paddingToParent = 44;
         juce::Path parentRectanglePath; // complicated b/c it's dashed
         bool isPaddingComponent { false };

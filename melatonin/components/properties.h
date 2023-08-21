@@ -45,7 +45,7 @@ namespace melatonin
         ComponentModel& model;
         juce::PropertyPanel panel { "Properties" };
 
-        int padding = 5;
+        int padding = 3;
 
         void componentModelChanged (ComponentModel&) override
         {

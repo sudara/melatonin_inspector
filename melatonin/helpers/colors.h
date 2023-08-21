@@ -48,6 +48,9 @@ namespace melatonin::colors
     const juce::Colour boxModelBoundingBox = juce::Colour::fromRGB (66, 157, 226);
     const juce::Colour overlayDistanceToHovered = juce::Colour::fromRGB (212, 86, 63);
 
+    const juce::Colour checkerDark = juce::Colour::fromRGB (51, 51, 51);
+    const juce::Colour checkerLight = juce::Colour::fromRGB (104, 104, 104);
+
     static inline juce::String rgbaString (juce::Colour& color)
     {
         if (color.getAlpha() < 255)

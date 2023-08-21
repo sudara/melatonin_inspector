@@ -251,8 +251,10 @@ namespace melatonin
 
         int getItemHeight() const override
         {
+            auto normalItemHeight = 28;
+
             // root has top padding
-            return (getParentItem() == nullptr) ? 52 : 28;
+            return (getParentItem() == nullptr) ? normalItemHeight + 12 : normalItemHeight;
         }
 
         std::function<void (juce::Component* c)> outlineComponentCallback;

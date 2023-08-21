@@ -29,13 +29,13 @@ namespace melatonin
             addChildComponent (tree);
             addChildComponent (emptySearchLabel);
 
-            // visibilities of these are managed by the panels below
+            // visibilities of these are managed by the panels above
             addChildComponent (boxModel);
             addChildComponent (colorPicker);
             addChildComponent (preview);
             addChildComponent (properties);
 
-            // z-order on panels is higher so disclosures are clickable
+            // z-order on panels is higher so they are clickable
             addAndMakeVisible (boxModelPanel);
             addAndMakeVisible (colorPickerPanel);
             addAndMakeVisible (previewPanel);
@@ -111,6 +111,7 @@ namespace melatonin
                 clearButton.setVisible (searchBox.getText().isNotEmpty());
             };
 
+            enabledButton.on = inspectorEnabled;
             enabledButton.onClick = [this] {
                 toggleCallback (!inspectorEnabled);
             };
@@ -183,20 +184,19 @@ namespace melatonin
             boxModelPanel.setBounds (mainCol.removeFromTop (32));
             boxModel.setBounds (mainCol.removeFromTop (boxModel.isVisible() ? 280 : 0));
 
-            auto previewHeight = (model.hasPerformanceTiming() && !preview.zoom) ? 182 : 132;
+            auto previewHeight = (preview.showsPerformanceTimings()) ? 182 : 132;
             auto previewBounds = mainCol.removeFromTop (preview.isVisible() ? previewHeight : 32);
             preview.setBounds (previewBounds);
-            previewPanel.setBounds (previewBounds.removeFromTop (32));
+            previewPanel.setBounds (previewBounds.removeFromTop (32).removeFromLeft (200));
 
-            // the picker icon overlays the panel header, so we overlap it
+            // the picker icon + rgba toggle overlays the panel header, so we overlap it
             auto colorPickerHeight = 72;
             int numColorsToDisplay = juce::jlimit (0, properties.isVisible() ? 12 : 3, (int) model.colors.size());
             if (colorPicker.isVisible() && !model.colors.empty())
                 colorPickerHeight += 24 * numColorsToDisplay;
             auto colorPickerBounds = mainCol.removeFromTop (colorPicker.isVisible() ? colorPickerHeight : 32);
-
             colorPicker.setBounds (colorPickerBounds.withTrimmedLeft (32));
-            colorPickerPanel.setBounds (colorPickerBounds.removeFromTop (32));
+            colorPickerPanel.setBounds (colorPickerBounds.removeFromTop (32).removeFromLeft (200));
 
             propertiesPanel.setBounds (mainCol.removeFromTop (33)); // extra pixel for divider
             properties.setBounds (mainCol.withTrimmedLeft (32));
@@ -270,8 +270,11 @@ namespace melatonin
         }
 
         // called from the main melatonin_inspector.h
+        // for example, on load of the entire inspector
+        // or after a toggle button click
         void toggle (bool enabled)
         {
+            enabledButton.on = enabled;
             inspectorEnabled = enabled;
 
             // content visibility is handled by the panel

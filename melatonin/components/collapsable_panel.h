@@ -36,7 +36,7 @@ namespace melatonin
             if (drawTopDivider)
                 area.removeFromTop (1); // pixel perfect, please
 
-            toggleButton.setBounds (area.reduced (8, 2).removeFromLeft(200));
+            toggleButton.setBounds (area.reduced (8, 2).removeFromLeft (200));
         }
 
         // when the inspector as a whole is toggled, recall our content's visibility
