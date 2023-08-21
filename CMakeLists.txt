@@ -20,8 +20,9 @@ if (MelatoninInspector_IS_TOP_LEVEL)
 
     FetchContent_MakeAvailable(JUCE)
 
-    juce_add_console_app(dummy VERSION 1.0.0)
+    juce_add_gui_app (dummy VERSION 1.0.0)
     target_sources(dummy PRIVATE tests/dummy.cpp)
+    set_target_properties(dummy PROPERTIES COMPILE_WARNING_AS_ERROR ON)
 endif ()
 
 if (NOT COMMAND juce_add_module)
