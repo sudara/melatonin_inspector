@@ -169,7 +169,7 @@ namespace melatonin
         void forceSelectAndOpen (juce::NotificationType notificationType = juce::sendNotification)
         {
             selectable = true;
-            setSelected (true, notificationType);
+            setSelected (true, true, notificationType);
             selectable = false;
             setOpen (true);
         }
