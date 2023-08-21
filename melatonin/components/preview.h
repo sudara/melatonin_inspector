@@ -123,6 +123,7 @@ namespace melatonin
             else if (!previewImage.isNull())
             {
                 // don't want our checkers aliased
+                g.setOpacity (1.0f); // oddly needed to draw the image properly, otherwise there's alpha
                 g.saveState();
                 g.setImageResamplingQuality (juce::Graphics::ResamplingQuality::lowResamplingQuality);
 
@@ -130,7 +131,6 @@ namespace melatonin
                 g.drawImage (checkerboard.getClippedImage (previewImage.getBounds()), previewImageBounds.toFloat(), juce::RectanglePlacement::centred);
 
                 g.restoreState();
-                g.setOpacity (1.0f); // oddly needed to draw the image properly, otherwise there's alpha
                 g.drawImage (previewImage, previewImageBounds.toFloat(), juce::RectanglePlacement::centred);
             }
         }
