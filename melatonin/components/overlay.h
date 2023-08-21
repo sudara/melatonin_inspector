@@ -468,13 +468,15 @@ namespace melatonin
                     lineToBottomHoveredComponent = juce::Line<int> (p1, p1.withY (hoveredBounds.getBottom())).toFloat();
 
                     // avoid drawing horizontal line and if line is going into component
-                    if (lineToBottomHoveredComponent.isHorizontal() || lineToBottomHoveredComponent.getStartY() < lineToBottomHoveredComponent.getEndY())
+                    if (juce::approximatelyEqual (lineToBottomHoveredComponent.getStartY(), lineToBottomHoveredComponent.getEndY()) || lineToBottomHoveredComponent.getStartY() < lineToBottomHoveredComponent.getEndY())
                         lineToBottomHoveredComponent = juce::Line<float>();
+
                     // avoid drawing strictly vertical line lineToLeftHoveredComponent
-                    if (lineToLeftHoveredComponent.isVertical() || lineToLeftHoveredComponent.getStartX() > lineToLeftHoveredComponent.getEndX())
+                    if (juce::approximatelyEqual (lineToLeftHoveredComponent.getStartX(), lineToLeftHoveredComponent.getEndX()) || lineToLeftHoveredComponent.getStartX() > lineToLeftHoveredComponent.getEndX())
                         lineToLeftHoveredComponent = juce::Line<float>();
+
                     // avoid drawing strictly vertical line lineToRightHoveredComponent
-                    if (lineToRightHoveredComponent.isVertical() || lineToRightHoveredComponent.getStartX() < lineToRightHoveredComponent.getEndX())
+                    if (juce::approximatelyEqual (lineToRightHoveredComponent.getStartX(), lineToRightHoveredComponent.getEndX()) || lineToRightHoveredComponent.getStartX() < lineToRightHoveredComponent.getEndX())
                         lineToRightHoveredComponent = juce::Line<float>();
                 }
                 else
@@ -495,14 +497,15 @@ namespace melatonin
                     lineToTopHoveredComponent = juce::Line<int> (p1, p1.withY (hoveredBounds.getY())).toFloat();
 
                     // avoid drawing horizontal line and if line is going into component
-                    if (lineToTopHoveredComponent.isHorizontal() || lineToTopHoveredComponent.getStartY() > lineToTopHoveredComponent.getEndY())
+                    if (juce::approximatelyEqual (lineToTopHoveredComponent.getStartY(), lineToTopHoveredComponent.getEndY()) || lineToTopHoveredComponent.getStartY() > lineToTopHoveredComponent.getEndY())
                         lineToTopHoveredComponent = juce::Line<float>();
 
-                    // avoid drawing stricly vertical line lineToLeftHoveredComponent
-                    if (lineToLeftHoveredComponent.isVertical() || lineToLeftHoveredComponent.getStartX() > lineToLeftHoveredComponent.getEndX())
+                    // avoid drawing strictly vertical line lineToLeftHoveredComponent
+                    if (juce::approximatelyEqual (lineToLeftHoveredComponent.getStartX(), lineToLeftHoveredComponent.getEndX()) || lineToLeftHoveredComponent.getStartX() > lineToLeftHoveredComponent.getEndX())
                         lineToLeftHoveredComponent = juce::Line<float>();
-                    // avoid drawing stricly vertical line lineToRightHoveredComponent
-                    if (lineToRightHoveredComponent.isVertical() || lineToRightHoveredComponent.getStartX() < lineToRightHoveredComponent.getEndX())
+
+                    // avoid drawing strictly vertical line lineToRightHoveredComponent
+                    if (juce::approximatelyEqual (lineToRightHoveredComponent.getStartX(), lineToRightHoveredComponent.getEndX()) || lineToRightHoveredComponent.getStartX() < lineToRightHoveredComponent.getEndX())
                         lineToRightHoveredComponent = juce::Line<float>();
                 }
 
