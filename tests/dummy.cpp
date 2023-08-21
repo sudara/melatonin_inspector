@@ -9,6 +9,10 @@ public:
         mainWindow.reset (new MainWindow (getApplicationName()));
         inspector = std::make_unique<melatonin::Inspector> (*mainWindow);
         inspector->setVisible (true);
+
+        // on CI, we start this as a background process
+        juce::Process::makeForegroundProcess();
+        mainWindow->toFront(true);
     }
 
     void shutdown() override
