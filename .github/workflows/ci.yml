@@ -34,7 +34,7 @@ jobs:
             binary: dummy.app/Contents/MacOS/dummy &
           - name: Windows
             os: windows-latest
-            binary: START /B Debug/dummy.exe
+            binary: ./Debug/dummy.exe &
 
     steps:
       - name: Checkout
