@@ -31,7 +31,7 @@ jobs:
         include:
           - name: macOS
             os: macos-latest
-            binary: dummy.app/Contents/MacOS/pluginval
+            binary: dummy.app/Contents/MacOS/dummy
           - name: Windows
             os: windows-latest
             binary: ./dummy.exe
@@ -52,6 +52,7 @@ jobs:
         working-directory: Builds/dummy_artefacts
         timeout-minutes: 1
         run: |
+          ls -ahl
           ${{ matrix.binary }} 
 
       - uses: OrbitalOwen/desktop-screenshot-action@0.1
