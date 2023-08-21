@@ -31,10 +31,10 @@ jobs:
         include:
           - name: macOS
             os: macos-latest
-            binary: dummy.app/Contents/MacOS/dummy
+            binary: dummy.app/Contents/MacOS/dummy &
           - name: Windows
             os: windows-latest
-            binary: ./dummy.exe
+            binary: start "" dummy.exe
 
     steps:
       - name: Checkout
