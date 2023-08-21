@@ -107,7 +107,7 @@ namespace melatonin
             g.strokePath (parentRectanglePath, parentStroke);
 
             g.setColour (colors::boxModelBoundingBox);
-            g.drawRect (componentRectangle(), 1.0);
+            g.drawRect (componentRectangle(), 1);
 
             // draw padding
             g.setColour (colors::boxModelBoundingBox.withAlpha (0.2f));
