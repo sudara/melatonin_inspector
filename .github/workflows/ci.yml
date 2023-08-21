@@ -57,4 +57,4 @@ jobs:
 
       - uses: OrbitalOwen/desktop-screenshot-action@0.1
         with:
-          file-name: 'desktop.jpg'
+          file-name: ${{ matrix.name }}.jpg
