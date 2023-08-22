@@ -129,31 +129,30 @@ Keep track of the max. Double click to `repaint` and get fresh timings. See [set
 
 
 
-## How to install
-
+## Install with CMake
 
 ### CMake option #1: `FetchContent`
 
-Example usage:
-```cmake
-include (FetchContent)
+Place this somewhere before your call to `juce_add_plugin` or `juce_add_gui_app`:
 
+```cmake
+Include(FetchContent)
 FetchContent_Declare (melatonin_inspector
   GIT_REPOSITORY https://github.com/sudara/melatonin_inspector.git
-  GIT_TAG origin/main)
+  GIT_TAG origin/main
+  SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/melatonin_inspector)
 
 FetchContent_MakeAvailable (melatonin_inspector)
-
-target_link_libraries (yourTarget PRIVATE Melatonin::Inspector)
 ```
 
-### CMake option #2 git submodules and `add_subdirectory`
+### CMake option #2 git submodules
 
-If you are a git submodule aficionado, add this repository as a git submodule to your project:
+If you are a git submodule aficionado, life is easy! Add this repository as a git submodule to your project:
 ```sh
 git submodule add -b main https://github.com/sudara/melatonin_inspector.git modules/melatonin_inspector
 ```
-and then simply call `add_subdirectory` in your CMakeLists.txt:
+and then simply call `add_subdirectory` in your CMakeLists.txt. Remember, modules go *before* your main call to `juce_add_plugin` or `juce_add_gui_app` to make life easy:
+
 ```cmake
 add_subdirectory (modules/melatonin_inspector)
 ```
@@ -163,18 +162,41 @@ To update melatonin_inspector down the road (gasp! maintained dependencies!?) yo
 git submodule update --remote --merge modules/melatonin_inspector
 ```
 
-### Tell JUCE about the module
+### CMake Step 2: Tell JUCE about the module
 
-After your `juce_add_plugin` call, you'll need to link the  your plugin to this module's target, for example:
+Wait wait, not quite done with CMake yet! You couldn't get away that easy. 
+
+*After* your `juce_add_plugin` call you need to link your plugin to this module, for example:
 
 ```
 target_link_libraries("YourProject" PRIVATE melatonin_inspector)
 ```
 
-Note: you don't have to call `juce_add_module`, that's handled by CMake automatically.
+Note: you don't have to call `juce_add_module`. That's handled by our CMake.
 
 If you use Projucer, add the module manually.
  
+## Install with Projucer
+
+If you're rolling old school, or just prefer Projucer life, you'll be happy to note that though JUCE doesn't make it easy we've bent over backwards to make sure our icons, etc are included in the module.
+
+
+### Download the module 
+
+You can still use git to add it as a submodule if you'd like stay up to date with any changes:
+
+```
+git submodule add -b main https://github.com/sudara/melatonin_perfetto.git modules/melatonin_perfetto
+```
+
+Or just download it and stick it somewhere.
+
+### Add it to the projucer
+
+![Projucer - 2023-08-22 04@2x](https://github.com/sudara/melatonin_inspector/assets/472/010d9bf3-f8dc-4fc1-9039-69ba42ff856c)
+
+That's it! 
+
 ## 3. Add an include to your Plugin Editor
 
 Include the module header:
