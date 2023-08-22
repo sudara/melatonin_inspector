@@ -1,3 +1,5 @@
+![](https://github.com/sudara/melatonin_inspector/actions/workflows/ci.yml/badge.svg)
+
 ## Melatonin Component Inspector
 
 A JUCE module that gives you the ability to inspect and visually edit (non-destructively) components in your UI.
@@ -133,40 +135,39 @@ Keep track of the max. Double click to `repaint` and get fresh timings. See [set
 
 ### CMake option #1: `FetchContent`
 
-Place this somewhere before your call to `juce_add_plugin` or `juce_add_gui_app`:
+Place this chunk o love somewhere before your call to `juce_add_plugin` or `juce_add_gui_app`:
 
 ```cmake
-Include(FetchContent)
+Include (FetchContent)
 FetchContent_Declare (melatonin_inspector
   GIT_REPOSITORY https://github.com/sudara/melatonin_inspector.git
   GIT_TAG origin/main
   SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/melatonin_inspector)
-
 FetchContent_MakeAvailable (melatonin_inspector)
 ```
 
 ### CMake option #2 git submodules
 
-If you are a git submodule aficionado, life is easy! Add this repository as a git submodule to your project:
+If you are a git submodule aficionado, life is great! Add this submodule to your project:
 ```sh
 git submodule add -b main https://github.com/sudara/melatonin_inspector.git modules/melatonin_inspector
 ```
-and then simply call `add_subdirectory` in your CMakeLists.txt. Remember, modules go *before* your main call to `juce_add_plugin` or `juce_add_gui_app` to make life easy:
+and then simply call `add_subdirectory` in your CMakeLists.txt. Remember, modules go *before* your main call to `juce_add_plugin` or `juce_add_gui_app` ([this makes life easier in IDEs](https://github.com/juce-framework/JUCE/blob/master/docs/CMake%20API.md#juce_enable_module_source_groups)):
 
 ```cmake
 add_subdirectory (modules/melatonin_inspector)
 ```
 
-To update melatonin_inspector down the road (gasp! maintained dependencies!?) you can:
+To update melatonin_inspector down the road (gasp! maintained dependencies!?):
 ```git
 git submodule update --remote --merge modules/melatonin_inspector
 ```
 
 ### CMake Step 2: Tell JUCE about the module
 
-Wait wait, not quite done with CMake yet! You couldn't get away that easy. 
+Wait wait, not so fast! You couldn't get away that easily. 
 
-*After* your `juce_add_plugin` call you need to link your plugin to this module, for example:
+*After* your `juce_add_plugin` call you will need to link your plugin to the module's target, for example:
 
 ```
 target_link_libraries("YourProject" PRIVATE melatonin_inspector)
@@ -281,6 +282,10 @@ Want timings for your custom components ***right now***? Do what I do and derive
 Check out [the forum post for detail](https://forum.juce.com/t/fr-callback-or-other-mechanism-for-exposing-component-debugging-timing/54481/11?u=sudara). Or, if you run a JUCE fork, you might prefer [Roland's solution](https://forum.juce.com/t/fr-callback-or-other-mechanism-for-exposing-component-debugging-timing/54481/6?u=sudara).
 
 ## FAQ
+
+### Can I use this in a GUI app/standalone?
+
+Yup! See the tests folder for an example.
 
 ### Can I save my component resizes or edits?
 
