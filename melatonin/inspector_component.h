@@ -16,32 +16,34 @@
 
 namespace melatonin
 {
-    class InspectorComponent : public juce::Component, public juce::Button::Listener
+    class InspectorComponent : public juce::Component
     {
     public:
-        explicit InspectorComponent (juce::Component& rootComponent, bool enabledAtStart = true) : root (rootComponent)
+        explicit InspectorComponent (juce::Component& rootComponent, bool enabledAtStart = true) : root (rootComponent), inspectorEnabled (enabledAtStart)
         {
             setMouseClickGrabsKeyboardFocus (false);
 
-            addAndMakeVisible (toggleButton);
+            addAndMakeVisible (enabledButton);
             addAndMakeVisible (logo);
 
             addChildComponent (tree);
             addChildComponent (emptySearchLabel);
 
-            addAndMakeVisible (colorPickerPanel);
-            addAndMakeVisible (previewPanel);
-            addAndMakeVisible (propertiesPanel);
-
-            // visibility of everything but boxModel is managed by the toggle in the above panels
-            addAndMakeVisible (boxModel);
+            // visibilities of these are managed by the panels above
+            addChildComponent (boxModel);
             addChildComponent (colorPicker);
             addChildComponent (preview);
             addChildComponent (properties);
 
+            // z-order on panels is higher so they are clickable
+            addAndMakeVisible (boxModelPanel);
+            addAndMakeVisible (colorPickerPanel);
+            addAndMakeVisible (previewPanel);
+            addAndMakeVisible (propertiesPanel);
+
             addAndMakeVisible (searchBox);
             addAndMakeVisible (searchIcon);
-            addChildComponent (clearBtn);
+            addChildComponent (clearButton);
 
             colorPicker.setRootComponent (&root);
             colorPicker.togglePickerCallback = [this] (bool value) {
@@ -61,13 +63,6 @@ namespace melatonin
             emptySelectionPrompt.setJustificationType (juce::Justification::centredTop);
             emptySearchLabel.setJustificationType (juce::Justification::centredTop);
             emptySearchLabel.setColour (juce::Label::textColourId, colors::treeItemTextSelected);
-
-            toggleButton.setButtonText ("Enable inspector");
-            toggleButton.setColour (juce::TextButton::textColourOffId, colors::disclosure);
-            toggleButton.setColour (juce::TextButton::textColourOnId, colors::highlight);
-            toggleButton.setToggleState (enabledAtStart, juce::dontSendNotification);
-
-            toggleButton.addListener (this);
 
             // the JUCE widget is unfriendly for theming, so indenting is also manually handled
             tree.setIndentSize (12);
@@ -113,10 +108,15 @@ namespace melatonin
                     emptySearchLabel.setVisible (false);
                 }
 
-                clearBtn.setVisible (searchBox.getText().isNotEmpty());
+                clearButton.setVisible (searchBox.getText().isNotEmpty());
             };
 
-            clearBtn.onClick = [this] {
+            enabledButton.on = inspectorEnabled;
+            enabledButton.onClick = [this] {
+                toggleCallback (!inspectorEnabled);
+            };
+
+            clearButton.onClick = [this] {
                 searchBox.setText ("");
                 searchBox.giveAwayKeyboardFocus();
             };
@@ -165,9 +165,6 @@ namespace melatonin
         void resized() override
         {
             auto area = getLocalBounds();
-            int padding = 8;
-
-            auto inspectorEnabled = toggleButton.getToggleState();
 
             if (!inspectorEnabled)
                 mainColumnBounds = area.removeFromLeft (380);
@@ -178,32 +175,34 @@ namespace melatonin
             auto headerHeight = 48;
 
             topArea = mainCol.removeFromTop (headerHeight);
-            toggleButton.setBounds (topArea.reduced (padding + 6, 0));
-            logo.setBounds (topArea.withTrimmedLeft (topArea.getWidth() - 56));
+            auto toolbar = topArea;
+            enabledButton.setBounds (toolbar.removeFromLeft (48));
+            logo.setBounds (toolbar.removeFromRight (56));
 
-            mainCol.removeFromTop (10);
-            boxModel.setBounds (mainCol.removeFromTop (300));
+            mainCol.removeFromTop (12);
+            boxModelPanel.setBounds (mainCol.removeFromTop (32));
+            boxModel.setBounds (mainCol.removeFromTop (boxModel.isVisible() ? 280 : 0));
 
-            previewPanel.setBounds (mainCol.removeFromTop (32));
-            auto previewExpandedBounds = (model.hasPerformanceTiming() && !preview.zoom) ? 150 : 100;
-            preview.setBounds (mainCol.removeFromTop (preview.isVisible() ? previewExpandedBounds : 0));
+            auto previewHeight = (preview.showsPerformanceTimings()) ? 182 : 132;
+            auto previewBounds = mainCol.removeFromTop (preview.isVisible() ? previewHeight : 32);
+            preview.setBounds (previewBounds);
+            previewPanel.setBounds (previewBounds.removeFromTop (32).removeFromLeft (200));
 
-            // the picker icon overlays the panel header, so we overlap it
+            // the picker icon + rgba toggle overlays the panel header, so we overlap it
             auto colorPickerHeight = 72;
             int numColorsToDisplay = juce::jlimit (0, properties.isVisible() ? 12 : 3, (int) model.colors.size());
             if (colorPicker.isVisible() && !model.colors.empty())
                 colorPickerHeight += 24 * numColorsToDisplay;
             auto colorPickerBounds = mainCol.removeFromTop (colorPicker.isVisible() ? colorPickerHeight : 32);
-
             colorPicker.setBounds (colorPickerBounds.withTrimmedLeft (32));
-            colorPickerPanel.setBounds (colorPickerBounds.removeFromTop (32));
+            colorPickerPanel.setBounds (colorPickerBounds.removeFromTop (32).removeFromLeft (200));
 
             propertiesPanel.setBounds (mainCol.removeFromTop (33)); // extra pixel for divider
             properties.setBounds (mainCol.withTrimmedLeft (32));
 
             searchBoxBounds = area.removeFromTop (headerHeight);
             auto b = searchBoxBounds;
-            clearBtn.setBounds (b.removeFromRight (48));
+            clearButton.setBounds (b.removeFromRight (48));
             searchIcon.setBounds (b.removeFromLeft (48));
             searchBox.setBounds (b.reduced (0, 2));
 
@@ -269,22 +268,13 @@ namespace melatonin
             tree.scrollToKeepItemVisible (tree.getSelectedItem (0));
         }
 
-        void buttonClicked (juce::Button* button) override
-        {
-            if (button == &toggleButton)
-            {
-                auto enabled = toggleButton.getToggleState();
-                toggle (enabled);
-
-                // this callback needs to stay here
-                // so it's never called from the inspector document (via cmd-i)
-                toggleCallback (enabled);
-            }
-        }
-
+        // called from the main melatonin_inspector.h
+        // for example, on load of the entire inspector
+        // or after a toggle button click
         void toggle (bool enabled)
         {
-            toggleButton.setToggleState (enabled, juce::dontSendNotification);
+            enabledButton.on = enabled;
+            inspectorEnabled = enabled;
 
             // content visibility is handled by the panel
             previewPanel.setVisible (enabled);
@@ -312,17 +302,15 @@ namespace melatonin
     private:
         Component::SafePointer<Component> selectedComponent;
         Component& root;
-
         juce::SharedResourcePointer<InspectorSettings> settings;
-
-        juce::ToggleButton toggleButton;
-
         ComponentModel model;
+        bool inspectorEnabled;
 
         juce::Rectangle<int> mainColumnBounds, topArea, searchBoxBounds, treeViewBounds;
-        InspectorImageButton logo { "Logo" };
+        InspectorImageButton logo { "logo" };
 
         BoxModel boxModel { model };
+        CollapsablePanel boxModelPanel { "BOX MODEL", &boxModel };
 
         Preview preview { model };
         CollapsablePanel previewPanel { "PREVIEW", &preview };
@@ -338,8 +326,9 @@ namespace melatonin
         juce::Label emptySelectionPrompt { "SelectionPrompt", "Select any component to see components tree" };
         juce::Label emptySearchLabel { "EmptySearchResultsPrompt", "No component found" };
         juce::TextEditor searchBox { "Search box" };
-        InspectorImageButton clearBtn { "Clear", { 0, 6 } };
-        InspectorImageButton searchIcon { "Search", { 8, 8 } };
+        InspectorImageButton enabledButton { "enabled", { 8, 6 }, true };
+        InspectorImageButton clearButton { "clear", { 0, 6 } };
+        InspectorImageButton searchIcon { "search", { 8, 8 } };
         std::unique_ptr<ComponentTreeViewItem> rootItem;
 
         ComponentTreeViewItem* getRoot()
@@ -360,11 +349,6 @@ namespace melatonin
             colorPicker.reset();
 
             resized();
-        }
-
-        [[nodiscard]] bool shouldShowPanel (CollapsablePanel& panel)
-        {
-            return settings->props->getBoolValue (panel.getName(), true);
         }
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InspectorComponent)

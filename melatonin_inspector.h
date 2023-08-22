@@ -12,7 +12,7 @@ dependencies:     juce_gui_basics, juce_gui_extra
 END_JUCE_MODULE_DECLARATION
 */
 #pragma once
-#include "LatestCompiledAssets/InspectorBinaryData.h"
+#include "InspectorBinaryData.h"
 #include "melatonin/lookandfeel.h"
 #include "melatonin_inspector/melatonin/components/overlay.h"
 #include "melatonin_inspector/melatonin/helpers/inspector_settings.h"
@@ -47,11 +47,11 @@ namespace melatonin
                 return false;
             }
         };
-        explicit Inspector (juce::Component& rootComponent, bool enabledAtStart = true)
+        explicit Inspector (juce::Component& rootComponent, bool inspectorEnabledAtStart = true)
             : juce::DocumentWindow ("Melatonin Inspector", colors::background, 7, true),
-              inspectorComponent (rootComponent, enabledAtStart),
+              inspectorComponent (rootComponent, inspectorEnabledAtStart),
               root (rootComponent),
-              enabled (enabledAtStart)
+              inspectorEnabled (inspectorEnabledAtStart)
         {
             setMouseClickGrabsKeyboardFocus (false);
             root.addAndMakeVisible (overlay);
@@ -110,13 +110,13 @@ namespace melatonin
             settings->props->setValue ("x", getX());
             settings->props->setValue ("y", getY());
 
-            // only overwrite width/height when enabled.
+            // only overwrite width/height when inspectorEnabled.
             // the disabled dimensions are fixed,
             // so this lets us "open back up" when re-enabling
-            if (enabled)
+            if (inspectorEnabled)
             {
-                settings->props->setValue ("enabledWidth", getWidth());
-                settings->props->setValue ("enabledHeight", getHeight());
+                settings->props->setValue ("inspectorEnabledWidth", getWidth());
+                settings->props->setValue ("inspectorEnabledHeight", getHeight());
             }
 
             settings->saveIfNeeded();
@@ -125,17 +125,17 @@ namespace melatonin
         void restoreBoundsIfNeeded()
         {
             // disabled is a fixed 380x400
-            // enabled must be at least 700x800
-            auto minWidth = enabled ? 700 : 380;
-            auto minHeight = enabled ? 800 : 400;
+            // inspectorEnabled must be at least 700x800
+            auto minWidth = inspectorEnabled ? 700 : 380;
+            auto minHeight = inspectorEnabled ? 800 : 400;
 
             auto x = settings->props->getIntValue ("x", 0);
             auto y = settings->props->getIntValue ("y", 0);
 
-            if (enabled)
+            if (inspectorEnabled)
             {
-                auto width = settings->props->getIntValue ("enabledWidth", minWidth);
-                auto height = settings->props->getIntValue ("enabledHeight", minHeight);
+                auto width = settings->props->getIntValue ("inspectorEnabledWidth", minWidth);
+                auto height = settings->props->getIntValue ("inspectorEnabledHeight", minHeight);
                 setResizable (true, false);
                 setResizeLimits (minWidth, minHeight, 1200, 1200);
                 setBounds (x, y, width, height);
@@ -154,7 +154,7 @@ namespace melatonin
         void outlineComponent (Component* c)
         {
             // don't dogfood the overlay
-            if (!enabled || overlay.isParentOf (c))
+            if (!inspectorEnabled || overlay.isParentOf (c))
                 return;
 
             overlay.outlineComponent (c);
@@ -163,7 +163,7 @@ namespace melatonin
 
         void outlineDistanceCallback (Component* c)
         {
-            if (!enabled || overlay.isParentOf (c))
+            if (!inspectorEnabled || overlay.isParentOf (c))
                 return;
 
             overlay.outlineDistanceCallback (c);
@@ -171,7 +171,7 @@ namespace melatonin
 
         void selectComponent (Component* c, bool collapseTree = true)
         {
-            if (!enabled || overlay.isParentOf (c))
+            if (!inspectorEnabled || overlay.isParentOf (c))
                 return;
 
             overlay.selectComponent (c);
@@ -180,7 +180,7 @@ namespace melatonin
 
         void dragComponent (Component* c, const juce::MouseEvent& e)
         {
-            if (!enabled || overlay.isParentOf (c))
+            if (!inspectorEnabled || overlay.isParentOf (c))
                 return;
 
             overlay.dragSelectedComponent (e);
@@ -189,7 +189,7 @@ namespace melatonin
 
         void startDragComponent (Component* c, const juce::MouseEvent& e)
         {
-            if (!enabled || overlay.isParentOf (c))
+            if (!inspectorEnabled || overlay.isParentOf (c))
                 return;
 
             overlay.startDraggingComponent (e);
@@ -216,7 +216,7 @@ namespace melatonin
             // the DocumentWindow always stays open, even when disabled
             setVisible (true);
 
-            enabled = newStatus;
+            inspectorEnabled = newStatus;
             overlay.setVisible (newStatus);
             inspectorComponent.toggle (newStatus);
 
@@ -225,7 +225,7 @@ namespace melatonin
 
         void toggle()
         {
-            toggle (!enabled);
+            toggle (!inspectorEnabled);
         }
 
         std::function<void()> onClose;
@@ -235,7 +235,7 @@ namespace melatonin
         melatonin::InspectorLookAndFeel inspectorLookAndFeel;
         melatonin::InspectorComponent inspectorComponent;
         juce::Component& root;
-        bool enabled;
+        bool inspectorEnabled;
         melatonin::Overlay overlay;
         melatonin::MouseListener mouseListener { root };
         OpenInspector keyListener { *this };
@@ -256,7 +256,7 @@ namespace melatonin
             mouseListener.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, true); };
             mouseListener.componentStartDraggingCallback = [this] (Component* c, const juce::MouseEvent& e) { this->startDragComponent (c, e); };
             mouseListener.componentDraggedCallback = [this] (Component* c, const juce::MouseEvent& e) { this->dragComponent (c, e); };
-            mouseListener.mouseExitCallback = [this]() { if (this->enabled) inspectorComponent.redisplaySelectedComponent(); };
+            mouseListener.mouseExitCallback = [this]() { if (this->inspectorEnabled) inspectorComponent.redisplaySelectedComponent(); };
 
             inspectorComponent.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, true); };
             inspectorComponent.outlineComponentCallback = [this] (Component* c) { this->outlineComponent (c); };

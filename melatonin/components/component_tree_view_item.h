@@ -169,7 +169,7 @@ namespace melatonin
         void forceSelectAndOpen (juce::NotificationType notificationType = juce::sendNotification)
         {
             selectable = true;
-            setSelected (true, notificationType);
+            setSelected (true, true, notificationType);
             selectable = false;
             setOpen (true);
         }
@@ -251,8 +251,10 @@ namespace melatonin
 
         int getItemHeight() const override
         {
+            auto normalItemHeight = 28;
+
             // root has top padding
-            return (getParentItem() == nullptr) ? 52 : 28;
+            return (getParentItem() == nullptr) ? normalItemHeight + 12 : normalItemHeight;
         }
 
         std::function<void (juce::Component* c)> outlineComponentCallback;
@@ -285,18 +287,14 @@ namespace melatonin
 
         void validateSubItems()
         {
-            for (int i = 0; i < getNumSubItems(); ++i)
-            {
-                // Ideally we'd just re-render the sub-items branch:
-                // auto subItemToValidate = dynamic_cast<ComponentTreeViewItem*> (getSubItem (i));
+            // Ideally we'd just re-render the sub-items branch:
+            // auto subItemToValidate = dynamic_cast<ComponentTreeViewItem*> (getSubItem (i));
 
-                // However, that wasn't working so the scorched earth strategy is
-                // if any child has a deleted component, we re-render the whole branch
-                // (we don't explicitly know if things were added or removed)
-                clearSubItems();
-                addItemsForChildComponents();
-                break;
-            }
+            // However, that wasn't working so the scorched earth strategy is
+            // if any child has a deleted component, we re-render the whole branch
+            // (we don't explicitly know if things were added or removed)
+            clearSubItems();
+            addItemsForChildComponents();
         }
 
         void selectTabbedComponentChildIfNeeded()

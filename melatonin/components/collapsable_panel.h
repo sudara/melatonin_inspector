@@ -36,7 +36,7 @@ namespace melatonin
             if (drawTopDivider)
                 area.removeFromTop (1); // pixel perfect, please
 
-            toggleButton.setBounds (area.reduced (8, 2).removeFromLeft(200));
+            toggleButton.setBounds (area.reduced (8, 2).removeFromLeft (200));
         }
 
         // when the inspector as a whole is toggled, recall our content's visibility
@@ -79,7 +79,7 @@ namespace melatonin
                     g.setOpacity (0.5f);
 
                 g.drawText (button.getButtonText(),
-                    button.getLocalBounds().withTrimmedLeft (juce::roundToInt (tickWidth) + 16).withTrimmedRight (2),
+                    button.getLocalBounds().withTrimmedLeft (juce::roundToInt (tickWidth) + 12).withTrimmedRight (2),
                     juce::Justification::centredLeft);
             }
 
@@ -87,8 +87,7 @@ namespace melatonin
             {
                 juce::Rectangle<float> tickBounds (x, y, w, h);
 
-                tickBounds.reduce (0, 2);
-                auto boxSize = tickBounds.getHeight();
+                auto boxSize = tickBounds.getHeight() - 5;
 
                 juce::Path p;
                 p.addTriangle (tickBounds.getX(), tickBounds.getY(), tickBounds.getX() + boxSize + 2, tickBounds.getY(), tickBounds.getX() + boxSize * 0.5f + 1, tickBounds.getY() + boxSize);
@@ -102,6 +101,8 @@ namespace melatonin
 
                 if (!ticked)
                     transform = transform.translated (0, -boxSize * 0.25f + 1);
+                else
+                    transform = transform.translated (-1, 3);
 
                 g.fillPath (p, transform);
             }

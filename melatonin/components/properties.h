@@ -45,7 +45,7 @@ namespace melatonin
         ComponentModel& model;
         juce::PropertyPanel panel { "Properties" };
 
-        int padding = 5;
+        int padding = 3;
 
         void componentModelChanged (ComponentModel&) override
         {
@@ -72,8 +72,8 @@ namespace melatonin
         [[nodiscard]] juce::Array<juce::PropertyComponent*> createPropertyComponents() const
         {
             // we can't actually set these values from the front end, so disable them
-            auto cachedImage = new juce::BooleanPropertyComponent (model.hasCachedImageValue, "CachedToImage", "");
-            cachedImage->setEnabled (false);
+            auto hasCachedImage = new juce::BooleanPropertyComponent (model.hasCachedImageValue, "CachedToImage", "");
+            hasCachedImage->setEnabled (false);
 
             // Always have class up top
             juce::Array<juce::PropertyComponent*> props = {
@@ -110,7 +110,7 @@ namespace melatonin
                 new juce::TextPropertyComponent (model.fontValue, "Font", 5, false, false),
                 new juce::BooleanPropertyComponent (model.wantsFocusValue, "Wants Keyboard Focus", ""),
                 new juce::BooleanPropertyComponent (model.accessibilityHandledValue, "Accessibility", ""),
-                cachedImage,
+                hasCachedImage,
                 new juce::BooleanPropertyComponent (model.interceptsMouseValue, "Intercepts Mouse", ""),
                 new juce::BooleanPropertyComponent (model.childrenInterceptsMouseValue, "Children Intercepts", "") });
 

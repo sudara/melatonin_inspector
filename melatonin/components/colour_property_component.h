@@ -45,10 +45,10 @@ namespace melatonin
         class ColorSelector : public juce::ColourSelector, private juce::ChangeListener
         {
         public:
-            explicit ColorSelector (int flags = (showAlphaChannel | showColourAtTop | showSliders | showColourspace),
+            explicit ColorSelector (int selectorFlags = (showAlphaChannel | showColourAtTop | showSliders | showColourspace),
                 int edgeGap = 4,
                 int gapAroundColourSpaceComponent = 7)
-                : juce::ColourSelector (flags, edgeGap, gapAroundColourSpaceComponent)
+                : juce::ColourSelector (selectorFlags, edgeGap, gapAroundColourSpaceComponent)
             {
                 addChangeListener (this);
             }
@@ -103,11 +103,11 @@ namespace melatonin
             {
                 if (e.mouseWasClicked())
                 {
-                    auto flags = juce::ColourSelector::showSliders | juce::ColourSelector::showColourspace;
+                    auto selectorFlags = juce::ColourSelector::showSliders | juce::ColourSelector::showColourspace;
                     if (alpha)
-                        flags |= juce::ColourSelector::showAlphaChannel;
+                        selectorFlags |= juce::ColourSelector::showAlphaChannel;
 
-                    auto colourSelector = std::make_unique<ColorSelector> (flags);
+                    auto colourSelector = std::make_unique<ColorSelector> (selectorFlags);
 
                     colourSelector->setLookAndFeel (&getLookAndFeel());
                     colourSelector->setSize (300, 300);

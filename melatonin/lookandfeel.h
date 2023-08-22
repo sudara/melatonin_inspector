@@ -160,7 +160,7 @@ namespace melatonin
                 r.getX() - 5,
                 r.getHeight(),
                 juce::Justification::centredLeft,
-                2);
+                true);
 
             if (component.getProperties().getWithDefault ("isUserProperty", false))
             {

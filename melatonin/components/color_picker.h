@@ -61,10 +61,9 @@ namespace melatonin
             colorPickerButton.onClick = [this]() {
                 // hides the text when the picker isn't active
                 // uncertain why, but this must be accessed through "this"
-                if (this->colorPickerButton.enabled)
+                if (this->colorPickerButton.on)
                 {
                     preview.setVisible (true);
-
                     // pick an arbitrary first position in the overlay
                     if (root != nullptr)
                         updatePicker ({ root->getX() + 10, root->getY() + 10 });
@@ -82,7 +81,7 @@ namespace melatonin
 
                 // toggle overlay
                 if (togglePickerCallback)
-                    togglePickerCallback (!colorPickerButton.enabled);
+                    togglePickerCallback (!colorPickerButton.on);
             };
 
             // sets the color properties with the correct display format
@@ -98,7 +97,7 @@ namespace melatonin
 
         void paint (juce::Graphics& g) override
         {
-            if (colorPickerButton.enabled)
+            if (colorPickerButton.on)
             {
                 g.setColour (colors::black);
 
@@ -115,7 +114,7 @@ namespace melatonin
             {
                 g.setColour (colors::propertyName);
                 g.setFont (juce::Font ("Verdana", 15, juce::Font::FontStyleFlags::plain));
-                g.drawText ("No Color Properties", panelBounds.withTrimmedLeft (5), juce::Justification::topLeft);
+                g.drawText ("No Color Properties", panelBounds.withTrimmedLeft (3).withTrimmedTop (2), juce::Justification::topLeft);
             }
         }
 
@@ -144,7 +143,7 @@ namespace melatonin
             if (root == nullptr)
                 return;
 
-            event.eventComponent->setMouseCursor (colorPickerButton.enabled ? eyedropperCursor : juce::MouseCursor::NormalCursor);
+            event.eventComponent->setMouseCursor (colorPickerButton.on ? eyedropperCursor : juce::MouseCursor::NormalCursor);
 
             auto rootPos = event.getEventRelativeTo (root).getPosition();
 
@@ -164,7 +163,7 @@ namespace melatonin
 
         void mouseExit (const juce::MouseEvent& event) override
         {
-            event.eventComponent->setMouseCursor (colorPickerButton.enabled ? eyedropperCursor : juce::MouseCursor::NormalCursor);
+            event.eventComponent->setMouseCursor (colorPickerButton.on ? eyedropperCursor : juce::MouseCursor::NormalCursor);
         }
 
         void mouseDown (const juce::MouseEvent& /*event*/) override
@@ -172,11 +171,11 @@ namespace melatonin
             if (root == nullptr || image == nullptr)
                 return;
 
-            if (colorPickerButton.enabled && selectedColor != juce::Colours::transparentBlack)
+            if (colorPickerButton.on && selectedColor != juce::Colours::transparentBlack)
             {
                 model.pickedColor.setValue ((int) selectedColor.getARGB());
                 model.refresh(); // update Last Picked
-                colorPickerButton.enabled = false;
+                colorPickerButton.on = false;
                 colorPickerButton.onClick();
             }
         }
@@ -232,7 +231,7 @@ namespace melatonin
         {
             if (!isVisible())
             {
-                colorPickerButton.enabled = false;
+                colorPickerButton.on = false;
                 colorPickerButton.onClick();
             }
         }
@@ -242,12 +241,12 @@ namespace melatonin
         Preview& preview;
 
         juce::PropertyPanel panel { "Properties" };
-        InspectorImageButton colorPickerButton { "Eyedropper", { 0, 6 }, true };
+        InspectorImageButton colorPickerButton { "eyedropper", { 0, 6 }, true };
         juce::Rectangle<int> colorValueBounds;
         juce::Rectangle<int> panelBounds;
         RGBAToggle rgbaToggle;
 
-        juce::Image eyedropperCursorImage = getIcon ("Eyedropperon").rescaled (16, 16);
+        juce::Image eyedropperCursorImage = getIcon ("eyedropperon").rescaled (16, 16);
         juce::MouseCursor eyedropperCursor { eyedropperCursorImage, 0, 15 };
 
         std::unique_ptr<juce::Image> image;
@@ -257,7 +256,7 @@ namespace melatonin
 
         void updatePicker (juce::Point<int> point)
         {
-            if (!colorPickerButton.enabled)
+            if (!colorPickerButton.on)
                 return;
 
             selectedColor = image->getPixelAt (point.x, point.y);
