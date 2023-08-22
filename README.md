@@ -130,8 +130,7 @@ Keep track of the max. Double click to `repaint` and get fresh timings. See [set
 ![AudioPluginHost - 2023-08-16 57](https://github.com/sudara/melatonin_inspector/assets/472/7b08ea30-ebd1-4900-bb67-02bb8393211b)
 
 
-
-## Install with CMake
+## Installing with CMake
 
 ### CMake option #1: `FetchContent`
 
@@ -177,10 +176,9 @@ Note: you don't have to call `juce_add_module`. That's handled by our CMake.
 
 If you use Projucer, add the module manually.
  
-## Install with Projucer
+## Installing with Projucer
 
 If you're rolling old school, or just prefer Projucer life, you'll be happy to note that though JUCE doesn't make it easy we've bent over backwards to make sure our icons, etc are included in the module.
-
 
 ### Download the module 
 
@@ -194,11 +192,13 @@ Or just download it and stick it somewhere.
 
 ### Add it to the projucer
 
-![Projucer - 2023-08-22 04@2x](https://github.com/sudara/melatonin_inspector/assets/472/010d9bf3-f8dc-4fc1-9039-69ba42ff856c)
+Just "Add a module from a specified folder" and you're done!
 
-That's it! 
+<p align="center">
+<img src="https://github.com/sudara/melatonin_inspector/assets/472/010d9bf3-f8dc-4fc1-9039-69ba42ff856c" width="500"/>
+</p>
 
-## 3. Add an include to your Plugin Editor
+## 2. Add an include to your Plugin Editor
 
 Include the module header:
 
@@ -206,7 +206,7 @@ Include the module header:
 #include "melatonin_inspector/melatonin_inspector.h"
 ```
 
-## 4. Add the inspector as a private member to your Editor
+## 3. Add the inspector as a private member to your Editor
 
 The easiest way to get started is to pass a reference to the root component of your UI (typically the Editor itself like in this example, but you could also inspect anything that derives from `juce::Component`).
 
@@ -220,7 +220,7 @@ If you prefer the inspector open in the disabled state by default, you can pass 
 melatonin::Inspector inspector { *this, false };
 ```
 
-## 5. Set it visible
+## 4. Set it visible
 
 When the inspector as an editor member, you can use `cmd/ctrl i` to toggle whether the inspector is enabled.
 
@@ -236,7 +236,7 @@ inspector.setVisible(true);
 inspector.toggle(true);
 ```
 
-## 6. Optional: Make it smarter 
+## 5. Optional: Make it smarter 
 
 Setting up as above means that the inspector will always be constructed with your editor. Clicking close on the inspector's `DocumentWindow` will just hide it while disabling inspection. 
 
@@ -260,7 +260,7 @@ inspector->setVisible (true);
 ```
 Thanks to @FigBug for this feature.
 
-## 7. Optional: Setup component timing
+## 6. Optional: Setup component timing
 
 Just `#include modules/melatonin_inspector/melatonin/helpers/timing.h` and then call the RAII helper ***at the top*** of a component's paint method:
 
