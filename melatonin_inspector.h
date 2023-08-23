@@ -18,6 +18,7 @@ END_JUCE_MODULE_DECLARATION
 #include "melatonin_inspector/melatonin/helpers/inspector_settings.h"
 #include "melatonin_inspector/melatonin/helpers/mouse_listener.h"
 #include "melatonin_inspector/melatonin/inspector_component.h"
+#include <melatonin_inspector/melatonin/components/fps_meter.h>
 
 namespace melatonin
 {
@@ -237,6 +238,7 @@ namespace melatonin
         juce::Component& root;
         bool inspectorEnabled;
         melatonin::Overlay overlay;
+        melatonin::FPSMeter fpsMeter { overlay };
         melatonin::MouseListener mouseListener { root };
         OpenInspector keyListener { *this };
 
@@ -264,6 +266,11 @@ namespace melatonin
             inspectorComponent.toggleOverlayCallback = [this] (bool enable) {
                 this->overlay.setVisible (enable);
                 mouseListener.enabled = enable;
+            };
+            inspectorComponent.toggleFPSCallback = [this] (bool enable) {
+                if (enable)
+                    this->fpsMeter.setBounds (this->overlay.getLocalBounds().removeFromRight (50).removeFromTop (30));
+                this->fpsMeter.setVisible (enable);
             };
         }
     };

@@ -9,6 +9,13 @@
 #include "melatonin_inspector/melatonin/components/properties.h"
 #include "melatonin_inspector/melatonin/lookandfeel.h"
 
+// VBlank was added in 7.0.3
+#if (JUCE_MAJOR_VERSION >= 7) && (JUCE_MINOR_VERSION >= 1 || JUCE_BUILDNUMBER >= 3)
+    #define MELATONIN_VBLANK 1
+#else
+    #define MELATONIN_VBLANK 0
+#endif
+
 /*
  * Right now this unfortunately bundles all inspector components
  * as well as the tree view and selection logic.
@@ -24,6 +31,7 @@ namespace melatonin
             setMouseClickGrabsKeyboardFocus (false);
 
             addAndMakeVisible (enabledButton);
+            addAndMakeVisible (fpsToggle);
             addAndMakeVisible (logo);
 
             addChildComponent (tree);
@@ -116,6 +124,12 @@ namespace melatonin
                 toggleCallback (!inspectorEnabled);
             };
 
+            fpsToggle.on = settings->props->getBoolValue ("fpsEnabled", false);
+            fpsToggle.onClick = [this] {
+                settings->props->setValue ("fpsEnabled", fpsToggle.on);
+                toggleFPSCallback (fpsToggle.on);
+            };
+
             clearButton.onClick = [this] {
                 searchBox.setText ("");
                 searchBox.giveAwayKeyboardFocus();
@@ -177,6 +191,7 @@ namespace melatonin
             topArea = mainCol.removeFromTop (headerHeight);
             auto toolbar = topArea;
             enabledButton.setBounds (toolbar.removeFromLeft (48));
+            fpsToggle.setBounds (toolbar.removeFromLeft (48));
             logo.setBounds (toolbar.removeFromRight (56));
 
             mainCol.removeFromTop (12);
@@ -221,7 +236,7 @@ namespace melatonin
             // only show on hover if there isn't something selected
             if (!selectedComponent || selectedComponent == component)
             {
-                model.displayComponent (component);
+                model.selectComponent (component);
 
                 repaint();
                 resized();
@@ -229,8 +244,7 @@ namespace melatonin
                 // Selects and highlights
                 if (component != nullptr)
                 {
-                    // getRoot()->recursivelyCloseSubItems();
-
+                    getRoot()->recursivelyCloseSubItems();
                     getRoot()->openTreeAndSelect (component);
                     tree.scrollToKeepItemVisible (tree.getSelectedItem (0));
                 }
@@ -298,6 +312,7 @@ namespace melatonin
         std::function<void (Component* c)> outlineComponentCallback;
         std::function<void (bool enabled)> toggleCallback;
         std::function<void (bool enabled)> toggleOverlayCallback;
+        std::function<void (bool enabled)> toggleFPSCallback;
 
     private:
         Component::SafePointer<Component> selectedComponent;
@@ -326,9 +341,12 @@ namespace melatonin
         juce::Label emptySelectionPrompt { "SelectionPrompt", "Select any component to see components tree" };
         juce::Label emptySearchLabel { "EmptySearchResultsPrompt", "No component found" };
         juce::TextEditor searchBox { "Search box" };
-        InspectorImageButton enabledButton { "enabled", { 8, 6 }, true };
         InspectorImageButton clearButton { "clear", { 0, 6 } };
         InspectorImageButton searchIcon { "search", { 8, 8 } };
+
+        InspectorImageButton enabledButton { "enabled", { 8, 6 }, true };
+        InspectorImageButton fpsToggle { "dogfood", { 8, 8 }, true };
+
         std::unique_ptr<ComponentTreeViewItem> rootItem;
 
         ComponentTreeViewItem* getRoot()

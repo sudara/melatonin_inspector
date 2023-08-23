@@ -69,10 +69,6 @@ namespace melatonin
         std::vector<NamedProperty> namedProperties;
         std::vector<NamedProperty> colors;
 
-        void displayComponent (juce::Component*)
-        {
-            updateModel();
-        }
 
         void refresh()
         {
@@ -107,6 +103,10 @@ namespace melatonin
         void updateModel()
         {
             removeListeners();
+
+            // always show picked color, even with no component selected
+            if (!pickedColor.getValue().isVoid())
+                colors.emplace_back ("Last Picked", pickedColor);
 
             if (!selectedComponent)
             {
@@ -151,9 +151,6 @@ namespace melatonin
             populatePerformanceData (selectedComponent->getProperties());
 
             {
-                if (!pickedColor.getValue().isVoid())
-                    colors.emplace_back ("Last Picked", pickedColor);
-
                 auto& properties = selectedComponent->getProperties();
                 for (const auto& nv : properties)
                 {
