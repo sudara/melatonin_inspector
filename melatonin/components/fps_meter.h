@@ -63,11 +63,11 @@ namespace melatonin
             auto now = juce::Time::getMillisecondCounterHiRes();
             auto elapsed = now - lastTime;
 
-            if (lastTime == 0)
+            if (juce::approximatelyEqual(lastTime, 0.0))
             {
                 lastTime = now;
             }
-            else if (frameTime == 0)
+            else if (juce::approximatelyEqual(frameTime, 0.f))
             {
                 frameTime = (float) elapsed;
             }
