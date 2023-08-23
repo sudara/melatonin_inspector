@@ -9,6 +9,7 @@ namespace melatonin
     {
     public:
         int zoomScale = 20;
+        juce::Rectangle<int> previewImageBounds;
 
         explicit Preview (ComponentModel& _model) : model (_model)
         {
@@ -215,7 +216,6 @@ namespace melatonin
 
         juce::Rectangle<int> buttonsBounds;
         juce::Rectangle<int> contentBounds;
-        juce::Rectangle<int> previewImageBounds;
         juce::Rectangle<int> exclusiveBounds;
         juce::Rectangle<int> withChildrenBounds;
         juce::Rectangle<int> maxBounds;

@@ -116,7 +116,10 @@ namespace melatonin
             }
 
             outlinedComponent = component;
-            outlinedBounds = getLocalAreaForOutline (component);
+
+            if (outlinedComponent)
+                outlinedBounds = getLocalAreaForOutline (component);
+
             repaint();
         }
 
@@ -157,8 +160,12 @@ namespace melatonin
 
         void selectComponent (Component* component)
         {
+            // allow us to clear selection
             if (!component)
+            {
+                deselectComponent();
                 return;
+            }
 
             if (selectedComponent)
             {

@@ -282,6 +282,21 @@ namespace melatonin
             tree.scrollToKeepItemVisible (tree.getSelectedItem (0));
         }
 
+        void deselectComponent()
+        {
+            selectedComponent = nullptr;
+            tree.clearSelectedItems();
+
+            properties.reset();
+            model.deselectComponent();
+            tree.setRootItem (getRoot());
+
+            preview.repaint();
+            colorPicker.reset();
+
+            resized();
+        }
+
         // called from the main melatonin_inspector.h
         // for example, on load of the entire inspector
         // or after a toggle button click
@@ -352,21 +367,6 @@ namespace melatonin
         ComponentTreeViewItem* getRoot()
         {
             return dynamic_cast<ComponentTreeViewItem*> (tree.getRootItem());
-        }
-
-        void deselectComponent()
-        {
-            selectedComponent = nullptr;
-            tree.clearSelectedItems();
-
-            properties.reset();
-            model.deselectComponent();
-            tree.setRootItem (getRoot());
-
-            preview.repaint();
-            colorPicker.reset();
-
-            resized();
         }
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InspectorComponent)

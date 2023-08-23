@@ -25,22 +25,32 @@ namespace melatonin
     class Inspector : public juce::ComponentListener, public juce::DocumentWindow
     {
     public:
-        class OpenInspector : public juce::KeyListener
+        class InspectorKeyCommands : public juce::KeyListener
         {
         public:
-            explicit OpenInspector (Inspector& i) : inspector (i) {}
+            explicit InspectorKeyCommands (Inspector& i) : inspector (i) {}
             Inspector& inspector;
 
-            bool keyPressed (const juce::KeyPress& key, Component* /*originatingComponent*/) override
+            bool keyPressed (const juce::KeyPress& keyPress, Component* /*originatingComponent*/) override
             {
 #if JUCE_WINDOWS
                 bool modifierPresent = juce::ModifierKeys::getCurrentModifiers().isCtrlDown();
 #else
                 bool modifierPresent = juce::ModifierKeys::getCurrentModifiers().isCommandDown();
 #endif
-                if (key.isKeyCurrentlyDown ('I') && modifierPresent)
+                if (keyPress.isKeyCurrentlyDown ('I') && modifierPresent)
                 {
                     inspector.toggle();
+                    return true;
+                }
+                else if (keyPress.isKeyCode(juce::KeyPress::escapeKey))
+                {
+                    if (inspector.inspectorEnabled)
+                    {
+                        inspector.inspectorComponent.deselectComponent();
+                        inspector.overlay.outlineComponent (nullptr);
+                        inspector.overlay.selectComponent (nullptr);
+                    }
                     return true;
                 }
 
@@ -240,7 +250,7 @@ namespace melatonin
         melatonin::Overlay overlay;
         melatonin::FPSMeter fpsMeter { overlay };
         melatonin::MouseListener mouseListener { root };
-        OpenInspector keyListener { *this };
+        InspectorKeyCommands keyListener { *this };
 
         // Resize our overlay when the root component changes
         void componentMovedOrResized (Component& rootComponent, bool wasMoved, bool wasResized) override

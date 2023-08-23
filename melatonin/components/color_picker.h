@@ -308,14 +308,10 @@ namespace melatonin
 
         void updateSnapshotDimensions()
         {
-
-            if (!isVisible())
-                return;
-
             // we are creating a 20x zoom
             // (for example at the minimum width of 380, it's 19 pixels total)
-            int numberOfPixelsWidth = int (preview.getWidth() / preview.zoomScale);
-            int numberOfPixelsHeight = int (preview.getHeight() / preview.zoomScale);
+            int numberOfPixelsWidth = int (juce::jmax(380, preview.previewImageBounds.getWidth()) / preview.zoomScale);
+            int numberOfPixelsHeight = int (juce::jmax(100, preview.previewImageBounds.getHeight()) / preview.zoomScale);
 
             // remove 1 extra pixel to ensure odd number of pixels
             if (numberOfPixelsWidth % 2 == 0)
