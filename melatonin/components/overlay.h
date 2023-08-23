@@ -11,7 +11,7 @@ namespace melatonin
         {
             setAlwaysOnTop (true);
             setName ("Melatonin Overlay");
-            // need to click on the resizeable
+            // need to click on the resizeable corners of the component outlines
             setInterceptsMouseClicks (false, true);
             addAndMakeVisible (dimensions);
 
@@ -138,7 +138,7 @@ namespace melatonin
             distanceToLeftHoveredLabel.setVisible (false);
             distanceToRightHoveredLabel.setVisible (false);
         }
-        // draws a disatances line when component is selected shows distance to parent or hovered element
+        // draws a distance line when component is selected, showing distance to parent or hovered element
         void outlineDistanceCallback (Component* hovComponent)
         {
             hoveredComponent = hovComponent;
@@ -557,10 +557,12 @@ namespace melatonin
         {
             dimensions.setVisible (false);
 
-            selectedComponent->removeComponentListener (this);
-            selectedComponent->removeMouseListener (this);
-
-            selectedComponent->setMouseCursor (juce::MouseCursor::NormalCursor);
+            if (selectedComponent != nullptr)
+            {
+                selectedComponent->removeComponentListener (this);
+                selectedComponent->removeMouseListener (this);
+                selectedComponent->setMouseCursor (juce::MouseCursor::NormalCursor);
+            }
 
             selectedComponent = nullptr;
             repaint();
