@@ -313,4 +313,4 @@ Note that CI tests for compilation and treats errors on both macOS and Windows a
 
 All assets are PNG exported at 2x. 
 
-Please see the CMakelists.txt file for details on how to add icons in a Projucer friendly way. It's cumbersome! 
+Please see the CMakelists.txt file for details on how to add icons in a Projucer friendly way. There's a script for it!

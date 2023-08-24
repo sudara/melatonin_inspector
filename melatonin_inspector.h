@@ -12,7 +12,6 @@ dependencies:     juce_gui_basics, juce_gui_extra
 END_JUCE_MODULE_DECLARATION
 */
 #pragma once
-#include "InspectorBinaryData.h"
 #include "melatonin/lookandfeel.h"
 #include "melatonin_inspector/melatonin/components/overlay.h"
 #include "melatonin_inspector/melatonin/helpers/inspector_settings.h"

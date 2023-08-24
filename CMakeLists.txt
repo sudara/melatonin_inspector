@@ -42,19 +42,11 @@ endif ()
 
 # Assets are precompiled in the module to make it Projucer friendly
 #
-# TODO: We need to automate this.
-#
-# To work with CMake Assets:
+# To add or modify images:
 #  * Uncomment the following lines to generate the assets again
-#  * Delete everything in "LatestCompliedAssets" folder so there's no conflict
-#  * Comment out the manual includes in melatonin_inspector.cpp
-
-# When ready to commit:
-#  * Comment out these lines again
-#  * Move the new binary .cpp from your build folder to LatestCompiledAssets
-#  * Move the latest InspectorBinaryData.h to the main module folder
-#    (for me the files are in cmake-build-debug/modules/melatonin_inspector/juce_binarydata_MelatoninInspector
-#  * Add the .cpp includes manually to melatonin_inspector.cpp
+#  * build as you would normally via CMake
+#  * run modules/melatonin_inspector/copy_cmake_assets.rb from your main PROJECT folder
+#  * comment these lines back out
 
 #file(GLOB_RECURSE MelatoninInspectorAssetFiles CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/Assets/*")
 #juce_add_binary_data(MelatoninInspectorAssets SOURCES ${MelatoninInspectorAssetFiles} HEADER_NAME InspectorBinaryData.h NAMESPACE InspectorBinaryData)
