@@ -124,7 +124,7 @@ namespace melatonin
                 toggleCallback (!inspectorEnabled);
             };
 
-            fpsToggle.on = settings->props->getBoolValue ("fpsEnabled", false);
+            fpsToggle.on = false;
             fpsToggle.onClick = [this] {
                 settings->props->setValue ("fpsEnabled", fpsToggle.on);
                 toggleFPSCallback (fpsToggle.on);
@@ -358,9 +358,8 @@ namespace melatonin
         juce::TextEditor searchBox { "Search box" };
         InspectorImageButton clearButton { "clear", { 0, 6 } };
         InspectorImageButton searchIcon { "search", { 8, 8 } };
-
         InspectorImageButton enabledButton { "enabled", { 8, 6 }, true };
-        InspectorImageButton fpsToggle { "dogfood", { 8, 8 }, true };
+        InspectorImageButton fpsToggle { "speedometer", { 2, 7 }, true };
 
         std::unique_ptr<ComponentTreeViewItem> rootItem;
 
