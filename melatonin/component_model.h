@@ -33,6 +33,8 @@ namespace melatonin
 
         void selectComponent (juce::Component* component)
         {
+            TRACE_COMPONENT();
+
             // add component listener to component and unsubscribe from previous component
             if (selectedComponent)
                 selectedComponent->removeComponentListener (this);
@@ -47,6 +49,8 @@ namespace melatonin
 
         void deselectComponent()
         {
+            TRACE_COMPONENT();
+
             if (selectedComponent)
                 selectedComponent->removeComponentListener (this);
 
@@ -68,7 +72,6 @@ namespace melatonin
 
         std::vector<NamedProperty> namedProperties;
         std::vector<NamedProperty> colors;
-
 
         void refresh()
         {
@@ -102,6 +105,8 @@ namespace melatonin
 
         void updateModel()
         {
+            TRACE_COMPONENT();
+
             removeListeners();
 
             // always show picked color, even with no component selected
@@ -174,6 +179,8 @@ namespace melatonin
 
         void removeListeners()
         {
+            TRACE_COMPONENT();
+
             widthValue.removeListener (this);
             heightValue.removeListener (this);
             xValue.removeListener (this);
@@ -204,6 +211,8 @@ namespace melatonin
         // allows properties to be set from our properties
         void valueChanged (juce::Value& value) override
         {
+            TRACE_COMPONENT();
+
             if (selectedComponent)
             {
                 if (value.refersToSameSourceAs (widthValue) || value.refersToSameSourceAs (heightValue))
@@ -281,6 +290,8 @@ namespace melatonin
 
         void componentMovedOrResized (juce::Component&, bool wasMoved, bool wasResized) override
         {
+            TRACE_COMPONENT();
+
             if (wasResized || wasMoved)
             {
                 updateModel();

@@ -249,6 +249,8 @@ namespace melatonin
 
         void togglePicker (bool on)
         {
+            TRACE_COMPONENT();
+
             if (on)
             {
                 // get notified by all mouse activity in the target app/plugin
@@ -282,6 +284,8 @@ namespace melatonin
 
         void updatePicker (juce::Point<int> positionInRoot)
         {
+            TRACE_COMPONENT();
+
             if (!colorPickerButton.on)
                 return;
 
@@ -299,6 +303,8 @@ namespace melatonin
         // but still lets users navigate the UI (changing tabs, popups, etc)
         void updateSnapshot (juce::Point<int> positionInRoot)
         {
+            TRACE_COMPONENT();
+
             if (root == nullptr)
                 return;
 
@@ -308,10 +314,12 @@ namespace melatonin
 
         void updateSnapshotDimensions()
         {
+            TRACE_COMPONENT();
+
             // we are creating a 20x zoom
             // (for example at the minimum width of 380, it's 19 pixels total)
-            int numberOfPixelsWidth = int (juce::jmax(380, preview.previewImageBounds.getWidth()) / preview.zoomScale);
-            int numberOfPixelsHeight = int (juce::jmax(100, preview.previewImageBounds.getHeight()) / preview.zoomScale);
+            int numberOfPixelsWidth = int (juce::jmax (380, preview.previewImageBounds.getWidth()) / preview.zoomScale);
+            int numberOfPixelsHeight = int (juce::jmax (100, preview.previewImageBounds.getHeight()) / preview.zoomScale);
 
             // remove 1 extra pixel to ensure odd number of pixels
             if (numberOfPixelsWidth % 2 == 0)
@@ -334,6 +342,8 @@ namespace melatonin
 
         void componentModelChanged (ComponentModel&) override
         {
+            TRACE_COMPONENT();
+
             panel.clear();
             juce::Array<juce::PropertyComponent*> props;
 

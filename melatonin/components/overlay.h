@@ -39,6 +39,7 @@ namespace melatonin
 
         void paint (juce::Graphics& g) override
         {
+            TRACE_COMPONENT();
             g.setColour (colors::overlayBoundingBox);
 
             // draws inwards as the line thickens
@@ -109,6 +110,8 @@ namespace melatonin
         // Components that belong to overlay are screened out by the caller (inspector)
         void outlineComponent (Component* component)
         {
+            TRACE_COMPONENT();
+
             // get rid of another outline when re-entering a selected component
             if (selectedComponent == component)
             {
@@ -160,6 +163,8 @@ namespace melatonin
 
         void selectComponent (Component* component)
         {
+            TRACE_COMPONENT();
+
             // allow us to clear selection
             if (!component)
             {
@@ -200,6 +205,8 @@ namespace melatonin
         // We *must* then manually manage the size of the ResizableBorderComponent
         void componentMovedOrResized (Component& component, bool wasMoved, bool wasResized) override
         {
+            TRACE_COMPONENT();
+
             if (wasResized || wasMoved)
             {
                 // sort of annoying if hover triggers on resize

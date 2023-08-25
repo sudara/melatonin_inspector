@@ -28,6 +28,8 @@ namespace melatonin
     public:
         explicit InspectorComponent (juce::Component& rootComponent, bool enabledAtStart = true) : root (rootComponent), inspectorEnabled (enabledAtStart)
         {
+            TRACE_COMPONENT();
+
             setMouseClickGrabsKeyboardFocus (false);
 
             addAndMakeVisible (enabledButton);
@@ -172,12 +174,16 @@ namespace melatonin
             getRoot()->setOpenness (ComponentTreeViewItem::Openness::opennessOpen);
 
             tree.setVisible (true);
+            auto numComponents = getRoot()->countItemsRecursively();
+            searchBox.setTextToShowWhenEmpty (juce::String("Filter "+ juce::String(numComponents) + " components..."), colors::searchText);
 
             resized();
         }
 
         void resized() override
         {
+            TRACE_COMPONENT();
+
             auto area = getLocalBounds();
 
             if (!inspectorEnabled)
@@ -230,6 +236,8 @@ namespace melatonin
 
         void displayComponentInfo (Component* component)
         {
+            TRACE_COMPONENT();
+
             if (!rootItem)
                 reconstructRoot();
 
@@ -261,6 +269,8 @@ namespace melatonin
 
         void selectComponent (Component* component, bool collapseTreeBeforeSelection)
         {
+            TRACE_COMPONENT();
+
             if (component && selectedComponent == component)
             {
                 deselectComponent();
@@ -284,6 +294,8 @@ namespace melatonin
 
         void deselectComponent()
         {
+            TRACE_COMPONENT();
+
             selectedComponent = nullptr;
             tree.clearSelectedItems();
 
@@ -302,6 +314,8 @@ namespace melatonin
         // or after a toggle button click
         void toggle (bool enabled)
         {
+            TRACE_COMPONENT();
+
             enabledButton.on = enabled;
             inspectorEnabled = enabled;
 

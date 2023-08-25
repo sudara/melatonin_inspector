@@ -1,17 +1,23 @@
 /*
 BEGIN_JUCE_MODULE_DECLARATION
 
-ID:               melatonin_inspector
-vendor:           Sudara
-version:          1.3.0
-name:             Melatonin Inspector
-description:      A component inspector for JUCE, inspired by Figma, web inspector and Jim Credland's Component Debugger
-license:          MIT
-dependencies:     juce_gui_basics, juce_gui_extra
+ID:                 melatonin_inspector
+vendor:             Sudara
+version:            1.3.0
+name:               Melatonin Inspector
+description:        A component inspector for JUCE, inspired by Figma, web inspector and Jim Credland's Component Debugger
+license:            MIT
+dependencies:       juce_gui_basics, juce_gui_extra
+minimumCppStandard: 17
 
 END_JUCE_MODULE_DECLARATION
 */
 #pragma once
+
+#ifndef PERFETTO
+    #define TRACE_COMPONENT(...)
+#endif
+
 #include "melatonin/lookandfeel.h"
 #include "melatonin_inspector/melatonin/components/overlay.h"
 #include "melatonin_inspector/melatonin/helpers/inspector_settings.h"
@@ -60,6 +66,7 @@ namespace melatonin
               inspectorComponent (rootComponent),
               root (rootComponent)
         {
+            TRACE_COMPONENT();
             root.addChildComponent (overlay);
             overlay.setBounds (root.getLocalBounds());
             root.addComponentListener (this);
@@ -112,6 +119,7 @@ namespace melatonin
         // for example 4-5 times on construction
         void saveBounds()
         {
+            TRACE_COMPONENT();
             if (settings->props == nullptr)
                 return;
 
@@ -132,6 +140,7 @@ namespace melatonin
 
         void restoreBoundsIfNeeded()
         {
+            TRACE_COMPONENT();
             // disabled is a fixed 380x400
             // inspectorEnabled must be at least 700x800
             auto minWidth = inspectorEnabled ? 700 : 380;
@@ -161,6 +170,8 @@ namespace melatonin
 
         void outlineComponent (Component* c)
         {
+            TRACE_COMPONENT();
+
             // don't dogfood the overlay
             if (!inspectorEnabled || overlay.isParentOf (c))
                 return;
@@ -171,6 +182,8 @@ namespace melatonin
 
         void outlineDistanceCallback (Component* c)
         {
+            TRACE_COMPONENT();
+
             if (!inspectorEnabled || overlay.isParentOf (c))
                 return;
 
@@ -179,6 +192,8 @@ namespace melatonin
 
         void selectComponent (Component* c, bool collapseTree = true)
         {
+            TRACE_COMPONENT();
+
             if (!inspectorEnabled || overlay.isParentOf (c))
                 return;
 
@@ -188,6 +203,8 @@ namespace melatonin
 
         void dragComponent (Component* c, const juce::MouseEvent& e)
         {
+            TRACE_COMPONENT();
+
             if (!inspectorEnabled || overlay.isParentOf (c))
                 return;
 
@@ -197,6 +214,8 @@ namespace melatonin
 
         void startDragComponent (Component* c, const juce::MouseEvent& e)
         {
+            TRACE_COMPONENT();
+
             if (!inspectorEnabled || overlay.isParentOf (c))
                 return;
 
@@ -205,6 +224,8 @@ namespace melatonin
 
         void clearSelections()
         {
+            TRACE_COMPONENT();
+
             inspectorComponent.deselectComponent();
             overlay.outlineComponent (nullptr);
             overlay.selectComponent (nullptr);
@@ -228,6 +249,8 @@ namespace melatonin
 
         void toggle (bool newStatus)
         {
+            TRACE_COMPONENT();
+
             // the DocumentWindow always stays open, even when disabled
             setVisible (true);
 
@@ -240,7 +263,7 @@ namespace melatonin
             if (newStatus)
                 // without this, target apps that have UI to open the inspector
                 // will select that piece of UI within the same click, see #70
-                juce::Timer::callAfterDelay(500, [&]() { overlayMouseListener.enable(); });
+                juce::Timer::callAfterDelay (500, [&]() { overlayMouseListener.enable(); });
             else
                 overlayMouseListener.disable();
         }
