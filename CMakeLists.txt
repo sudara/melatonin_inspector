@@ -29,8 +29,7 @@ if (NOT COMMAND juce_add_module)
     message(FATAL_ERROR "JUCE must be added to your project before melatonin_inspector!")
 endif ()
 
-# this makes the assumption the current directory is named melatonin_inspector
-juce_add_module("${CMAKE_CURRENT_LIST_DIR}")
+juce_add_module(melatonin_inspector)
 add_library(Melatonin::Inspector ALIAS melatonin_inspector)
 
 if (MelatoninInspector_IS_TOP_LEVEL)
