@@ -194,12 +194,16 @@ namespace melatonin
 
         void recursivelyCloseSubItems()
         {
-            TRACE_COMPONENT("name", getComponentName().toStdString());
+            TRACE_COMPONENT ("name", getComponentName().toStdString());
 
             for (int i = 0; i < getNumSubItems(); ++i)
             {
-                getSubItem (i)->setOpen (false);
-                dynamic_cast<ComponentTreeViewItem*> (getSubItem (i))->recursivelyCloseSubItems();
+                // optimization: only recurse when item is open
+                if (getSubItem (i)->isOpen())
+                {
+                    getSubItem (i)->setOpen (false);
+                    dynamic_cast<ComponentTreeViewItem*> (getSubItem (i))->recursivelyCloseSubItems();
+                }
             }
         }
 
