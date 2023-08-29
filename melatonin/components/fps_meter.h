@@ -2,6 +2,13 @@
 #include "juce_gui_basics/juce_gui_basics.h"
 #include "melatonin_inspector/melatonin/helpers/colors.h"
 
+// VBlank was added in 7.0.3
+#if (JUCE_MAJOR_VERSION >= 7) && (JUCE_MINOR_VERSION >= 1 || JUCE_BUILDNUMBER >= 3)
+    #define MELATONIN_VBLANK 1
+#else
+    #define MELATONIN_VBLANK 0
+#endif
+
 namespace melatonin
 {
     class FPSMeter : public juce::Component, private juce::Timer

@@ -16,6 +16,8 @@ END_JUCE_MODULE_DECLARATION
 
 #ifndef PERFETTO
     #define TRACE_COMPONENT(...)
+    #define TRACE_EVENT_BEGIN(category, ...)
+    #define TRACE_EVENT_END(category)
 #endif
 
 #include "melatonin/lookandfeel.h"
@@ -148,24 +150,30 @@ namespace melatonin
             auto minWidth = inspectorEnabled ? 700 : 380;
             auto minHeight = inspectorEnabled ? 800 : 400;
 
+            TRACE_EVENT_BEGIN ("component", "props getIntValue");
             auto x = settings->props->getIntValue ("x", 0);
             auto y = settings->props->getIntValue ("y", 0);
+            TRACE_EVENT_END ("component");
 
             if (inspectorEnabled)
             {
+                TRACE_EVENT_BEGIN ("component", "restore enabled bounds");
                 auto width = settings->props->getIntValue ("inspectorEnabledWidth", minWidth);
                 auto height = settings->props->getIntValue ("inspectorEnabledHeight", minHeight);
                 setResizable (true, false); // calls resized
                 setResizeLimits (minWidth, minHeight, 1200, 1200);
                 setBounds (x, y, width, height);
+                TRACE_EVENT_END ("component");
             }
             else
             {
+                TRACE_EVENT_BEGIN ("component", "restore disabled bounds");
                 // decrease the resize limits first for the setSize call to work!
                 // the order of these calls matters a lot
                 setResizeLimits (minWidth, minHeight, minWidth, minHeight);
                 setBounds (x, y, minWidth, minHeight);
                 setResizable (false, false);
+                TRACE_EVENT_END ("component");
             }
 
             inspectorComponent.setBounds (getLocalBounds());

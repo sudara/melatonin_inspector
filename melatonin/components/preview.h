@@ -271,6 +271,8 @@ namespace melatonin
         // it's later clipped as needed
         void drawCheckerboard()
         {
+            TRACE_COMPONENT();
+
             if (previewImageBounds.isEmpty())
                 return;
 
