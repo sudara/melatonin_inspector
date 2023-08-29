@@ -276,20 +276,8 @@ namespace melatonin
                 deselectComponent();
                 return;
             }
-
             selectedComponent = component;
-
-            // update value in the model
-            model.selectComponent (component);
-
             displayComponentInfo (selectedComponent);
-            if (collapseTreeBeforeSelection)
-            {
-                getRoot()->recursivelyCloseSubItems();
-            }
-            getRoot()->openTreeAndSelect (component);
-
-            tree.scrollToKeepItemVisible (tree.getSelectedItem (0));
         }
 
         void deselectComponent()
