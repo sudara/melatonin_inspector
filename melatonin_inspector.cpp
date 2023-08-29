@@ -1,7 +1,19 @@
-// As specified by the JUCE Module document, other cpp files are manually included
-// These assets are pre-generated to be happy in Projucer
-// If we were CMake only, none of this would be necessary
+// WARNING! This file is automatically written by copy_cmake_assets.rb
+
+// As recommended by the JUCE MODULE API, these cpp files are included by the main module cpp
+// See https://github.com/juce-framework/JUCE/blob/master/docs/JUCE%20Module%20Format.md#module-cpp-files
+
+// NOLINTBEGIN(bugprone-suspicious-include)
 #include "LatestCompiledAssets/BinaryData1.cpp"
+#include "LatestCompiledAssets/BinaryData10.cpp"
+#include "LatestCompiledAssets/BinaryData11.cpp"
+#include "LatestCompiledAssets/BinaryData12.cpp"
+#include "LatestCompiledAssets/BinaryData13.cpp"
+#include "LatestCompiledAssets/BinaryData14.cpp"
+#include "LatestCompiledAssets/BinaryData15.cpp"
+#include "LatestCompiledAssets/BinaryData16.cpp"
+#include "LatestCompiledAssets/BinaryData17.cpp"
+#include "LatestCompiledAssets/BinaryData18.cpp"
 #include "LatestCompiledAssets/BinaryData2.cpp"
 #include "LatestCompiledAssets/BinaryData3.cpp"
 #include "LatestCompiledAssets/BinaryData4.cpp"
@@ -10,8 +22,5 @@
 #include "LatestCompiledAssets/BinaryData7.cpp"
 #include "LatestCompiledAssets/BinaryData8.cpp"
 #include "LatestCompiledAssets/BinaryData9.cpp"
-#include "LatestCompiledAssets/BinaryData10.cpp"
-#include "LatestCompiledAssets/BinaryData11.cpp"
-#include "LatestCompiledAssets/BinaryData12.cpp"
-#include "LatestCompiledAssets/BinaryData13.cpp"
-#include "LatestCompiledAssets/BinaryData14.cpp"
+// NOLINTEND(bugprone-suspicious-include)
+

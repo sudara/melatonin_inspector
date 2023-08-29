@@ -11,7 +11,7 @@ namespace melatonin
         {
             setAlwaysOnTop (true);
             setName ("Melatonin Overlay");
-            // need to click on the resizeable
+            // need to click on the resizeable corners of the component outlines
             setInterceptsMouseClicks (false, true);
             addAndMakeVisible (dimensions);
 
@@ -39,6 +39,7 @@ namespace melatonin
 
         void paint (juce::Graphics& g) override
         {
+            TRACE_COMPONENT();
             g.setColour (colors::overlayBoundingBox);
 
             // draws inwards as the line thickens
@@ -109,6 +110,8 @@ namespace melatonin
         // Components that belong to overlay are screened out by the caller (inspector)
         void outlineComponent (Component* component)
         {
+            TRACE_COMPONENT();
+
             // get rid of another outline when re-entering a selected component
             if (selectedComponent == component)
             {
@@ -116,7 +119,10 @@ namespace melatonin
             }
 
             outlinedComponent = component;
-            outlinedBounds = getLocalAreaForOutline (component);
+
+            if (outlinedComponent)
+                outlinedBounds = getLocalAreaForOutline (component);
+
             repaint();
         }
 
@@ -135,7 +141,7 @@ namespace melatonin
             distanceToLeftHoveredLabel.setVisible (false);
             distanceToRightHoveredLabel.setVisible (false);
         }
-        // draws a disatances line when component is selected shows distance to parent or hovered element
+        // draws a distance line when component is selected, showing distance to parent or hovered element
         void outlineDistanceCallback (Component* hovComponent)
         {
             hoveredComponent = hovComponent;
@@ -157,8 +163,14 @@ namespace melatonin
 
         void selectComponent (Component* component)
         {
+            TRACE_COMPONENT();
+
+            // allow us to clear selection
             if (!component)
+            {
+                deselectComponent();
                 return;
+            }
 
             if (selectedComponent)
             {
@@ -193,6 +205,8 @@ namespace melatonin
         // We *must* then manually manage the size of the ResizableBorderComponent
         void componentMovedOrResized (Component& component, bool wasMoved, bool wasResized) override
         {
+            TRACE_COMPONENT();
+
             if (wasResized || wasMoved)
             {
                 // sort of annoying if hover triggers on resize
@@ -550,10 +564,12 @@ namespace melatonin
         {
             dimensions.setVisible (false);
 
-            selectedComponent->removeComponentListener (this);
-            selectedComponent->removeMouseListener (this);
-
-            selectedComponent->setMouseCursor (juce::MouseCursor::NormalCursor);
+            if (selectedComponent != nullptr)
+            {
+                selectedComponent->removeComponentListener (this);
+                selectedComponent->removeMouseListener (this);
+                selectedComponent->setMouseCursor (juce::MouseCursor::NormalCursor);
+            }
 
             selectedComponent = nullptr;
             repaint();

@@ -8,32 +8,41 @@ namespace melatonin
     class MouseListener : public juce::MouseListener
     {
     public:
-        bool enabled = true;
-
-        explicit MouseListener (juce::Component& c) : root (c)
+        explicit MouseListener (juce::Component& c, bool startEnabled = true) : root (c)
         {
             // Listen to all mouse movements for all children of the root
-            root.addMouseListener (this, true);
+            if (startEnabled)
+            {
+                enabled = true;
+                root.addMouseListener (this, true);
+            }
         }
 
         ~MouseListener() override
         {
+            if (enabled)
+                root.removeMouseListener (this);
+        }
+
+        void enable()
+        {
+            enabled = true;
+            root.addMouseListener (this, true);
+        }
+
+        void disable()
+        {
+            enabled = false;
             root.removeMouseListener (this);
         }
 
         void mouseEnter (const juce::MouseEvent& event) override
         {
-            if (!enabled)
-                return;
-
             outlineComponentCallback (event.originalComponent);
         }
 
         void mouseMove (const juce::MouseEvent& event) override
         {
-            if (!enabled)
-                return;
-
             if (outlineDistanceCallback && event.mods.isAltDown())
                 outlineDistanceCallback (event.originalComponent);
             else
@@ -42,9 +51,6 @@ namespace melatonin
 
         void mouseUp (const juce::MouseEvent& event) override
         {
-            if (!enabled)
-                return;
-
             if (event.mods.isLeftButtonDown() && !isDragging)
             {
                 selectComponentCallback (event.originalComponent);
@@ -54,9 +60,6 @@ namespace melatonin
 
         void mouseDown (const juce::MouseEvent& event) override
         {
-            if (!enabled)
-                return;
-
             if (event.mods.isLeftButtonDown() && event.originalComponent->isMouseOverOrDragging())
             {
                 componentStartDraggingCallback (event.originalComponent, event);
@@ -65,9 +68,6 @@ namespace melatonin
 
         void mouseDrag (const juce::MouseEvent& event) override
         {
-            if (!enabled)
-                return;
-
             // takes care of small mouse position drift on selection
             if (event.getDistanceFromDragStart() > 3 && event.originalComponent->isMouseOverOrDragging())
             {
@@ -78,9 +78,6 @@ namespace melatonin
 
         void mouseExit (const juce::MouseEvent& event) override
         {
-            if (!enabled)
-                return;
-
             if (event.originalComponent == &root)
             {
                 mouseExitCallback();
@@ -96,6 +93,7 @@ namespace melatonin
 
     private:
         juce::Component& root;
+        bool enabled = false;
 
         bool isDragging { false };
     };

@@ -9,6 +9,7 @@ namespace melatonin
     {
     public:
         int zoomScale = 20;
+        juce::Rectangle<int> previewImageBounds;
 
         explicit Preview (ComponentModel& _model) : model (_model)
         {
@@ -42,6 +43,8 @@ namespace melatonin
 
         void paint (juce::Graphics& g) override
         {
+            TRACE_COMPONENT();
+
             g.setColour (colors::black);
             g.fillRect (contentBounds);
 
@@ -137,6 +140,8 @@ namespace melatonin
 
         void resized() override
         {
+            TRACE_COMPONENT();
+
             auto area = getLocalBounds();
             buttonsBounds = area.removeFromTop (32);
             timingToggle.setBounds (buttonsBounds.removeFromRight (32));
@@ -215,7 +220,6 @@ namespace melatonin
 
         juce::Rectangle<int> buttonsBounds;
         juce::Rectangle<int> contentBounds;
-        juce::Rectangle<int> previewImageBounds;
         juce::Rectangle<int> exclusiveBounds;
         juce::Rectangle<int> withChildrenBounds;
         juce::Rectangle<int> maxBounds;
@@ -225,6 +229,8 @@ namespace melatonin
 
         void componentModelChanged (ComponentModel&) override
         {
+            TRACE_COMPONENT();
+
             if (auto component = model.getSelectedComponent())
                 previewImage = component->createComponentSnapshot ({ component->getWidth(), component->getHeight() }, false, 2.0f);
             else

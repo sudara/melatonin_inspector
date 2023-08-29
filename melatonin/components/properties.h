@@ -54,6 +54,7 @@ namespace melatonin
 
         void updateProperties()
         {
+            TRACE_COMPONENT();
             panel.clear();
 
             if (!model.getSelectedComponent())
@@ -71,6 +72,8 @@ namespace melatonin
 
         [[nodiscard]] juce::Array<juce::PropertyComponent*> createPropertyComponents() const
         {
+            TRACE_COMPONENT();
+
             // we can't actually set these values from the front end, so disable them
             auto hasCachedImage = new juce::BooleanPropertyComponent (model.hasCachedImageValue, "CachedToImage", "");
             hasCachedImage->setEnabled (false);

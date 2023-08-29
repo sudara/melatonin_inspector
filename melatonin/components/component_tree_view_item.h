@@ -68,6 +68,8 @@ namespace melatonin
         // naive but functional...
         void openTreeAndSelect (juce::Component* target)
         {
+            TRACE_COMPONENT();
+
             // don't let us select something already selected
             if (component == target && !isSelected())
             {
@@ -87,6 +89,8 @@ namespace melatonin
 
         void paintItem (juce::Graphics& g, int w, int /*h*/) override
         {
+            TRACE_COMPONENT();
+
             if (!component)
                 return;
 
@@ -176,6 +180,8 @@ namespace melatonin
 
         void itemClicked (const juce::MouseEvent& event) override
         {
+            TRACE_COMPONENT();
+
             if (onlyTogglesDisclosure (event))
                 return;
 
@@ -188,6 +194,8 @@ namespace melatonin
 
         void recursivelyCloseSubItems()
         {
+            TRACE_COMPONENT();
+
             for (int i = 0; i < getNumSubItems(); ++i)
             {
                 getSubItem (i)->setOpen (false);
@@ -195,8 +203,23 @@ namespace melatonin
             }
         }
 
+        [[nodiscard]] int countItemsRecursively() const noexcept
+        {
+            int total = 1;
+
+            for (int i = 0; i < getNumSubItems(); ++i)
+            {
+                auto item = dynamic_cast<ComponentTreeViewItem*> (getSubItem (i));
+                total += item->countItemsRecursively();
+            }
+
+            return total;
+        }
+
         void filterNodesRecursively (const juce::String& searchString)
         {
+            TRACE_COMPONENT();
+
             // Iterate over the child nodes of the current node
             for (int i = getNumSubItems() - 1; i >= 0; --i)
             {

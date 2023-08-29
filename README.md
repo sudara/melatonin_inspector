@@ -302,3 +302,20 @@ In the special case of `TabbedComponent`, each tab is added as a child.
 ### I have a problem / feature request
 
 Please do submit an Issue or PR on the repository! Or visit the [official thread on the JUCE forum](https://forum.juce.com/t/melatonin-inspector-a-web-inspector-ish-module-for-juce-components/45672).
+
+
+## Contributing
+
+Contributions are always welcome! 
+
+The inspector wouldn't be half as awesome without the help of the community.
+
+If you'd like to contribute, look out for the issues tagged with "[Good First Issue](https://github.com/sudara/melatonin_inspector/issues?q=is:issue+is:open+label:%22good+first+issue%22)"
+
+Note that CI tests for compilation and treats errors on both macOS and Windows as errors. 
+
+### Assets
+
+All assets are PNG exported at 2x. 
+
+Please see the CMakelists.txt file for details on how to add icons in a Projucer friendly way. There's a script for it!

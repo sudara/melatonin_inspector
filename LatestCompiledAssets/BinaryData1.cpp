@@ -68,7 +68,7 @@ const char* _DS_Store = (const char*) temp_binary_data_0;
 
 }
 
-#include "melatonin_inspector/InspectorBinaryData.h"
+#include "InspectorBinaryData.h"
 
 namespace InspectorBinaryData
 {
@@ -86,7 +86,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
     {
         case 0x6abebe70:  numBytes = 6148; return _DS_Store;
         case 0xb444a937:  numBytes = 1419; return clear_png;
-        case 0x7e314a7f:  numBytes = 481; return dogfoodoff_png;
+        case 0x7e314a7f:  numBytes = 929; return dogfoodoff_png;
         case 0x805edfe3:  numBytes = 894; return dogfoodon_png;
         case 0x4846b8f8:  numBytes = 1031; return enabledoff_png;
         case 0x4d153e4a:  numBytes = 1017; return enabledon_png;
@@ -95,7 +95,11 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
         case 0x14ab743c:  numBytes = 673; return eyedropperoff_png;
         case 0xc74a0a86:  numBytes = 671; return eyedropperon_png;
         case 0x78ded995:  numBytes = 25781; return logo_png;
+        case 0x48464668:  numBytes = 1076; return moveoff_png;
+        case 0xd13642da:  numBytes = 958; return moveon_png;
         case 0xd5ac3312:  numBytes = 941; return search_png;
+        case 0xca80f4b8:  numBytes = 1419; return speedometeroff_png;
+        case 0x40c48a8a:  numBytes = 1371; return speedometeron_png;
         case 0xf76847cf:  numBytes = 850; return timingoff_png;
         case 0x10aaf893:  numBytes = 867; return timingon_png;
         default: break;
@@ -118,7 +122,11 @@ const char* namedResourceList[] =
     "eyedropperoff_png",
     "eyedropperon_png",
     "logo_png",
+    "moveoff_png",
+    "moveon_png",
     "search_png",
+    "speedometeroff_png",
+    "speedometeron_png",
     "timingoff_png",
     "timingon_png"
 };
@@ -136,7 +144,11 @@ const char* originalFilenames[] =
     "eyedropper-off.png",
     "eyedropper-on.png",
     "logo.png",
+    "move-off.png",
+    "move-on.png",
     "search.png",
+    "speedometer-off.png",
+    "speedometer-on.png",
     "timing-off.png",
     "timing-on.png"
 };
