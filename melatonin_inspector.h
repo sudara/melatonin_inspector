@@ -162,6 +162,7 @@ namespace melatonin
             else
             {
                 // decrease the resize limits first for the setSize call to work!
+                // the order of these calls matters a lot
                 setResizeLimits (minWidth, minHeight, minWidth, minHeight);
                 setBounds (x, y, minWidth, minHeight);
                 setResizable (false, false);

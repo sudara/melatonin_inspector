@@ -194,7 +194,7 @@ namespace melatonin
 
         void recursivelyCloseSubItems()
         {
-            TRACE_COMPONENT();
+            TRACE_COMPONENT("name", getComponentName().toStdString());
 
             for (int i = 0; i < getNumSubItems(); ++i)
             {

@@ -267,7 +267,7 @@ namespace melatonin
             }
         }
 
-        void selectComponent (Component* component, bool collapseTreeBeforeSelection)
+        void selectComponent (Component* component, bool)
         {
             TRACE_COMPONENT();
 
