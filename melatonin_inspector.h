@@ -105,12 +105,14 @@ namespace melatonin
 
         void moved() override
         {
+            TRACE_COMPONENT();
             DocumentWindow::resized();
             saveBounds();
         }
 
         void resized() override
         {
+            TRACE_COMPONENT();
             DocumentWindow::resized();
             saveBounds();
         }

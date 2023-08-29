@@ -117,6 +117,7 @@ namespace melatonin
             {
                 // if not manually removed, it'll linger in the model...
                 removePerformanceData();
+                notifyListeners();
                 return;
             }
 
@@ -171,10 +172,7 @@ namespace melatonin
                 for (auto& nv : colors)
                     nv.value.addListener (this);
             }
-
-            listenerList.call ([this] (Listener& listener) {
-                listener.componentModelChanged (*this);
-            });
+            notifyListeners();
         }
 
         void removeListeners()
@@ -202,10 +200,6 @@ namespace melatonin
 
             colors.clear();
             namedProperties.clear();
-
-            listenerList.call ([this] (Listener& listener) {
-                listener.componentModelChanged (*this);
-            });
         }
 
         // allows properties to be set from our properties
@@ -318,6 +312,13 @@ namespace melatonin
             {
                 removePerformanceData();
             }
+        }
+
+        void notifyListeners()
+        {
+            listenerList.call ([this] (Listener& listener) {
+                listener.componentModelChanged (*this);
+            });
         }
 
         void removePerformanceData()
