@@ -175,7 +175,7 @@ namespace melatonin
 
             tree.setVisible (true);
             auto numComponents = getRoot()->countItemsRecursively();
-            searchBox.setTextToShowWhenEmpty (juce::String("Filter "+ juce::String(numComponents) + " components..."), colors::searchText);
+            searchBox.setTextToShowWhenEmpty (juce::String ("Filter " + juce::String (numComponents) + " components..."), colors::searchText);
 
             resized();
         }
@@ -267,7 +267,7 @@ namespace melatonin
             }
         }
 
-        void selectComponent (Component* component, bool)
+        void selectComponent (Component* component)
         {
             TRACE_COMPONENT();
 
@@ -300,25 +300,25 @@ namespace melatonin
         // called from the main melatonin_inspector.h
         // for example, on load of the entire inspector
         // or after a toggle button click
-        void toggle (bool enabled)
+        void toggle (bool nowEnabled)
         {
             TRACE_COMPONENT();
 
-            enabledButton.on = enabled;
-            inspectorEnabled = enabled;
+            enabledButton.on = nowEnabled;
+            inspectorEnabled = nowEnabled;
 
             // content visibility is handled by the panel
-            previewPanel.setVisible (enabled);
-            colorPickerPanel.setVisible (enabled);
-            propertiesPanel.setVisible (enabled);
-            tree.setVisible (enabled);
+            previewPanel.setVisible (nowEnabled);
+            colorPickerPanel.setVisible (nowEnabled);
+            propertiesPanel.setVisible (nowEnabled);
+            tree.setVisible (nowEnabled);
 
-            if (!enabled)
+            if (!nowEnabled)
                 model.deselectComponent();
 
-            // when opened from key command, select the root
-            if (enabled && selectedComponent == nullptr)
-                selectComponent (&root, false);
+            // populate the tree view if nothing selected
+            else if (selectedComponent == nullptr)
+                reconstructRoot();
 
             colorPicker.reset();
 

@@ -155,7 +155,7 @@ namespace melatonin
             {
                 auto width = settings->props->getIntValue ("inspectorEnabledWidth", minWidth);
                 auto height = settings->props->getIntValue ("inspectorEnabledHeight", minHeight);
-                setResizable (true, false);
+                setResizable (true, false); // calls resized
                 setResizeLimits (minWidth, minHeight, 1200, 1200);
                 setBounds (x, y, width, height);
             }
@@ -193,7 +193,7 @@ namespace melatonin
             overlay.outlineDistanceCallback (c);
         }
 
-        void selectComponent (Component* c, bool collapseTree = true)
+        void selectComponent (Component* c)
         {
             TRACE_COMPONENT();
 
@@ -201,7 +201,7 @@ namespace melatonin
                 return;
 
             overlay.selectComponent (c);
-            inspectorComponent.selectComponent (c, collapseTree);
+            inspectorComponent.selectComponent (c);
         }
 
         void dragComponent (Component* c, const juce::MouseEvent& e)
@@ -262,13 +262,15 @@ namespace melatonin
             restoreBoundsIfNeeded();
 
             overlay.setVisible (newStatus);
-            clearSelections();
             if (newStatus)
                 // without this, target apps that have UI to open the inspector
                 // will select that piece of UI within the same click, see #70
                 juce::Timer::callAfterDelay (500, [&]() { overlayMouseListener.enable(); });
             else
+            {
+                clearSelections();
                 overlayMouseListener.disable();
+            }
         }
 
         void toggle()
@@ -302,12 +304,12 @@ namespace melatonin
         {
             overlayMouseListener.outlineComponentCallback = [this] (Component* c) { this->outlineComponent (c); };
             overlayMouseListener.outlineDistanceCallback = [this] (Component* c) { this->outlineDistanceCallback (c); };
-            overlayMouseListener.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, true); };
+            overlayMouseListener.selectComponentCallback = [this] (Component* c) { this->selectComponent (c); };
             overlayMouseListener.componentStartDraggingCallback = [this] (Component* c, const juce::MouseEvent& e) { this->startDragComponent (c, e); };
             overlayMouseListener.componentDraggedCallback = [this] (Component* c, const juce::MouseEvent& e) { this->dragComponent (c, e); };
             overlayMouseListener.mouseExitCallback = [this]() { if (this->inspectorEnabled) inspectorComponent.redisplaySelectedComponent(); };
 
-            inspectorComponent.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, true); };
+            inspectorComponent.selectComponentCallback = [this] (Component* c) { this->selectComponent (c); };
             inspectorComponent.outlineComponentCallback = [this] (Component* c) { this->outlineComponent (c); };
             inspectorComponent.toggleCallback = [this] (bool enable) { this->toggle (enable); };
             inspectorComponent.toggleOverlayCallback = [this] (bool enable) {
