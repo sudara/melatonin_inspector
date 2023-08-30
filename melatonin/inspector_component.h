@@ -316,7 +316,10 @@ namespace melatonin
             tree.setVisible (nowEnabled);
 
             if (!nowEnabled)
+            {
                 model.deselectComponent();
+                getRoot()->recursivelyCloseSubItems();
+            }
 
             // populate the tree view if nothing selected
             else if (selectedComponent == nullptr)
