@@ -327,7 +327,7 @@ namespace melatonin
             };
             inspectorComponent.toggleFPSCallback = [this] (bool enable) {
                 if (enable)
-                    this->fpsMeter.setBounds (this->overlay.getLocalBounds().removeFromRight (50).removeFromTop (30));
+                    this->fpsMeter.setBounds (this->overlay.getLocalBounds().removeFromRight (60).removeFromTop (40));
                 this->fpsMeter.setVisible (enable);
             };
         }
