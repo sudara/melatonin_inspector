@@ -296,7 +296,7 @@ namespace melatonin
         juce::Component& root;
         bool inspectorEnabled = false;
         melatonin::Overlay overlay;
-        melatonin::FPSMeter fpsMeter { overlay };
+        melatonin::FPSMeter fpsMeter { root };
         melatonin::MouseListener overlayMouseListener { root, false };
         InspectorKeyCommands keyListener { *this };
 
@@ -327,7 +327,7 @@ namespace melatonin
             };
             inspectorComponent.toggleFPSCallback = [this] (bool enable) {
                 if (enable)
-                    this->fpsMeter.setBounds (this->overlay.getLocalBounds().removeFromRight (60).removeFromTop (40));
+                    this->fpsMeter.setBounds (root.getLocalBounds().removeFromRight (60).removeFromTop (40));
                 this->fpsMeter.setVisible (enable);
             };
         }
