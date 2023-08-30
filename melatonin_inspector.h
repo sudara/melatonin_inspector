@@ -91,6 +91,7 @@ namespace melatonin
             setContentNonOwned (&inspectorComponent, true);
             setupCallbacks();
 
+            setResizable (true, false); // calls resized
             toggle (inspectorEnabledAtStart);
         }
 
@@ -150,30 +151,30 @@ namespace melatonin
             auto minWidth = inspectorEnabled ? 700 : 380;
             auto minHeight = inspectorEnabled ? 800 : 400;
 
-            TRACE_EVENT_BEGIN ("component", "props getIntValue");
             auto x = settings->props->getIntValue ("x", 0);
             auto y = settings->props->getIntValue ("y", 0);
-            TRACE_EVENT_END ("component");
 
             if (inspectorEnabled)
             {
-                TRACE_EVENT_BEGIN ("component", "restore enabled bounds");
                 auto width = settings->props->getIntValue ("inspectorEnabledWidth", minWidth);
                 auto height = settings->props->getIntValue ("inspectorEnabledHeight", minHeight);
-                setResizable (true, false); // calls resized
+
+                // Note: Ideally we'd call setResizable but it recreates the desktop window
+                // which adds >30ms in Debug with little change of behavior
+                // setResizable (true, false);
+
                 setResizeLimits (minWidth, minHeight, 1200, 1200);
                 setBounds (x, y, width, height);
-                TRACE_EVENT_END ("component");
             }
             else
             {
-                TRACE_EVENT_BEGIN ("component", "restore disabled bounds");
                 // decrease the resize limits first for the setSize call to work!
                 // the order of these calls matters a lot
                 setResizeLimits (minWidth, minHeight, minWidth, minHeight);
                 setBounds (x, y, minWidth, minHeight);
-                setResizable (false, false);
-                TRACE_EVENT_END ("component");
+
+                // Keep this commented out, as it will recreate the desktop window
+                // setResizable (false, false);
             }
 
             inspectorComponent.setBounds (getLocalBounds());

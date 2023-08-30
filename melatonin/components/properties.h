@@ -31,6 +31,7 @@ namespace melatonin
 
         void resized() override
         {
+            TRACE_COMPONENT();
             // let the property panel know what total height we need to be
             panel.setBounds (getLocalBounds().withTrimmedTop (padding));
         }
