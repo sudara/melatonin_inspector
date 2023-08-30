@@ -299,6 +299,16 @@ It traverses components from the root, building a `TreeView`.
 
 In the special case of `TabbedComponent`, each tab is added as a child. 
 
+### My FPS seems lower than expected, is it accurate?
+
+Check the following:
+
+* Are you running *just* your plugin? Make sure other plugin UIs are closed.
+* Is it possible something in your plugin is painting continuously?
+* I do optimize the inspector for Debug, but it can be tough to get 60fps in Debug. Try Release.
+
+Feel free to ask for other ideas in the [forum thread](https://forum.juce.com/t/melatonin-inspector-a-web-inspector-ish-module-for-juce-components/45672).
+
 ### I have a problem / feature request
 
 Please do submit an Issue or PR on the repository! Or visit the [official thread on the JUCE forum](https://forum.juce.com/t/melatonin-inspector-a-web-inspector-ish-module-for-juce-components/45672).
