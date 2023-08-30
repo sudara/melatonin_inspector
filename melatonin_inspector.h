@@ -16,6 +16,7 @@ END_JUCE_MODULE_DECLARATION
 
 #ifndef PERFETTO
     #define TRACE_COMPONENT(...)
+    #define TRACE_EVENT(category, ...)
     #define TRACE_EVENT_BEGIN(category, ...)
     #define TRACE_EVENT_END(category)
 #endif
