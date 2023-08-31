@@ -40,7 +40,7 @@ namespace melatonin
                 vBlankCallback = { this,
                     [this] {
                         TRACE_EVENT ("component", "fps vBlankCallback");
-                        repaint();
+                        this->repaint();
                     } };
 #else
                 // avoid as much aliasing with display refresh times as possible
@@ -93,9 +93,9 @@ namespace melatonin
             }
             else
             {
-                // use a static number of hypothetical fps to smooth the value
+                // use a static number of hypothetical 30 fps to smooth the value
                 // https://stackoverflow.com/a/87333
-                double smoothing = std::pow (0.9f, elapsed * 5 / 1000);
+                double smoothing = std::pow (0.9f, elapsed * 30 / 1000);
                 frameTime = (frameTime * smoothing) + (elapsed * (1.0f - smoothing));
             }
             lastTime = now;

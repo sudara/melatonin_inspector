@@ -299,13 +299,20 @@ It traverses components from the root, building a `TreeView`.
 
 In the special case of `TabbedComponent`, each tab is added as a child. 
 
-### My FPS seems lower than expected, is it accurate?
+### My FPS seems low, is it accurate?
 
-Check the following:
+It's a smoothed running average.
+
+If you see low FPS rates, check the following:
 
 * Are you running *just* your plugin? Make sure other plugin UIs are closed.
-* Is it possible something in your plugin is painting continuously?
-* I do optimize the inspector for Debug, but it can be tough to get 60fps in Debug. Try Release.
+* I optimize the inspector for Debug usage, but it can be tough for complex UIs to hit 60fps in Debug, especially on macOS (see note below). See what happens in Release.
+* You might have legitimately expensive paint calls (esp. in Debug). You can verify this out via [Perfetto](https://github.com/sudara/melatonin_perfetto).
+
+On recent macOS, a `repaint()` on even small sections of a window (ie, what the FPS meter does) will cause the OS to paint the entire plugin window. You can use `Flash Screen Updates` in Quartz Debug to verify this.  Because of this macOS behavior, the FPS meter will actually trigger full repaints of your UI, so anything expensive (especially in Debug) will slow down what the FPS meter reports.
+
+If you are using the JUCE flag `JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS`, JUCE will internally manage the rectangles that need to be repainted, with the aim of being more precise/hygenic with what actually gets painted. This might be a good choice if your plugin already frequently repainting parts of the UI. But please don't switch over to that flag just to appease the FPS meter! It needs to be a choice you make depending on your internal testing (without the FPS meter in play).
+
 
 Feel free to ask for other ideas in the [forum thread](https://forum.juce.com/t/melatonin-inspector-a-web-inspector-ish-module-for-juce-components/45672).
 
