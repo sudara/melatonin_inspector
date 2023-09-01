@@ -18,6 +18,11 @@ namespace melatonin
         {
             overlay.addChildComponent (this);
 
+            // don't repaint the parent
+            // unfortunately, on macOS, this no longer works
+            // See FAQ in README for more info
+            setOpaque (true);
+
             setInterceptsMouseClicks (false, false);
         }
 

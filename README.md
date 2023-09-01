@@ -52,11 +52,7 @@ Filter components by name. Names are derived from stock components, label/button
 
 See what exactly is drawing on a per-component basis, even when hidden.
 
-
-<p align="center">
-<img src="https://user-images.githubusercontent.com/472/213702194-c3c586e1-981f-4760-b095-5d7a13f322b7.gif" width="600"/>
-</p>
-
+![](https://github.com/sudara/melatonin_inspector/assets/472/429e4ce6-cc6c-4ca0-ba7c-201272234c6b)
 
 ## Edit component position and spacing
 
@@ -116,7 +112,16 @@ See what that Slider's `trackColourId` is set to, and hey, go ahead and try out 
 
 Accurately pinpoint colors. Click to pick and store one. Toggle between RGBA and HEX values.
 
-![AudioPluginHost - 2023-08-16 27](https://github.com/sudara/melatonin_inspector/assets/472/9d9d1fe8-b34a-4e1f-a71c-26f0a0ef5169)
+<p align="center">
+<img src="https://github.com/sudara/melatonin_inspector/assets/472/9d9d1fe8-b34a-4e1f-a71c-26f0a0ef5169" width="450"/>
+</p>
+
+
+## FPS meter
+
+![AudioPluginHost - 2023-09-01 56](https://github.com/sudara/melatonin_inspector/assets/472/06ee7e30-a536-4dc3-a54e-13aba3a2b0c0)
+
+Please see the [FAQ](https://github.com/sudara/melatonin_inspector#my-fps-seems-low-is-it-accurate) for details. 
 
 
 ## Display component performance in real time
