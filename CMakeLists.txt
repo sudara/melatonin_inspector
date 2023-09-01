@@ -23,7 +23,7 @@ if (MelatoninInspector_IS_TOP_LEVEL)
     SET(TARGET_NAME "unique_ptr_disabled" CACHE STRING "specify target to compile")
 
     juce_add_gui_app ("${TARGET_NAME}" VERSION 1.0.0)
-    target_sources("${TARGET_NAME}" PRIVATE "tests/#{TARGET_NAME}.cpp")
+    target_sources("${TARGET_NAME}" PRIVATE "tests/${TARGET_NAME}.cpp")
     set_target_properties("${TARGET_NAME}" PROPERTIES COMPILE_WARNING_AS_ERROR ON)
 
 endif ()
