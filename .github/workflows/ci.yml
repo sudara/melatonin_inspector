@@ -21,7 +21,7 @@ permissions:
 jobs:
 
   BuildAndTest:
-    name: ${{ matrix.name }}
+    name: ${{ matrix.os }} ${{ matrix.app }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
 
@@ -38,7 +38,7 @@ jobs:
           fetch-depth: 1
 
       - name: Configure
-        run: cmake -B Builds
+        run: cmake -B Builds -DTARGET_NAME:STRING=${{ matrix.app }}
 
       - name: Build
         run: cmake --build Builds --parallel 4
