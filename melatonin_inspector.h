@@ -16,6 +16,9 @@ END_JUCE_MODULE_DECLARATION
 
 #ifndef PERFETTO
     #define TRACE_COMPONENT(...)
+    #define TRACE_EVENT(category, ...)
+    #define TRACE_EVENT_BEGIN(category, ...)
+    #define TRACE_EVENT_END(category)
 #endif
 
 #include "melatonin/lookandfeel.h"
@@ -89,6 +92,7 @@ namespace melatonin
             setContentNonOwned (&inspectorComponent, true);
             setupCallbacks();
 
+            setResizable (true, false); // calls resized
             toggle (inspectorEnabledAtStart);
         }
 
@@ -105,12 +109,14 @@ namespace melatonin
 
         void moved() override
         {
+            TRACE_COMPONENT();
             DocumentWindow::resized();
             saveBounds();
         }
 
         void resized() override
         {
+            TRACE_COMPONENT();
             DocumentWindow::resized();
             saveBounds();
         }
@@ -153,16 +159,23 @@ namespace melatonin
             {
                 auto width = settings->props->getIntValue ("inspectorEnabledWidth", minWidth);
                 auto height = settings->props->getIntValue ("inspectorEnabledHeight", minHeight);
-                setResizable (true, false);
+
+                // Note: Ideally we'd call setResizable but it recreates the desktop window
+                // which adds >30ms in Debug with little change of behavior
+                // setResizable (true, false);
+
                 setResizeLimits (minWidth, minHeight, 1200, 1200);
                 setBounds (x, y, width, height);
             }
             else
             {
                 // decrease the resize limits first for the setSize call to work!
+                // the order of these calls matters a lot
                 setResizeLimits (minWidth, minHeight, minWidth, minHeight);
                 setBounds (x, y, minWidth, minHeight);
-                setResizable (false, false);
+
+                // Keep this commented out, as it will recreate the desktop window
+                // setResizable (false, false);
             }
 
             inspectorComponent.setBounds (getLocalBounds());
@@ -190,7 +203,7 @@ namespace melatonin
             overlay.outlineDistanceCallback (c);
         }
 
-        void selectComponent (Component* c, bool collapseTree = true)
+        void selectComponent (Component* c)
         {
             TRACE_COMPONENT();
 
@@ -198,7 +211,7 @@ namespace melatonin
                 return;
 
             overlay.selectComponent (c);
-            inspectorComponent.selectComponent (c, collapseTree);
+            inspectorComponent.selectComponent (c);
         }
 
         void dragComponent (Component* c, const juce::MouseEvent& e)
@@ -259,13 +272,15 @@ namespace melatonin
             restoreBoundsIfNeeded();
 
             overlay.setVisible (newStatus);
-            clearSelections();
             if (newStatus)
                 // without this, target apps that have UI to open the inspector
                 // will select that piece of UI within the same click, see #70
                 juce::Timer::callAfterDelay (500, [&]() { overlayMouseListener.enable(); });
             else
+            {
+                clearSelections();
                 overlayMouseListener.disable();
+            }
         }
 
         void toggle()
@@ -282,7 +297,7 @@ namespace melatonin
         juce::Component& root;
         bool inspectorEnabled = false;
         melatonin::Overlay overlay;
-        melatonin::FPSMeter fpsMeter { overlay };
+        melatonin::FPSMeter fpsMeter { root };
         melatonin::MouseListener overlayMouseListener { root, false };
         InspectorKeyCommands keyListener { *this };
 
@@ -299,12 +314,12 @@ namespace melatonin
         {
             overlayMouseListener.outlineComponentCallback = [this] (Component* c) { this->outlineComponent (c); };
             overlayMouseListener.outlineDistanceCallback = [this] (Component* c) { this->outlineDistanceCallback (c); };
-            overlayMouseListener.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, true); };
+            overlayMouseListener.selectComponentCallback = [this] (Component* c) { this->selectComponent (c); };
             overlayMouseListener.componentStartDraggingCallback = [this] (Component* c, const juce::MouseEvent& e) { this->startDragComponent (c, e); };
             overlayMouseListener.componentDraggedCallback = [this] (Component* c, const juce::MouseEvent& e) { this->dragComponent (c, e); };
             overlayMouseListener.mouseExitCallback = [this]() { if (this->inspectorEnabled) inspectorComponent.redisplaySelectedComponent(); };
 
-            inspectorComponent.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, true); };
+            inspectorComponent.selectComponentCallback = [this] (Component* c) { this->selectComponent (c); };
             inspectorComponent.outlineComponentCallback = [this] (Component* c) { this->outlineComponent (c); };
             inspectorComponent.toggleCallback = [this] (bool enable) { this->toggle (enable); };
             inspectorComponent.toggleOverlayCallback = [this] (bool enable) {
@@ -313,7 +328,7 @@ namespace melatonin
             };
             inspectorComponent.toggleFPSCallback = [this] (bool enable) {
                 if (enable)
-                    this->fpsMeter.setBounds (this->overlay.getLocalBounds().removeFromRight (50).removeFromTop (30));
+                    this->fpsMeter.setBounds (root.getLocalBounds().removeFromRight (60).removeFromTop (40));
                 this->fpsMeter.setVisible (enable);
             };
         }

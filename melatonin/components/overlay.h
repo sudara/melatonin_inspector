@@ -101,6 +101,7 @@ namespace melatonin
 
         void resized() override
         {
+            TRACE_COMPONENT();
             if (outlinedComponent)
             {
                 outlineComponent (outlinedComponent);

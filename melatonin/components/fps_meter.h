@@ -2,6 +2,13 @@
 #include "juce_gui_basics/juce_gui_basics.h"
 #include "melatonin_inspector/melatonin/helpers/colors.h"
 
+// VBlank was added in 7.0.3
+#if (JUCE_MAJOR_VERSION >= 7) && (JUCE_MINOR_VERSION >= 1 || JUCE_BUILDNUMBER >= 3)
+    #define MELATONIN_VBLANK 1
+#else
+    #define MELATONIN_VBLANK 0
+#endif
+
 namespace melatonin
 {
     class FPSMeter : public juce::Component, private juce::Timer
@@ -10,11 +17,18 @@ namespace melatonin
         explicit FPSMeter (juce::Component& o) : overlay (o)
         {
             overlay.addChildComponent (this);
+
+            // don't repaint the parent
+            // unfortunately, on macOS, this no longer works
+            // See FAQ in README for more info
+            setOpaque (true);
+
             setInterceptsMouseClicks (false, false);
         }
 
         void timerCallback() override
         {
+            TRACE_EVENT ("component", "fps timer callback");
             repaint();
         }
 
@@ -22,6 +36,7 @@ namespace melatonin
         {
             frameTime = 0;
             lastTime = 0;
+            fps = 0;
             if (isVisible())
             {
 #if MELATONIN_VBLANK
@@ -29,10 +44,12 @@ namespace melatonin
                 // syncs to ensure each paint call is preceded by a recalculation
                 vBlankCallback = { this,
                     [this] {
-                        repaint();
+                        TRACE_EVENT ("component", "fps vBlankCallback");
+                        this->repaint();
                     } };
 #else
-                // avoid as much aliasing with the display refresh times as possible
+                // avoid as much aliasing with display refresh times as possible
+                // TODO: investigate optimal value
                 startTimerHz (120);
 #endif
             }
@@ -48,45 +65,55 @@ namespace melatonin
 
         void paint (juce::Graphics& g) override
         {
+            TRACE_COMPONENT();
+
             update();
+
+            // tried to go for pixel font but didn't work :/
             g.setImageResamplingQuality (juce::Graphics::ResamplingQuality::lowResamplingQuality);
-            g.setFont (font);
-            g.setColour (colors::black.withAlpha (0.5f));
+            g.setColour (colors::black);
             g.fillRect (getLocalBounds());
-            g.setColour (colors::white);
-            g.setFont (juce::Font (12.0f));
-            g.drawText (juce::String (juce::String (juce::roundToInt (1000 / frameTime) + 1) + " FPS"), getLocalBounds(), juce::Justification::centredRight, true);
+            g.setColour (juce::Colours::green);
+            g.setFont (font);
+            g.drawText (juce::String (juce::String (fps) + " FPS"), getLocalBounds(), juce::Justification::centred, true);
         }
 
         void update()
         {
+            TRACE_COMPONENT();
+
             auto now = juce::Time::getMillisecondCounterHiRes();
             auto elapsed = now - lastTime;
 
-            if (juce::approximatelyEqual(lastTime, 0.0))
+            if (juce::approximatelyEqual (lastTime, 0.0))
             {
                 lastTime = now;
+                return;
             }
-            else if (juce::approximatelyEqual(frameTime, 0.f))
+
+            if (juce::approximatelyEqual (frameTime, 0.0))
             {
-                frameTime = (float) elapsed;
+                // start without any smoothing
+                frameTime = elapsed;
             }
             else
             {
-                // use a static number of hypothetical fps to smooth the value
+                // use a static number of hypothetical 30 fps to smooth the value
                 // https://stackoverflow.com/a/87333
-                float smoothing = std::pow (0.9f, (float) elapsed * 5 / 1000);
-                frameTime = (frameTime * smoothing) + ((float) elapsed * (1.0f - smoothing));
+                double smoothing = std::pow (0.9f, elapsed * 30 / 1000);
+                frameTime = (frameTime * smoothing) + (elapsed * (1.0f - smoothing));
             }
             lastTime = now;
+            fps = juce::roundToInt (1000 / frameTime);
         }
 
     private:
         juce::Component& overlay;
         juce::Rectangle<int> bounds;
-        juce::Font font = juce::Font (juce::Font::getDefaultMonospacedFontName(), 12.0f, juce::Font::plain);
-        float frameTime = 0;
+        juce::Font font = juce::Font (juce::Font::getDefaultMonospacedFontName(), 16.0f, juce::Font::plain);
         double lastTime = juce::Time::getMillisecondCounterHiRes();
+        double frameTime = 0;
+        int fps = 0;
 
 #if MELATONIN_VBLANK
         juce::VBlankAttachment vBlankCallback;

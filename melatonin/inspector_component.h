@@ -9,13 +9,6 @@
 #include "melatonin_inspector/melatonin/components/properties.h"
 #include "melatonin_inspector/melatonin/lookandfeel.h"
 
-// VBlank was added in 7.0.3
-#if (JUCE_MAJOR_VERSION >= 7) && (JUCE_MINOR_VERSION >= 1 || JUCE_BUILDNUMBER >= 3)
-    #define MELATONIN_VBLANK 1
-#else
-    #define MELATONIN_VBLANK 0
-#endif
-
 /*
  * Right now this unfortunately bundles all inspector components
  * as well as the tree view and selection logic.
@@ -94,7 +87,7 @@ namespace melatonin
             logo.onClick = []() { juce::URL ("https://github.com/sudara/melatonin_inspector/").launchInDefaultBrowser(); };
             searchBox.onTextChange = [this] {
                 auto searchText = searchBox.getText();
-                reconstructRoot();
+                ensureTreeIsConstructed();
 
                 // try to find the first item that matches the search string
                 if (searchText.isNotEmpty())
@@ -164,18 +157,28 @@ namespace melatonin
             g.fillRect (treeViewBounds);
         }
 
-        void reconstructRoot()
+        void ensureTreeIsConstructed()
         {
+            TRACE_COMPONENT();
+
             jassert (selectComponentCallback);
-            if (rootItem)
+
+            // don't perform unnecessary work
+            if (rootItem && rootItem.get() == getRoot())
+                return;
+
+            // if the root was set to something else, wipe it
+            else if (rootItem)
                 tree.setRootItem (nullptr);
+
+            // construct the root item
             rootItem = std::make_unique<ComponentTreeViewItem> (&root, outlineComponentCallback, selectComponentCallback);
             tree.setRootItem (rootItem.get());
             getRoot()->setOpenness (ComponentTreeViewItem::Openness::opennessOpen);
 
             tree.setVisible (true);
             auto numComponents = getRoot()->countItemsRecursively();
-            searchBox.setTextToShowWhenEmpty (juce::String("Filter "+ juce::String(numComponents) + " components..."), colors::searchText);
+            searchBox.setTextToShowWhenEmpty (juce::String ("Filter " + juce::String (numComponents) + " components..."), colors::searchText);
 
             resized();
         }
@@ -238,16 +241,15 @@ namespace melatonin
         {
             TRACE_COMPONENT();
 
-            if (!rootItem)
-                reconstructRoot();
+            ensureTreeIsConstructed();
 
             // only show on hover if there isn't something selected
             if (!selectedComponent || selectedComponent == component)
             {
                 model.selectComponent (component);
 
-                repaint();
                 resized();
+                repaint();
 
                 // Selects and highlights
                 if (component != nullptr)
@@ -267,7 +269,7 @@ namespace melatonin
             }
         }
 
-        void selectComponent (Component* component, bool collapseTreeBeforeSelection)
+        void selectComponent (Component* component)
         {
             TRACE_COMPONENT();
 
@@ -276,20 +278,8 @@ namespace melatonin
                 deselectComponent();
                 return;
             }
-
             selectedComponent = component;
-
-            // update value in the model
-            model.selectComponent (component);
-
             displayComponentInfo (selectedComponent);
-            if (collapseTreeBeforeSelection)
-            {
-                getRoot()->recursivelyCloseSubItems();
-            }
-            getRoot()->openTreeAndSelect (component);
-
-            tree.scrollToKeepItemVisible (tree.getSelectedItem (0));
         }
 
         void deselectComponent()
@@ -312,25 +302,28 @@ namespace melatonin
         // called from the main melatonin_inspector.h
         // for example, on load of the entire inspector
         // or after a toggle button click
-        void toggle (bool enabled)
+        void toggle (bool nowEnabled)
         {
             TRACE_COMPONENT();
 
-            enabledButton.on = enabled;
-            inspectorEnabled = enabled;
+            enabledButton.on = nowEnabled;
+            inspectorEnabled = nowEnabled;
 
             // content visibility is handled by the panel
-            previewPanel.setVisible (enabled);
-            colorPickerPanel.setVisible (enabled);
-            propertiesPanel.setVisible (enabled);
-            tree.setVisible (enabled);
+            previewPanel.setVisible (nowEnabled);
+            colorPickerPanel.setVisible (nowEnabled);
+            propertiesPanel.setVisible (nowEnabled);
+            tree.setVisible (nowEnabled);
 
-            if (!enabled)
+            if (!nowEnabled)
+            {
                 model.deselectComponent();
+                getRoot()->recursivelyCloseSubItems();
+            }
 
-            // when opened from key command, select the root
-            if (enabled && selectedComponent == nullptr)
-                selectComponent (&root, false);
+            // populate the tree view if nothing selected
+            else if (selectedComponent == nullptr)
+                ensureTreeIsConstructed();
 
             colorPicker.reset();
 

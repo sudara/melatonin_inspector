@@ -50,13 +50,11 @@ Filter components by name. Names are derived from stock components, label/button
 
 ## Preview Component
 
-See what exactly is drawing on a per-component basis, even when hidden.
-
+See what exactly is drawing on a per-component basis, even when the component is hidden. A fixed transparency grid helps you understand which components and images have transparency.
 
 <p align="center">
-<img src="https://user-images.githubusercontent.com/472/213702194-c3c586e1-981f-4760-b095-5d7a13f322b7.gif" width="600"/>
+<img src="https://github.com/sudara/melatonin_inspector/assets/472/429e4ce6-cc6c-4ca0-ba7c-201272234c6b" width="600"/>
 </p>
-
 
 ## Edit component position and spacing
 
@@ -116,7 +114,18 @@ See what that Slider's `trackColourId` is set to, and hey, go ahead and try out 
 
 Accurately pinpoint colors. Click to pick and store one. Toggle between RGBA and HEX values.
 
-![AudioPluginHost - 2023-08-16 27](https://github.com/sudara/melatonin_inspector/assets/472/9d9d1fe8-b34a-4e1f-a71c-26f0a0ef5169)
+<p align="center">
+<img src="https://github.com/sudara/melatonin_inspector/assets/472/9d9d1fe8-b34a-4e1f-a71c-26f0a0ef5169" width="450"/>
+</p>
+
+
+## FPS meter
+
+Overlay an FPS meter on your Editor to get an intuitive understanding of your painting performance. Please see the [FAQ](https://github.com/sudara/melatonin_inspector#my-fps-seems-low-is-it-accurate) for details on usage.
+
+<p align="center">
+<img src="https://github.com/sudara/melatonin_inspector/assets/472/06ee7e30-a536-4dc3-a54e-13aba3a2b0c0" width="600"/>
+</p>
 
 
 ## Display component performance in real time
@@ -298,6 +307,23 @@ For that, one would need a component system relying on data for placement and si
 It traverses components from the root, building a `TreeView`. 
 
 In the special case of `TabbedComponent`, each tab is added as a child. 
+
+### My FPS seems low, is it accurate?
+
+It's a smoothed running average.
+
+If you see low FPS rates, check the following:
+
+* Are you running *just* your plugin? Make sure other plugin UIs are closed.
+* I optimize the inspector for Debug usage, but it can be tough for complex UIs to hit 60fps in Debug, especially on macOS (see note below). See what happens in Release.
+* You might have legitimately expensive paint calls (esp. in Debug). You can verify this out via [Perfetto](https://github.com/sudara/melatonin_perfetto).
+
+On recent macOS, a `repaint()` on even small sections of a window (ie, what the FPS meter does) will cause the OS to paint the entire plugin window. You can use `Flash Screen Updates` in Quartz Debug to verify this.  Because of this macOS behavior, the FPS meter will actually trigger full repaints of your UI, so anything expensive (especially in Debug) will slow down what the FPS meter reports.
+
+If you are using the JUCE flag `JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS`, JUCE will internally manage the rectangles that need to be repainted, with the aim of being more precise/hygenic with what actually gets painted. This might be a good choice if your plugin already frequently repainting parts of the UI. But please don't switch over to that flag just to appease the FPS meter! It needs to be a choice you make depending on your internal testing (without the FPS meter in play).
+
+
+Feel free to ask for other ideas in the [forum thread](https://forum.juce.com/t/melatonin-inspector-a-web-inspector-ish-module-for-juce-components/45672).
 
 ### I have a problem / feature request
 

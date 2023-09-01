@@ -9,7 +9,7 @@ namespace melatonin
     {
     public:
         int zoomScale = 20;
-        juce::Rectangle<int> previewImageBounds;
+        juce::Rectangle<int> maxPreviewImageBounds;
 
         explicit Preview (ComponentModel& _model) : model (_model)
         {
@@ -125,16 +125,33 @@ namespace melatonin
             }
             else if (!previewImage.isNull())
             {
+                // TODO: odd this is needed (otherwise there's alpha in the state from somewhere)
+                g.setOpacity (1.0f);
+
                 // don't want our checkers aliased
-                g.setOpacity (1.0f); // oddly needed to draw the image properly, otherwise there's alpha
+                // so lets draw exact pixels
                 g.saveState();
                 g.setImageResamplingQuality (juce::Graphics::ResamplingQuality::lowResamplingQuality);
 
-                // clipping keeps checkerboard background consistent across image positions / sizes
-                g.drawImage (checkerboard.getClippedImage (previewImage.getBounds()), previewImageBounds.toFloat(), juce::RectanglePlacement::centred);
+                // fits and scale the preview image and while doing so, grab the transform
+                // this lets us reuse the position/scaling for clipping the transparency grid
+                auto transform = juce::RectanglePlacement (juce::RectanglePlacement::centred).getTransformToFit (previewImage.getBounds().toFloat(), maxPreviewImageBounds.toFloat());
+                auto resizedPreviewImageBounds = previewImage.getBounds().transformedBy (transform);
 
+                // the transform is relative to maxPreviewImageBounds and has an "offset" already
+                // For example, the Y offset will be at 48px from the Preview component
+                // this would clip too much of the checkerboard (which is already placed at that offset).
+                // An alternative solution here would be to have the checkerboard have the same size as Preview
+                // but only start drawing the checkers at maxPreviewImageBounds
+                auto checkersClipBounds = resizedPreviewImageBounds.translated(-maxPreviewImageBounds.getX(), -maxPreviewImageBounds.getY());
+
+                // clipping keeps the checkerboard background fixed across image positions / sizes
+                auto clippedCheckers = checkerboard.getClippedImage (checkersClipBounds);
+                g.drawImage (clippedCheckers, resizedPreviewImageBounds.toFloat(), juce::RectanglePlacement::doNotResize);
+
+                // back to drawing hi-res for the image
                 g.restoreState();
-                g.drawImage (previewImage, previewImageBounds.toFloat(), juce::RectanglePlacement::centred);
+                g.drawImageTransformed (previewImage, transform);
             }
         }
 
@@ -164,7 +181,8 @@ namespace melatonin
                 withChildrenBounds = juce::Rectangle<int>();
             }
 
-            previewImageBounds = area.reduced (32, 16);
+            // default for this ends up being 32 48 382 68
+            maxPreviewImageBounds = area.reduced (32, 16);
             drawCheckerboard();
         }
 
@@ -271,18 +289,20 @@ namespace melatonin
         // it's later clipped as needed
         void drawCheckerboard()
         {
-            if (previewImageBounds.isEmpty())
+            TRACE_COMPONENT();
+
+            if (maxPreviewImageBounds.isEmpty())
                 return;
 
-            checkerboard = { juce::Image::RGB, previewImageBounds.getWidth(), previewImageBounds.getHeight(), true };
+            checkerboard = { juce::Image::RGB, maxPreviewImageBounds.getWidth(), maxPreviewImageBounds.getHeight(), true };
             juce::Graphics g2 (checkerboard);
             int checkerSize = settings->props->getIntValue ("checkerSize", 4);
 
-            for (int i = 0; i < previewImageBounds.getWidth(); i += checkerSize)
+            for (int i = 0; i < maxPreviewImageBounds.getWidth(); i += checkerSize)
             {
                 // keeps checkerboard background consistent across image positions / sizes
                 // allows for initial or ending partial checker
-                for (auto j = 0; j < previewImageBounds.getHeight(); j += checkerSize)
+                for (auto j = 0; j < maxPreviewImageBounds.getHeight(); j += checkerSize)
                 {
                     g2.setColour (((i + j) / checkerSize) % 2 == 0 ? colors::checkerLight : colors::checkerDark);
                     g2.fillRect (i, j, checkerSize, checkerSize);
