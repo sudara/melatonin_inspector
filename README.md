@@ -50,7 +50,7 @@ Filter components by name. Names are derived from stock components, label/button
 
 ## Preview Component
 
-See what exactly is drawing on a per-component basis, even when hidden.
+See what exactly is drawing on a per-component basis, even when the component is hidden. A fixed transparency grid helps you understand which components and images have transparency.
 
 ![](https://github.com/sudara/melatonin_inspector/assets/472/429e4ce6-cc6c-4ca0-ba7c-201272234c6b)
 
