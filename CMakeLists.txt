@@ -37,7 +37,7 @@ juce_add_module("${CMAKE_CURRENT_LIST_DIR}")
 add_library(Melatonin::Inspector ALIAS melatonin_inspector)
 
 if (MelatoninInspector_IS_TOP_LEVEL)
-    target_link_libraries(unique_ptr_enabled PRIVATE melatonin_inspector
+    target_link_libraries("${TARGET_NAME}" PRIVATE melatonin_inspector
     juce::juce_recommended_config_flags
     juce::juce_recommended_lto_flags
     juce::juce_recommended_warning_flags)
