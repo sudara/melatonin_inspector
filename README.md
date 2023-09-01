@@ -121,8 +121,7 @@ Accurately pinpoint colors. Click to pick and store one. Toggle between RGBA and
 
 ## FPS meter
 
-Overlay an FPS meter on your Editor to get an intuitive understanding of your painting performance. Please see the [FAQ](https://github.com/sudara/melatonin_inspector#my-fps-seems-low-is-it-accurate) for details. 
-
+Overlay an FPS meter on your Editor to get an intuitive understanding of your painting performance. Please see the [FAQ](https://github.com/sudara/melatonin_inspector#my-fps-seems-low-is-it-accurate) for details on usage.
 
 <p align="center">
 <img src="https://github.com/sudara/melatonin_inspector/assets/472/06ee7e30-a536-4dc3-a54e-13aba3a2b0c0" width="600"/>
