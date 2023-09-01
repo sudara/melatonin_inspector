@@ -190,7 +190,7 @@ namespace melatonin
                 return;
 
             overlay.outlineComponent (c);
-            inspectorComponent.displayComponentInfo (c);
+            inspectorComponent.displayComponentInfo (c, true);
         }
 
         void outlineDistanceCallback (Component* c)
@@ -203,7 +203,7 @@ namespace melatonin
             overlay.outlineDistanceCallback (c);
         }
 
-        void selectComponent (Component* c)
+        void selectComponent (Component* c, bool shouldCollapseTree = false)
         {
             TRACE_COMPONENT();
 
@@ -211,7 +211,7 @@ namespace melatonin
                 return;
 
             overlay.selectComponent (c);
-            inspectorComponent.selectComponent (c);
+            inspectorComponent.selectComponent (c, shouldCollapseTree);
         }
 
         void dragComponent (Component* c, const juce::MouseEvent& e)
@@ -314,12 +314,12 @@ namespace melatonin
         {
             overlayMouseListener.outlineComponentCallback = [this] (Component* c) { this->outlineComponent (c); };
             overlayMouseListener.outlineDistanceCallback = [this] (Component* c) { this->outlineDistanceCallback (c); };
-            overlayMouseListener.selectComponentCallback = [this] (Component* c) { this->selectComponent (c); };
+            overlayMouseListener.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, true); };
             overlayMouseListener.componentStartDraggingCallback = [this] (Component* c, const juce::MouseEvent& e) { this->startDragComponent (c, e); };
             overlayMouseListener.componentDraggedCallback = [this] (Component* c, const juce::MouseEvent& e) { this->dragComponent (c, e); };
             overlayMouseListener.mouseExitCallback = [this]() { if (this->inspectorEnabled) inspectorComponent.redisplaySelectedComponent(); };
 
-            inspectorComponent.selectComponentCallback = [this] (Component* c) { this->selectComponent (c); };
+            inspectorComponent.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, false); };
             inspectorComponent.outlineComponentCallback = [this] (Component* c) { this->outlineComponent (c); };
             inspectorComponent.toggleCallback = [this] (bool enable) { this->toggle (enable); };
             inspectorComponent.toggleOverlayCallback = [this] (bool enable) {

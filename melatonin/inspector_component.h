@@ -237,7 +237,7 @@ namespace melatonin
             tree.setBounds (treeViewBounds);
         }
 
-        void displayComponentInfo (Component* component)
+        void displayComponentInfo (Component* component, bool collapseTreeBeforeSelection=false)
         {
             TRACE_COMPONENT();
 
@@ -254,7 +254,9 @@ namespace melatonin
                 // Selects and highlights
                 if (component != nullptr)
                 {
-                    getRoot()->recursivelyCloseSubItems();
+                    if (collapseTreeBeforeSelection)
+                        getRoot()->recursivelyCloseSubItems();
+
                     getRoot()->openTreeAndSelect (component);
                     tree.scrollToKeepItemVisible (tree.getSelectedItem (0));
                 }
@@ -269,7 +271,7 @@ namespace melatonin
             }
         }
 
-        void selectComponent (Component* component)
+        void selectComponent (Component* component, bool collapseTreeBeforeSelection=false)
         {
             TRACE_COMPONENT();
 
@@ -279,7 +281,7 @@ namespace melatonin
                 return;
             }
             selectedComponent = component;
-            displayComponentInfo (selectedComponent);
+            displayComponentInfo (selectedComponent, collapseTreeBeforeSelection);
         }
 
         void deselectComponent()
