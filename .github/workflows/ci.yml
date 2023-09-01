@@ -28,7 +28,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        app: [unique_ptr_enabled, unique_ptr_disabled]
+        app: [member_enabled, member_disabled, unique_ptr_enabled, unique_ptr_disabled]
         os: [macos-latest, windows-latest]
 
     steps:

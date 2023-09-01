@@ -20,7 +20,7 @@ if (MelatoninInspector_IS_TOP_LEVEL)
 
     FetchContent_MakeAvailable(JUCE)
 
-    SET(TARGET_NAME "unique_ptr_disabled" CACHE STRING "specify target to compile")
+    SET(TARGET_NAME "unique_ptr_disabled" CACHE STRING "Name of cpp and target to compile")
 
     juce_add_gui_app ("${TARGET_NAME}" VERSION 1.0.0)
     target_sources("${TARGET_NAME}" PRIVATE "tests/${TARGET_NAME}.cpp")
