@@ -20,9 +20,14 @@ if (MelatoninInspector_IS_TOP_LEVEL)
 
     FetchContent_MakeAvailable(JUCE)
 
-    juce_add_gui_app (dummy VERSION 1.0.0)
-    target_sources(dummy PRIVATE tests/dummy.cpp)
-    set_target_properties(dummy PROPERTIES COMPILE_WARNING_AS_ERROR ON)
+    juce_add_gui_app (unique_ptr_enabled VERSION 1.0.0)
+    target_sources(unique_ptr_enabled PRIVATE tests/unique_ptr_enabled.cpp)
+    set_target_properties(unique_ptr_enabled PROPERTIES COMPILE_WARNING_AS_ERROR ON)
+
+    juce_add_gui_app (unique_ptr_disabled VERSION 1.0.0)
+    target_sources(unique_ptr_disabled PRIVATE tests/unique_ptr_disabled.cpp)
+    set_target_properties(unique_ptr_disabled PROPERTIES COMPILE_WARNING_AS_ERROR ON)
+
 endif ()
 
 if (NOT COMMAND juce_add_module)

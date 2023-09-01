@@ -28,13 +28,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        app: [unique_ptr_enabled, unique_ptr_disabled, member_enabled, member_disabled]
         include:
           - name: macOS
             os: macos-latest
-            binary: dummy.app/Contents/MacOS/dummy &
+            binary: ${{ matrix.app }}.app/Contents/MacOS/${{ matrix.app }} &
           - name: Windows
             os: windows-latest
-            binary: ./Debug/dummy.exe &
+            binary: ./Debug/${{ matrix.app }}.exe &
 
     steps:
       - name: Checkout
@@ -49,7 +50,7 @@ jobs:
         run: cmake --build Builds --parallel 4
 
       - name: Run
-        working-directory: Builds/dummy_artefacts
+        working-directory: Builds/${{ matrix.app }}_artefacts
         timeout-minutes: 1
         run: |
           ls -ahl
