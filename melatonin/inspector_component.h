@@ -252,7 +252,7 @@ namespace melatonin
                 repaint();
 
                 // Selects and highlights
-                if (component != nullptr)
+                if (component && getRoot())
                 {
                     if (collapseTreeBeforeSelection)
                         getRoot()->recursivelyCloseSubItems();
@@ -320,7 +320,8 @@ namespace melatonin
             if (!nowEnabled)
             {
                 model.deselectComponent();
-                getRoot()->recursivelyCloseSubItems();
+                if (getRoot())
+                    getRoot()->recursivelyCloseSubItems();
             }
 
             // populate the tree view if nothing selected
