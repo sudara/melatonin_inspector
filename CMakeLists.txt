@@ -20,9 +20,12 @@ if (MelatoninInspector_IS_TOP_LEVEL)
 
     FetchContent_MakeAvailable(JUCE)
 
-    juce_add_gui_app (dummy VERSION 1.0.0)
-    target_sources(dummy PRIVATE tests/dummy.cpp)
-    set_target_properties(dummy PROPERTIES COMPILE_WARNING_AS_ERROR ON)
+    SET(TARGET_NAME "unique_ptr_disabled" CACHE STRING "Name of cpp and target to compile")
+
+    juce_add_gui_app ("${TARGET_NAME}" VERSION 1.0.0)
+    target_sources("${TARGET_NAME}" PRIVATE "tests/${TARGET_NAME}.cpp")
+    set_target_properties("${TARGET_NAME}" PROPERTIES COMPILE_WARNING_AS_ERROR ON)
+
 endif ()
 
 if (NOT COMMAND juce_add_module)
@@ -34,7 +37,7 @@ juce_add_module("${CMAKE_CURRENT_LIST_DIR}")
 add_library(Melatonin::Inspector ALIAS melatonin_inspector)
 
 if (MelatoninInspector_IS_TOP_LEVEL)
-    target_link_libraries(dummy PRIVATE melatonin_inspector
+    target_link_libraries("${TARGET_NAME}" PRIVATE melatonin_inspector
     juce::juce_recommended_config_flags
     juce::juce_recommended_lto_flags
     juce::juce_recommended_warning_flags)

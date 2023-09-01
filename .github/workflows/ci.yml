@@ -21,20 +21,15 @@ permissions:
 jobs:
 
   BuildAndTest:
-    name: ${{ matrix.name }}
+    name: ${{ matrix.os }} ${{ matrix.app }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
 
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - name: macOS
-            os: macos-latest
-            binary: dummy.app/Contents/MacOS/dummy &
-          - name: Windows
-            os: windows-latest
-            binary: ./Debug/dummy.exe &
+        app: [member_enabled, member_disabled, unique_ptr_enabled, unique_ptr_disabled]
+        os: [macos-latest, windows-latest]
 
     steps:
       - name: Checkout
@@ -43,18 +38,27 @@ jobs:
           fetch-depth: 1
 
       - name: Configure
-        run: cmake -B Builds
+        run: cmake -B Builds -DTARGET_NAME:STRING=${{ matrix.app }}
 
       - name: Build
         run: cmake --build Builds --parallel 4
 
       - name: Run
-        working-directory: Builds/dummy_artefacts
+        if: ${{ matrix.os == 'macos-latest' }}
+        working-directory: Builds/${{ matrix.app }}_artefacts
         timeout-minutes: 1
         run: |
           ls -ahl
-          ${{ matrix.binary }} 
+          ${{ matrix.app }}.app/Contents/MacOS/${{ matrix.app }} &
+
+      - name: Run
+        if: ${{ matrix.os == 'windows-latest' }}
+        working-directory: Builds/${{ matrix.app }}_artefacts
+        timeout-minutes: 1
+        run: |
+          ls -ahl
+          ./Debug/${{ matrix.app }}.exe &
 
       - uses: OrbitalOwen/desktop-screenshot-action@0.1
         with:
-          file-name: ${{ matrix.name }}.jpg
+          file-name: ${{ matrix.os }}-${{matrix.app}}.jpg
