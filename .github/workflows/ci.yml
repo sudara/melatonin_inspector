@@ -28,14 +28,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        app: [unique_ptr_enabled, unique_ptr_disabled, member_enabled, member_disabled]
-        include:
-          - name: macOS
-            os: macos-latest
-            binary: ${{ matrix.app }}.app/Contents/MacOS/${{ matrix.app }} &
-          - name: Windows
-            os: windows-latest
-            binary: ./Debug/${{ matrix.app }}.exe &
+        app: [unique_ptr_enabled, unique_ptr_disabled]
+        os: [macos-latest, windows-latest]
 
     steps:
       - name: Checkout
@@ -50,11 +44,20 @@ jobs:
         run: cmake --build Builds --parallel 4
 
       - name: Run
+        if: ${{ matrix.os == 'macos-latest' }}
         working-directory: Builds/${{ matrix.app }}_artefacts
         timeout-minutes: 1
         run: |
           ls -ahl
-          ${{ matrix.binary }} 
+          ${{ matrix.app }}.app/Contents/MacOS/${{ matrix.app }} &
+
+      - name: Run
+        if: ${{ matrix.os == 'windows-latest' }}
+        working-directory: Builds/${{ matrix.app }}_artefacts
+        timeout-minutes: 1
+        run: |
+          ls -ahl
+          ./Debug/${{ matrix.app }}.exe &
 
       - uses: OrbitalOwen/desktop-screenshot-action@0.1
         with:
