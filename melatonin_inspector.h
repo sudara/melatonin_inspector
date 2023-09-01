@@ -152,8 +152,8 @@ namespace melatonin
             auto minWidth = inspectorEnabled ? 700 : 380;
             auto minHeight = inspectorEnabled ? 800 : 400;
 
-            auto x = settings->props->getIntValue ("x", 0);
-            auto y = settings->props->getIntValue ("y", 0);
+            auto x = settings->props->getIntValue ("x", 50);
+            auto y = settings->props->getIntValue ("y", 50);
 
             if (inspectorEnabled)
             {
