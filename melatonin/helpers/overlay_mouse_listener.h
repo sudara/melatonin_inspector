@@ -5,10 +5,10 @@ namespace melatonin
 {
     // Unfortunately the DocumentWindow cannot behave as our root component mouse listener
     // without some strange side effects. That's why we are doing the whole lambda dance...
-    class MouseListener : public juce::MouseListener
+    class OverlayMouseListener : public juce::MouseListener
     {
     public:
-        explicit MouseListener (juce::Component& c, bool startEnabled = true) : root (c)
+        explicit OverlayMouseListener (juce::Component& c, bool startEnabled = true) : root (c)
         {
             // Listen to all mouse movements for all children of the root
             if (startEnabled)
@@ -18,7 +18,7 @@ namespace melatonin
             }
         }
 
-        ~MouseListener() override
+        ~OverlayMouseListener() override
         {
             if (enabled)
                 root.removeMouseListener (this);
@@ -92,10 +92,10 @@ namespace melatonin
         std::function<void()> mouseExitCallback;
 
     private:
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OverlayMouseListener)
+
         juce::Component& root;
         bool enabled = false;
-
         bool isDragging { false };
     };
-
 }

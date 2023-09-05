@@ -24,7 +24,7 @@ END_JUCE_MODULE_DECLARATION
 #include "melatonin/lookandfeel.h"
 #include "melatonin_inspector/melatonin/components/overlay.h"
 #include "melatonin_inspector/melatonin/helpers/inspector_settings.h"
-#include "melatonin_inspector/melatonin/helpers/mouse_listener.h"
+#include "melatonin_inspector/melatonin/helpers/overlay_mouse_listener.h"
 #include "melatonin_inspector/melatonin/inspector_component.h"
 #include <melatonin_inspector/melatonin/components/fps_meter.h>
 
@@ -298,7 +298,7 @@ namespace melatonin
         bool inspectorEnabled = false;
         melatonin::Overlay overlay;
         melatonin::FPSMeter fpsMeter { root };
-        melatonin::MouseListener overlayMouseListener { root, false };
+        melatonin::OverlayMouseListener overlayMouseListener { root, false };
         InspectorKeyCommands keyListener { *this };
 
         // Resize our overlay when the root component changes
