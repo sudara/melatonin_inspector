@@ -82,12 +82,25 @@ namespace melatonin
             searchBox.setColour (juce::TextEditor::focusedOutlineColourId, juce::Colours::transparentBlack);
             searchBox.setTextToShowWhenEmpty ("Filter components...", colors::searchText);
             searchBox.setJustification (juce::Justification::centredLeft);
-            searchBox.onEscapeKey = [&] { searchBox.setText (""); searchBox.giveAwayKeyboardFocus(); };
+            searchBox.onEscapeKey = [&]
+            {
+                searchBox.setText ("");
+                searchBox.giveAwayKeyboardFocus();
+                lastSearchText = {};
+                getRoot()->validateSubItems();
+            };
 
             logo.onClick = []() { juce::URL ("https://github.com/sudara/melatonin_inspector/").launchInDefaultBrowser(); };
             searchBox.onTextChange = [this] {
                 auto searchText = searchBox.getText();
                 ensureTreeIsConstructed();
+
+                if ( lastSearchText.isNotEmpty() && ! searchText.startsWith ( lastSearchText ) )
+                {
+                    getRoot()->validateSubItems();
+                }
+
+                lastSearchText = searchText;
 
                 // try to find the first item that matches the search string
                 if (searchText.isNotEmpty())
@@ -370,6 +383,8 @@ namespace melatonin
         InspectorImageButton searchIcon { "search", { 8, 8 } };
         InspectorImageButton enabledButton { "enabled", { 8, 6 }, true };
         InspectorImageButton fpsToggle { "speedometer", { 2, 7 }, true };
+
+        juce::String lastSearchText;
 
         std::unique_ptr<ComponentTreeViewItem> rootItem;
 
