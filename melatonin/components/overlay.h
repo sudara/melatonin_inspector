@@ -373,7 +373,7 @@ namespace melatonin
             if (selectedComponent && hoveredComponent)
             {
                 int labelHeight = 15;
-                auto paddingToLabel = 4;
+                auto paddingToLabel = 4.0f;
 
                 // top
                 if (lineToTopHoveredComponent.getLength() > 0)
