@@ -112,9 +112,12 @@ namespace melatonin
                     colourSelector->setLookAndFeel (&getLookAndFeel());
                     colourSelector->setSize (300, 300);
                     colourSelector->setCurrentColour (juce::Colour ((uint32_t) int (value.getValue())), juce::dontSendNotification);
-                    colourSelector->onDismiss = [this, cs = colourSelector.get()]() {
-                        value = (int) cs->getCurrentColour().getARGB();
-                        repaint();
+                    colourSelector->onDismiss = [this, parentRef = juce::WeakReference<juce::Component> (this), cs = colourSelector.get()]() {
+                        if (! parentRef.wasObjectDeleted())
+                        {
+                            value = (int) cs->getCurrentColour().getARGB();
+                            repaint();
+                        }
                     };
                     colourSelector->onChange = [this, cs = colourSelector.get()]() {
                         value = (int) cs->getCurrentColour().getARGB();
