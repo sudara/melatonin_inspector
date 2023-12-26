@@ -63,5 +63,6 @@ jobs:
           ./Debug/${{ matrix.app }}.exe &
 
       - uses: OrbitalOwen/desktop-screenshot-action@0.1
+        if: ${{ matrix.os == 'windows-latest' }}
         with:
           file-name: ${{ matrix.os }}-${{matrix.app}}.jpg
