@@ -8,32 +8,42 @@ namespace melatonin
     class OverlayMouseListener : public juce::MouseListener
     {
     public:
-        explicit OverlayMouseListener (juce::Component& c, bool startEnabled = true) : root (c)
+        OverlayMouseListener()
         {
-            // Listen to all mouse movements for all children of the root
-            if (startEnabled)
-            {
-                enabled = true;
-                root.addMouseListener (this, true);
-            }
         }
 
         ~OverlayMouseListener() override
         {
+            if (enabled && root)
+                root->removeMouseListener (this);
+        }
+
+        void setRoot (juce::Component& c)
+        {
+            root = &c;
+
             if (enabled)
-                root.removeMouseListener (this);
+                root->addMouseListener (this, true);
+        }
+
+        void clearRoot()
+        {
+            if (enabled && root)
+                root->removeMouseListener (this);
+
+            root = nullptr;
         }
 
         void enable()
         {
             enabled = true;
-            root.addMouseListener (this, true);
+            root->addMouseListener (this, true);
         }
 
         void disable()
         {
             enabled = false;
-            root.removeMouseListener (this);
+            root->removeMouseListener (this);
         }
 
         void mouseEnter (const juce::MouseEvent& event) override
@@ -78,7 +88,7 @@ namespace melatonin
 
         void mouseExit (const juce::MouseEvent& event) override
         {
-            if (event.originalComponent == &root)
+            if (event.originalComponent == root)
             {
                 mouseExitCallback();
             }
@@ -94,7 +104,7 @@ namespace melatonin
     private:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OverlayMouseListener)
 
-        juce::Component& root;
+        juce::Component* root = nullptr;
         bool enabled = false;
         bool isDragging { false };
     };

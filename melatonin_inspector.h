@@ -30,7 +30,7 @@ END_JUCE_MODULE_DECLARATION
 
 namespace melatonin
 {
-    class Inspector : public juce::ComponentListener, public juce::DocumentWindow
+    class Inspector : public juce::ComponentListener, public juce::DocumentWindow, private juce::Timer
     {
     public:
         class InspectorKeyCommands : public juce::KeyListener
@@ -65,20 +65,12 @@ namespace melatonin
             }
         };
         explicit Inspector (juce::Component& rootComponent, bool inspectorEnabledAtStart = true)
-            : juce::DocumentWindow ("Melatonin Inspector", colors::background, 7, true),
-              inspectorComponent (rootComponent),
-              root (rootComponent)
+            : juce::DocumentWindow ("Melatonin Inspector", colors::background, 7, true)
         {
             TRACE_COMPONENT();
-            root.addChildComponent (overlay);
-            overlay.setBounds (root.getLocalBounds());
-            root.addComponentListener (this);
-
-            // allow us to open/close the inspector by key command
-            // bit sketchy because we're modifying the source app to accept key focus
-            root.addKeyListener (&keyListener);
-            root.setWantsKeyboardFocus (true);
             this->addKeyListener (&keyListener);
+
+            setRoot (rootComponent);
 
             // needs to come before the LNF
             restoreBoundsIfNeeded();
@@ -98,13 +90,46 @@ namespace melatonin
 
         ~Inspector() override
         {
-            root.removeKeyListener (&keyListener);
+            clearRoot();
+
             this->removeKeyListener (&keyListener);
-            root.removeComponentListener (this);
 
             // needed, otherwise removing look and feel will save bounds
             settings->props.reset();
             setLookAndFeel (nullptr);
+        }
+
+        void setRoot (juce::Component& rootComponent)
+        {
+            clearRoot();
+
+            root = &rootComponent;
+
+            root->addChildComponent (overlay);
+            overlay.setBounds (root->getLocalBounds());
+            root->addComponentListener (this);
+
+            // allow us to open/close the inspector by key command
+            // bit sketchy because we're modifying the source app to accept key focus
+            root->addKeyListener (&keyListener);
+            root->setWantsKeyboardFocus (true);
+
+            fpsMeter.setRoot (*root);
+            overlayMouseListener.setRoot (*root);
+            inspectorComponent.setRoot (*root);
+        }
+
+        void clearRoot()
+        {
+            if (root == nullptr)
+                return;
+
+            root->removeKeyListener (&keyListener);
+            root->removeComponentListener (this);
+
+            fpsMeter.clearRoot();
+            overlayMouseListener.clearRoot();
+            inspectorComponent.clearRoot();
         }
 
         void moved() override
@@ -288,18 +313,29 @@ namespace melatonin
             toggle (!inspectorEnabled);
         }
 
+        void setRootFollowsComponentUnderMouse (bool follow)
+        {
+            rootFollowsComponentUnderMouse = follow;
+
+            if (rootFollowsComponentUnderMouse)
+                startTimerHz (25);
+            else
+                stopTimer();
+        }
+
         std::function<void()> onClose;
 
     private:
         juce::SharedResourcePointer<InspectorSettings> settings;
         melatonin::InspectorLookAndFeel inspectorLookAndFeel;
         melatonin::InspectorComponent inspectorComponent;
-        juce::Component& root;
+        juce::Component::SafePointer<juce::Component> root;
         bool inspectorEnabled = false;
         melatonin::Overlay overlay;
-        melatonin::FPSMeter fpsMeter { root };
-        melatonin::OverlayMouseListener overlayMouseListener { root, false };
+        melatonin::FPSMeter fpsMeter;
+        melatonin::OverlayMouseListener overlayMouseListener;
         InspectorKeyCommands keyListener { *this };
+        bool rootFollowsComponentUnderMouse = false;
 
         // Resize our overlay when the root component changes
         void componentMovedOrResized (Component& rootComponent, bool wasMoved, bool wasResized) override
@@ -308,6 +344,32 @@ namespace melatonin
             {
                 overlay.setBounds (rootComponent.getLocalBounds());
             }
+        }
+
+        void componentBeingDeleted (juce::Component& component) override
+        {
+            if (&component == root)
+            {
+                clearRoot();
+                
+                auto& d = juce::Desktop::getInstance();
+                for (int i = 0; i < d.getNumComponents(); i++)
+                {
+                    if (auto c = d.getComponent (i); c != nullptr && c != this)
+                    {
+                        setRoot (*c);
+                        return;
+                    }
+                }
+            }
+        }
+
+        void timerCallback() override
+        {
+            for (auto ms : juce::Desktop::getInstance().getMouseSources())
+                if (auto c = ms.getComponentUnderMouse())
+                    if (auto top = c->getTopLevelComponent(); top != nullptr && top != root && top != this)
+                        setRoot (*top);
         }
 
         void setupCallbacks()
@@ -328,7 +390,7 @@ namespace melatonin
             };
             inspectorComponent.toggleFPSCallback = [this] (bool enable) {
                 if (enable)
-                    this->fpsMeter.setBounds (root.getLocalBounds().removeFromRight (60).removeFromTop (40));
+                    this->fpsMeter.setBounds (root->getLocalBounds().removeFromRight (60).removeFromTop (40));
                 this->fpsMeter.setVisible (enable);
             };
         }
