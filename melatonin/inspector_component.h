@@ -371,7 +371,7 @@ namespace melatonin
 
     private:
         Component::SafePointer<Component> selectedComponent;
-        Component* root;
+        Component* root = nullptr;
         juce::SharedResourcePointer<InspectorSettings> settings;
         ComponentModel model;
         bool inspectorEnabled;
