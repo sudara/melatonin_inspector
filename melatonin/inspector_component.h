@@ -374,7 +374,7 @@ namespace melatonin
         Component* root = nullptr;
         juce::SharedResourcePointer<InspectorSettings> settings;
         ComponentModel model;
-        bool inspectorEnabled;
+        bool inspectorEnabled = false;
 
         juce::Rectangle<int> mainColumnBounds, topArea, searchBoxBounds, treeViewBounds;
         InspectorImageButton logo { "logo" };
