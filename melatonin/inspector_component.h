@@ -19,7 +19,7 @@ namespace melatonin
     class InspectorComponent : public juce::Component
     {
     public:
-        explicit InspectorComponent (juce::Component& rootComponent, bool enabledAtStart = true) : root (rootComponent), inspectorEnabled (enabledAtStart)
+        explicit InspectorComponent()
         {
             TRACE_COMPONENT();
 
@@ -48,7 +48,6 @@ namespace melatonin
             addAndMakeVisible (searchIcon);
             addChildComponent (clearButton);
 
-            colorPicker.setRootComponent (&root);
             colorPicker.togglePickerCallback = [this] (bool value) {
                 if (toggleOverlayCallback)
                 {
@@ -153,6 +152,24 @@ namespace melatonin
             tree.setRootItem (nullptr);
         }
 
+        void setRoot (juce::Component& r)
+        {
+            root = &r;
+            colorPicker.setRootComponent (root);
+
+            tree.setRootItem (nullptr);
+            rootItem = nullptr;
+
+            if (inspectorEnabled)
+                ensureTreeIsConstructed();
+        }
+
+        void clearRoot()
+        {
+            root = nullptr;
+            colorPicker.setRootComponent (nullptr);
+        }
+
         void paint (juce::Graphics& g) override
         {
             auto mainPanelGradient = juce::ColourGradient::horizontal (colors::panelBackgroundDarker, (float) mainColumnBounds.getX(), colors::panelBackgroundLighter, (float) mainColumnBounds.getWidth());
@@ -185,7 +202,7 @@ namespace melatonin
                 tree.setRootItem (nullptr);
 
             // construct the root item
-            rootItem = std::make_unique<ComponentTreeViewItem> (&root, outlineComponentCallback, selectComponentCallback);
+            rootItem = std::make_unique<ComponentTreeViewItem> (root, outlineComponentCallback, selectComponentCallback);
             tree.setRootItem (rootItem.get());
             getRoot()->setOpenness (ComponentTreeViewItem::Openness::opennessOpen);
 
@@ -354,10 +371,10 @@ namespace melatonin
 
     private:
         Component::SafePointer<Component> selectedComponent;
-        Component& root;
+        Component* root = nullptr;
         juce::SharedResourcePointer<InspectorSettings> settings;
         ComponentModel model;
-        bool inspectorEnabled;
+        bool inspectorEnabled = false;
 
         juce::Rectangle<int> mainColumnBounds, topArea, searchBoxBounds, treeViewBounds;
         InspectorImageButton logo { "logo" };
