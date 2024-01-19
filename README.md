@@ -278,8 +278,7 @@ void paint (juce::Graphics& g) override
 {
     melatonin::ComponentTimer timer { this };
 
-    // Call derived class paintContent method
-    timedPaint (g);
+    // do all your expensive painting...
  ```
 
 This simply times the method and stores it in the component's own properties. It will store up to 3 values named `timing1`, `timing2`, `timing3`.
