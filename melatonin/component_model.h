@@ -22,6 +22,12 @@ namespace melatonin
         juce::Value lookAndFeelValue, typeValue, fontValue, alphaValue;
         juce::Value pickedColor;
         juce::Value timing1, timing2, timing3, timingMax, hasChildren;
+
+        struct AccessiblityDetail
+        {
+            juce::Value title, value, role, handlerType;
+        } accessiblityDetail;
+
         double timingWithChildren1, timingWithChildren2, timingWithChildren3, timingWithChildrenMax;
 
         ComponentModel() = default;
@@ -144,6 +150,65 @@ namespace melatonin
             accessibilityHandledValue.addListener (this);
             interceptsMouseValue.addListener (this);
             childrenInterceptsMouseValue.addListener (this);
+
+            if (selectedComponent->isAccessible() && selectedComponent->getAccessibilityHandler())
+            {
+                auto* accH = selectedComponent->getAccessibilityHandler();
+                accessiblityDetail.handlerType = type (*accH);
+                if (accH->getValueInterface())
+                {
+                    accessiblityDetail.value = accH->getValueInterface()->getCurrentValueAsString();
+                }
+                else
+                {
+                    accessiblityDetail.value = "no value interface";
+                }
+                accessiblityDetail.title = accH->getTitle();
+                auto role = accH->getRole();
+                switch (role)
+                {
+                    // Amazingly juce doesn' thave a display name fn for these
+#define DN(x)                          \
+    case juce::AccessibilityRole::x:   \
+        accessiblityDetail.role = #x; \
+        break;
+                    DN (button)
+                    DN (toggleButton)
+                    DN (radioButton)
+                    DN (comboBox)
+                    DN (image)
+                    DN (slider)
+                    DN (label)
+                    DN (staticText)
+                    DN (editableText)
+                    DN (menuItem)
+                    DN (menuBar)
+                    DN (popupMenu)
+                    DN (table)
+                    DN (tableHeader)
+                    DN (column)
+                    DN (row)
+                    DN (cell)
+                    DN (hyperlink)
+                    DN (list)
+                    DN (listItem)
+                    DN (tree)
+                    DN (treeItem)
+                    DN (progressBar)
+                    DN (group)
+                    DN (dialogWindow)
+                    DN (window)
+                    DN (scrollBar)
+                    DN (tooltip)
+                    DN (splashScreen)
+                    DN (ignored)
+                    DN (unspecified)
+#undef DN
+                    default:
+                        accessiblityDetail.role = juce::String ("Unknown ") + juce::String ((int) role);
+                        break;
+                }
+            }
 
             {
                 bool interceptsMouse = false;

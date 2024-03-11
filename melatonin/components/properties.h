@@ -68,6 +68,22 @@ namespace melatonin
             }
             panel.addProperties (props, padding);
 
+            if (model.accessibilityHandledValue.getValue())
+            {
+                auto& ad = model.accessiblityDetail;
+                auto aprops = juce::Array<juce::PropertyComponent*> {
+                    new juce::TextPropertyComponent (ad.title, "Title", 200, false, false),
+                    new juce::TextPropertyComponent (ad.value, "Value", 200, false, false),
+                    new juce::TextPropertyComponent (ad.role, "Role", 200, false, false),
+                    new juce::TextPropertyComponent (ad.handlerType, "Handler", 200, false, false),
+                };
+                for (auto* p : aprops)
+                {
+                    p->setLookAndFeel (&getLookAndFeel());
+                }
+                panel.addSection ("Accessibility", aprops);
+            }
+
             resized();
         }
 

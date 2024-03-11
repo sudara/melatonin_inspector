@@ -49,6 +49,19 @@ namespace melatonin
             return juce::String ("Editor: ") + editor->getAudioProcessor()->getName();
         }
 #endif
+        else if (c && c->isAccessible() && c->getAccessibilityHandler() && !c->getAccessibilityHandler()->getTitle().isEmpty())
+        {
+            // If a widget has an accessible name, prefer that to the internal
+            // name since it is user facing in a screen reader
+            auto acctitle = c->getAccessibilityHandler()->getTitle();
+            auto nm = c->getName();
+            if (nm != acctitle &&  !nm.isEmpty())
+            {
+                // but if i also have an internal name, dont' suppress it
+                acctitle += "(name=" + nm + ")";
+            }
+            return acctitle;
+        }
         else if (c && !c->getName().isEmpty())
         {
             return c->getName();
