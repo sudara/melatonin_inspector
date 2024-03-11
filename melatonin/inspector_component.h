@@ -7,6 +7,7 @@
 #include "melatonin_inspector/melatonin/components/component_tree_view_item.h"
 #include "melatonin_inspector/melatonin/components/preview.h"
 #include "melatonin_inspector/melatonin/components/properties.h"
+#include "melatonin_inspector/melatonin/components/accesibility.h"
 #include "melatonin_inspector/melatonin/lookandfeel.h"
 
 /*
@@ -37,12 +38,14 @@ namespace melatonin
             addChildComponent (colorPicker);
             addChildComponent (preview);
             addChildComponent (properties);
+            addChildComponent (accessibility);
 
             // z-order on panels is higher so they are clickable
             addAndMakeVisible (boxModelPanel);
             addAndMakeVisible (colorPickerPanel);
             addAndMakeVisible (previewPanel);
             addAndMakeVisible (propertiesPanel);
+            addAndMakeVisible (accessibilityPanel);
 
             addAndMakeVisible (searchBox);
             addAndMakeVisible (searchIcon);
@@ -251,6 +254,9 @@ namespace melatonin
             colorPicker.setBounds (colorPickerBounds.withTrimmedLeft (32));
             colorPickerPanel.setBounds (colorPickerBounds.removeFromTop (32).removeFromLeft (200));
 
+            accessibilityPanel.setBounds (mainCol.removeFromTop (32));
+            accessibility.setBounds (mainCol.removeFromTop (accessibility.isVisible() ? 110 : 0).withTrimmedLeft(32));
+
             propertiesPanel.setBounds (mainCol.removeFromTop (33)); // extra pixel for divider
             properties.setBounds (mainCol.withTrimmedLeft (32));
 
@@ -390,6 +396,9 @@ namespace melatonin
 
         Properties properties { model };
         CollapsablePanel propertiesPanel { "PROPERTIES", &properties, true };
+
+        Accessibility accessibility { model };
+        CollapsablePanel accessibilityPanel { "ACCESSIBILITY", &accessibility, false };
 
         // TODO: move to its own component
         juce::TreeView tree;

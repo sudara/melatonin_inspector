@@ -16,6 +16,7 @@ namespace melatonin
             virtual void componentModelChanged (ComponentModel& model) = 0;
         };
 
+        juce::Value nameValue;
         juce::Value widthValue, heightValue, xValue, yValue;
         juce::Value enabledValue, opaqueValue, hasCachedImageValue, accessibilityHandledValue;
         juce::Value visibleValue, wantsFocusValue, interceptsMouseValue, childrenInterceptsMouseValue;
@@ -127,6 +128,7 @@ namespace melatonin
                 return;
             }
 
+            nameValue = selectedComponent->getName();
             lookAndFeelValue = lnfString (selectedComponent);
             visibleValue = selectedComponent->isVisible();
             enabledValue = selectedComponent->isEnabled();
@@ -138,6 +140,7 @@ namespace melatonin
             typeValue = type (*selectedComponent);
             accessibilityHandledValue = selectedComponent->isAccessible();
 
+            nameValue.addListener(this);
             widthValue.addListener (this);
             heightValue.addListener (this);
             xValue.addListener (this);
