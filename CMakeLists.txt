@@ -24,6 +24,12 @@ if (MelatoninInspector_IS_TOP_LEVEL)
 
     juce_add_gui_app ("${TARGET_NAME}" VERSION 1.0.0)
     target_sources("${TARGET_NAME}" PRIVATE "tests/${TARGET_NAME}.cpp")
+
+    target_compile_definitions("${TARGET_NAME}" PUBLIC
+        JUCE_USE_CURL=0
+        JUCE_WEB_BROWSER=0
+    )
+
     set_target_properties("${TARGET_NAME}" PROPERTIES COMPILE_WARNING_AS_ERROR ON)
 
 endif ()
