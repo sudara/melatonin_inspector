@@ -7,7 +7,8 @@ namespace melatonin
     class Accessibility : public juce::Component, private ComponentModel::Listener
     {
     public:
-        Accessibility(ComponentModel & m) : model(m) {
+        explicit Accessibility (ComponentModel& m) : model (m)
+        {
             addAndMakeVisible (&panel);
             model.addListener (*this);
         }
@@ -30,16 +31,17 @@ namespace melatonin
             {
                 p->setLookAndFeel (&getLookAndFeel());
             }
-            panel.addProperties(aprops, 0);
+            panel.addProperties (aprops, 0);
             resized();
         }
 
     protected:
         ComponentModel& model;
-        void componentModelChanged (ComponentModel& model) override {
+
+        void componentModelChanged (ComponentModel&) override
+        {
             updateProperties();
         }
-
 
         void resized() override
         {
@@ -48,7 +50,7 @@ namespace melatonin
             panel.setBounds (getLocalBounds().withTrimmedTop (padding));
         }
 
-        int padding {3};
+        int padding { 3 };
 
         juce::PropertyPanel panel { "Accessibility" };
     };
