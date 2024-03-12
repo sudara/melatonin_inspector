@@ -49,6 +49,11 @@ namespace melatonin
             return juce::String ("Editor: ") + editor->getAudioProcessor()->getName();
         }
 #endif
+        else if (c && c->isAccessible() && c->getAccessibilityHandler() && !c->getAccessibilityHandler()->getTitle().isEmpty())
+        {
+            auto acctitle = c->getAccessibilityHandler()->getTitle();
+            return acctitle;
+        }
         else if (c && !c->getName().isEmpty())
         {
             return c->getName();
