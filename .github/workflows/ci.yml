@@ -3,6 +3,10 @@ name: CI
 on:
   workflow_dispatch:
   push:
+  pull_request:
+    branches:
+      - main
+      - next
 
 env:
   CMAKE_BUILD_PARALLEL_LEVEL: 3 # Use up to 3 cpus to build juceaide, etc
@@ -29,13 +33,22 @@ jobs:
       fail-fast: false
       matrix:
         app: [ member_enabled, member_disabled, unique_ptr_enabled, unique_ptr_disabled ]
-        os: [ macos-latest, windows-latest ]
+        os: [ macos-latest, windows-latest, ubuntu-latest ]
 
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 1
+
+      - name: Install Linux Deps
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt install libasound2-dev libx11-dev libxcomposite-dev libxcursor-dev libxext-dev libxinerama-dev libxrandr-dev libxrender-dev libfreetype6-dev libglu1-mesa-dev libjack-jackd2-dev
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 9
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 9
+
 
       - name: Run sccache-cache
         uses: mozilla-actions/sccache-action@v0.0.3
