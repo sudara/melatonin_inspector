@@ -51,7 +51,8 @@ namespace melatonin
                     inspector.toggle();
                     return true;
                 }
-                else if (keyPress.isKeyCode (juce::KeyPress::escapeKey))
+
+                if (keyPress.isKeyCode (juce::KeyPress::escapeKey))
                 {
                     if (inspector.inspectorEnabled)
                     {
@@ -325,37 +326,35 @@ namespace melatonin
 
         std::function<void()> onClose;
 
-        enum SelectionMode
-        {
+        enum SelectionMode {
             FOLLOWS_MOUSE,
             FOLLOWS_FOCUS
-        } selectionMode{FOLLOWS_MOUSE};
+        } selectionMode { FOLLOWS_MOUSE };
 
-        void setSelectionMode(SelectionMode newSM)
+        void setSelectionMode (SelectionMode newMode)
         {
-            if (newSM == selectionMode)
+            if (newMode == selectionMode)
                 return;
             // Out with the old
-            switch(selectionMode)
+            switch (selectionMode)
             {
                 case FOLLOWS_FOCUS:
-                    juce::Desktop::getInstance().removeFocusChangeListener(this);
+                    juce::Desktop::getInstance().removeFocusChangeListener (this);
                     break;
                 case FOLLOWS_MOUSE:
                     break;
             }
 
             // And in with the new
-            selectionMode = newSM;
-            switch(selectionMode)
+            selectionMode = newMode;
+            switch (selectionMode)
             {
                 case FOLLOWS_FOCUS:
-                    juce::Desktop::getInstance().addFocusChangeListener(this);
+                    juce::Desktop::getInstance().addFocusChangeListener (this);
                     break;
                 case FOLLOWS_MOUSE:
                     break;
             }
-
         }
 
     private:
@@ -384,7 +383,7 @@ namespace melatonin
             if (&component == root)
             {
                 clearRoot();
-                
+
                 auto& d = juce::Desktop::getInstance();
                 for (int i = 0; i < d.getNumComponents(); i++)
                 {
@@ -399,14 +398,14 @@ namespace melatonin
 
         void globalFocusChanged (Component* focusedComponent) override
         {
-            inspectorComponent.toggleOverlayCallback(true);
-            inspectorComponent.selectComponentCallback(focusedComponent);
+            inspectorComponent.toggleOverlayCallback (true);
+            inspectorComponent.selectComponentCallback (focusedComponent);
         }
 
     private:
         void timerCallback() override
         {
-            for (auto ms : juce::Desktop::getInstance().getMouseSources())
+            for (auto& ms : juce::Desktop::getInstance().getMouseSources())
                 if (auto c = ms.getComponentUnderMouse())
                     if (auto top = c->getTopLevelComponent(); top != nullptr && top != root && top != this)
                         setRoot (*top);
