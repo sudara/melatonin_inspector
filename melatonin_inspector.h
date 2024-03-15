@@ -30,7 +30,7 @@ END_JUCE_MODULE_DECLARATION
 
 namespace melatonin
 {
-    class Inspector : public juce::ComponentListener, public juce::DocumentWindow, private juce::Timer
+    class Inspector : public juce::ComponentListener, public juce::DocumentWindow, private juce::Timer, public juce::FocusChangeListener
     {
     public:
         class InspectorKeyCommands : public juce::KeyListener
@@ -325,6 +325,39 @@ namespace melatonin
 
         std::function<void()> onClose;
 
+        enum SelectionMode
+        {
+            FOLLOWS_MOUSE,
+            FOLLOWS_FOCUS
+        } selectionMode{FOLLOWS_MOUSE};
+
+        void setSelectionMode(SelectionMode newSM)
+        {
+            if (newSM == selectionMode)
+                return;
+            // Out with the old
+            switch(selectionMode)
+            {
+                case FOLLOWS_FOCUS:
+                    juce::Desktop::getInstance().removeFocusChangeListener(this);
+                    break;
+                case FOLLOWS_MOUSE:
+                    break;
+            }
+
+            // And in with the new
+            selectionMode = newSM;
+            switch(selectionMode)
+            {
+                case FOLLOWS_FOCUS:
+                    juce::Desktop::getInstance().addFocusChangeListener(this);
+                    break;
+                case FOLLOWS_MOUSE:
+                    break;
+            }
+
+        }
+
     private:
         juce::SharedResourcePointer<InspectorSettings> settings;
         melatonin::InspectorLookAndFeel inspectorLookAndFeel;
@@ -364,6 +397,13 @@ namespace melatonin
             }
         }
 
+        void globalFocusChanged (Component* focusedComponent) override
+        {
+            inspectorComponent.toggleOverlayCallback(true);
+            inspectorComponent.selectComponentCallback(focusedComponent);
+        }
+
+    private:
         void timerCallback() override
         {
             for (auto ms : juce::Desktop::getInstance().getMouseSources())
