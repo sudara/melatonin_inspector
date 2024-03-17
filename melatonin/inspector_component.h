@@ -27,8 +27,10 @@ namespace melatonin
             setMouseClickGrabsKeyboardFocus (false);
 
             addAndMakeVisible (enabledButton);
-            addAndMakeVisible (fpsToggle);
             addAndMakeVisible (logo);
+            addAndMakeVisible (fpsToggle);
+            addAndMakeVisible (moveToggle);
+            addAndMakeVisible (tabToggle);
 
             addChildComponent (tree);
             addChildComponent (emptySearchLabel);
@@ -145,6 +147,11 @@ namespace melatonin
                 searchBox.giveAwayKeyboardFocus();
             };
 
+            tabToggle.on = false;
+            tabToggle.onClick = [this] {
+                toggleSelectionMode(tabToggle.on);
+            };
+
             // the tree view is empty even if inspector is enabled
             // since at the moment when this panel getting initialized, the root component most likely doesn't have any children YET
             // we can either wait and launch async update or add empty label
@@ -233,7 +240,8 @@ namespace melatonin
             topArea = mainCol.removeFromTop (headerHeight);
             auto toolbar = topArea;
             enabledButton.setBounds (toolbar.removeFromLeft (48));
-            fpsToggle.setBounds (toolbar.removeFromLeft (48));
+            fpsToggle.setBounds (toolbar.removeFromLeft (42));
+            tabToggle.setBounds (toolbar.removeFromLeft (42));
             logo.setBounds (toolbar.removeFromRight (56));
 
             mainCol.removeFromTop (12);
@@ -374,6 +382,7 @@ namespace melatonin
         std::function<void (bool enabled)> toggleCallback;
         std::function<void (bool enabled)> toggleOverlayCallback;
         std::function<void (bool enabled)> toggleFPSCallback;
+        std::function<void (bool enabled)> toggleSelectionMode;
 
     private:
         Component::SafePointer<Component> selectedComponent;
@@ -409,6 +418,8 @@ namespace melatonin
         InspectorImageButton searchIcon { "search", { 8, 8 } };
         InspectorImageButton enabledButton { "enabled", { 8, 6 }, true };
         InspectorImageButton fpsToggle { "speedometer", { 2, 7 }, true };
+        InspectorImageButton moveToggle { "move", { 0, 6 }, true };
+        InspectorImageButton tabToggle { "tab", { 0, 6 }, true };
 
         juce::String lastSearchText;
 

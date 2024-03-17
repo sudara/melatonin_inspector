@@ -42,7 +42,7 @@ namespace InspectorBinaryData
     const int            logo_pngSize = 25781;
 
     extern const char*   moveoff_png;
-    const int            moveoff_pngSize = 1076;
+    const int            moveoff_pngSize = 1093;
 
     extern const char*   moveon_png;
     const int            moveon_pngSize = 958;
@@ -56,6 +56,12 @@ namespace InspectorBinaryData
     extern const char*   speedometeron_png;
     const int            speedometeron_pngSize = 1371;
 
+    extern const char*   taboff_png;
+    const int            taboff_pngSize = 531;
+
+    extern const char*   tabon_png;
+    const int            tabon_pngSize = 503;
+
     extern const char*   timingoff_png;
     const int            timingoff_pngSize = 850;
 
@@ -63,7 +69,7 @@ namespace InspectorBinaryData
     const int            timingon_pngSize = 867;
 
     // Number of elements in the namedResourceList and originalFileNames arrays.
-    const int namedResourceListSize = 18;
+    const int namedResourceListSize = 20;
 
     // Points to the start of a list of resource names.
     extern const char* namedResourceList[];

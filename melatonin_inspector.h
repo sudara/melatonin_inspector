@@ -301,7 +301,7 @@ namespace melatonin
             if (newStatus)
                 // without this, target apps that have UI to open the inspector
                 // will select that piece of UI within the same click, see #70
-                juce::Timer::callAfterDelay (500, [&]() { overlayMouseListener.enable(); });
+                juce::Timer::callAfterDelay (500, [&] { overlayMouseListener.enable(); });
             else
             {
                 clearSelections();
@@ -335,6 +335,7 @@ namespace melatonin
         {
             if (newMode == selectionMode)
                 return;
+
             // Out with the old
             switch (selectionMode)
             {
@@ -342,6 +343,7 @@ namespace melatonin
                     juce::Desktop::getInstance().removeFocusChangeListener (this);
                     break;
                 case FOLLOWS_MOUSE:
+                    overlayMouseListener.disable();
                     break;
             }
 
@@ -353,6 +355,7 @@ namespace melatonin
                     juce::Desktop::getInstance().addFocusChangeListener (this);
                     break;
                 case FOLLOWS_MOUSE:
+                    overlayMouseListener.enable();
                     break;
             }
         }
@@ -398,8 +401,7 @@ namespace melatonin
 
         void globalFocusChanged (Component* focusedComponent) override
         {
-            inspectorComponent.toggleOverlayCallback (true);
-            inspectorComponent.selectComponentCallback (focusedComponent);
+            selectComponent (focusedComponent);
         }
 
     private:
@@ -432,6 +434,7 @@ namespace melatonin
                     this->fpsMeter.setBounds (root->getLocalBounds().removeFromRight (60).removeFromTop (40));
                 this->fpsMeter.setVisible (enable);
             };
+            inspectorComponent.toggleSelectionMode = [this] (bool enable) { this->setSelectionMode (enable ? FOLLOWS_FOCUS : FOLLOWS_MOUSE); };
         }
     };
 }
