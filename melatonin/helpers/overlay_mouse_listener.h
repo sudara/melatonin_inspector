@@ -51,9 +51,9 @@ namespace melatonin
             dragEnabled = enable;
         }
 
-        void enableSelection (bool enabled)
+        void enableSelection (bool enableSelection)
         {
-            selectionEnabled = enabled;
+            selectionEnabled = enableSelection;
         }
 
         void mouseEnter (const juce::MouseEvent& event) override
