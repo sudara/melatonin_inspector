@@ -198,7 +198,8 @@ namespace melatonin
             {
                 constrainer.setMinimumOnscreenAmounts (selectedComponent->getHeight(), selectedComponent->getWidth(), selectedComponent->getHeight(), selectedComponent->getWidth());
                 // reset previous selection and update mouse cursor
-                selectedComponent->setMouseCursor (juce::MouseCursor::DraggingHandCursor);
+                if(isDraggingEnabled)
+                    selectedComponent->setMouseCursor (juce::MouseCursor::DraggingHandCursor);
             }
         }
 
@@ -235,7 +236,7 @@ namespace melatonin
 
         void mouseEnter (const juce::MouseEvent&) override
         {
-            if (!selectedComponent)
+            if (!selectedComponent || !isDraggingEnabled)
                 return;
 
             selectedComponent->setMouseCursor (juce::MouseCursor::DraggingHandCursor);
@@ -244,7 +245,7 @@ namespace melatonin
 
         void mouseMove (const juce::MouseEvent&) override
         {
-            if (!selectedComponent)
+            if (!selectedComponent || !isDraggingEnabled)
                 return;
             selectedComponent->setMouseCursor (juce::MouseCursor::DraggingHandCursor);
             repaint();
@@ -272,12 +273,18 @@ namespace melatonin
             }
         }
 
+        void enableDragging (bool enableDragging)
+        {
+            isDraggingEnabled = enableDragging;
+        }
+
     private:
         Component::SafePointer<Component> outlinedComponent;
         Component::SafePointer<Component> hoveredComponent;
         juce::Rectangle<int> outlinedBounds;
 
         bool isDragging = false;
+        bool isDraggingEnabled = false;
         juce::ComponentDragger componentDragger;
         juce::ComponentBoundsConstrainer boundsConstrainer;
 

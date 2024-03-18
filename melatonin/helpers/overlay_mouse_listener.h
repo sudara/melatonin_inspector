@@ -46,13 +46,29 @@ namespace melatonin
             root->removeMouseListener (this);
         }
 
+        void enableDragging (bool enable)
+        {
+            dragEnabled = enable;
+        }
+
+        void enableSelection (bool enableSelection)
+        {
+            selectionEnabled = enableSelection;
+        }
+
         void mouseEnter (const juce::MouseEvent& event) override
         {
+            if(!selectionEnabled)
+                return;
+
             outlineComponentCallback (event.originalComponent);
         }
 
         void mouseMove (const juce::MouseEvent& event) override
         {
+            if(!selectionEnabled || !dragEnabled)
+                return;
+
             if (outlineDistanceCallback && event.mods.isAltDown())
                 outlineDistanceCallback (event.originalComponent);
             else
@@ -61,7 +77,7 @@ namespace melatonin
 
         void mouseUp (const juce::MouseEvent& event) override
         {
-            if (event.mods.isLeftButtonDown() && !isDragging)
+            if (event.mods.isLeftButtonDown() && !isDragging && selectionEnabled)
             {
                 selectComponentCallback (event.originalComponent);
             }
@@ -70,6 +86,9 @@ namespace melatonin
 
         void mouseDown (const juce::MouseEvent& event) override
         {
+            if(!dragEnabled)
+                return;
+
             if (event.mods.isLeftButtonDown() && event.originalComponent->isMouseOverOrDragging())
             {
                 componentStartDraggingCallback (event.originalComponent, event);
@@ -78,6 +97,9 @@ namespace melatonin
 
         void mouseDrag (const juce::MouseEvent& event) override
         {
+            if(!dragEnabled)
+                return;
+
             // takes care of small mouse position drift on selection
             if (event.getDistanceFromDragStart() > 3 && event.originalComponent->isMouseOverOrDragging())
             {
@@ -107,5 +129,6 @@ namespace melatonin
         juce::Component* root = nullptr;
         bool enabled = false;
         bool isDragging { false };
+        bool dragEnabled { false }, selectionEnabled { false };
     };
 }
