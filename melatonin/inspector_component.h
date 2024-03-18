@@ -27,9 +27,10 @@ namespace melatonin
             setMouseClickGrabsKeyboardFocus (false);
 
             addAndMakeVisible (enabledButton);
+            addAndMakeVisible (enableDragging);
+            addAndMakeVisible (fpsToggle);
             addAndMakeVisible (logo);
             addAndMakeVisible (fpsToggle);
-            addAndMakeVisible (moveToggle);
             addAndMakeVisible (tabToggle);
 
             addChildComponent (tree);
@@ -136,6 +137,17 @@ namespace melatonin
             };
 
             // TODO: refactor this "on" state, it's terribly named
+            enableDragging.on = settings->props->getBoolValue ("enableDragging", false);
+            enableDragging.onClick = [this] {
+                if (enableDragging.on)
+                    tabToggle.on = false;
+
+                toggleMoveCallback (enableDragging.on);
+                toggleSelectionMode (tabToggle.on);
+
+                settings->props->setValue("enableDragging",enableDragging.on);
+            };
+
             fpsToggle.on = false;
             fpsToggle.onClick = [this] {
                 // TODO: I don't like that the "on" state implicitly was toggled here
@@ -151,8 +163,17 @@ namespace melatonin
             // TODO: sorta sketchy to "know" the enum default...
             tabToggle.on = settings->props->getIntValue ("selectionMode", 0);
             tabToggle.onClick = [this] {
-                settings->props->setValue ("selectionMode", fpsToggle.on);
+                settings->props->setValue ("selectionMode", tabToggle.on);
                 toggleSelectionMode (tabToggle.on);
+
+                toggleMoveCallback (enableDragging.on);
+
+                if (tabToggle.on)
+                {
+                    enableDragging.on = false;
+                    toggleMoveCallback(false);
+                }
+                enableDragging.repaint();
             };
 
             // the tree view is empty even if inspector is enabled
@@ -245,6 +266,8 @@ namespace melatonin
             enabledButton.setBounds (toolbar.removeFromLeft (48));
             fpsToggle.setBounds (toolbar.removeFromLeft (42));
             tabToggle.setBounds (toolbar.removeFromLeft (42));
+            enableDragging.setBounds (toolbar.removeFromLeft (42));
+            fpsToggle.setBounds (toolbar.removeFromLeft (48));
             logo.setBounds (toolbar.removeFromRight (56));
 
             mainCol.removeFromTop (12);
@@ -386,6 +409,7 @@ namespace melatonin
         std::function<void (bool enabled)> toggleOverlayCallback;
         std::function<void (bool enabled)> toggleFPSCallback;
         std::function<void (bool enabled)> toggleSelectionMode;
+        std::function<void (bool enabled)> toggleMoveCallback;
 
     private:
         Component::SafePointer<Component> selectedComponent;
@@ -420,8 +444,8 @@ namespace melatonin
         InspectorImageButton clearButton { "clear", { 0, 6 } };
         InspectorImageButton searchIcon { "search", { 8, 8 } };
         InspectorImageButton enabledButton { "enabled", { 8, 6 }, true };
+        InspectorImageButton enableDragging { "move", { 2, 7 }, true };
         InspectorImageButton fpsToggle { "speedometer", { 2, 7 }, true };
-        InspectorImageButton moveToggle { "move", { 0, 6 }, true };
         InspectorImageButton tabToggle { "tab", { 0, 6 }, true };
 
         juce::String lastSearchText;

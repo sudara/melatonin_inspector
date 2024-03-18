@@ -65,6 +65,14 @@ namespace melatonin
                 return false;
             }
         };
+
+        void restoreMenuState ()
+        {
+            overlayMouseListener.enableDragging (settings->props->getBoolValue ("enableDragging", false));
+
+            overlay.enableDragging(settings->props->getBoolValue ("enableDragging", false));
+        }
+
         explicit Inspector (juce::Component& rootComponent, bool inspectorEnabledAtStart = true)
             : juce::DocumentWindow ("Melatonin Inspector", colors::background, 7, true)
         {
@@ -75,6 +83,8 @@ namespace melatonin
 
             // needs to come before the LNF
             restoreBoundsIfNeeded();
+
+            restoreMenuState();
 
             // use our own lnf for both overlay and inspector
             setLookAndFeel (&inspectorLookAndFeel);
@@ -455,6 +465,12 @@ namespace melatonin
                     this->fpsMeter.setBounds (root->getLocalBounds().removeFromRight (60).removeFromTop (40));
                 this->fpsMeter.setVisible (enable);
             };
+
+            inspectorComponent.toggleMoveCallback = [this] (bool enable) {
+                overlayMouseListener.enableDragging (enable);
+                overlay.enableDragging (enable);
+            };
+
             inspectorComponent.toggleSelectionMode = [this] (bool enable) { this->setSelectionMode (enable ? FOLLOWS_FOCUS : FOLLOWS_MOUSE); };
         }
     };
