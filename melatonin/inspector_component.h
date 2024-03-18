@@ -27,6 +27,8 @@ namespace melatonin
             setMouseClickGrabsKeyboardFocus (false);
 
             addAndMakeVisible (enabledButton);
+            addAndMakeVisible (enableDragging);
+            addAndMakeVisible (enableSelection);
             addAndMakeVisible (fpsToggle);
             addAndMakeVisible (logo);
 
@@ -134,6 +136,16 @@ namespace melatonin
                 toggleCallback (!inspectorEnabled);
             };
 
+            enableDragging.on = settings->props->getBoolValue ("enableDragging", false);
+            enableDragging.onClick = [this] {
+                toggleMoveCallback (enableDragging.on);
+            };
+
+            enableSelection.on = settings->props->getBoolValue ("enableSelection", false);
+            enableSelection.onClick = [this] {
+                toggleIgnoreCallback (enableSelection.on);
+            };
+
             fpsToggle.on = false;
             fpsToggle.onClick = [this] {
                 settings->props->setValue ("fpsEnabled", fpsToggle.on);
@@ -233,6 +245,8 @@ namespace melatonin
             topArea = mainCol.removeFromTop (headerHeight);
             auto toolbar = topArea;
             enabledButton.setBounds (toolbar.removeFromLeft (48));
+            enableDragging.setBounds (toolbar.removeFromLeft (48));
+            enableSelection.setBounds (toolbar.removeFromLeft (48));
             fpsToggle.setBounds (toolbar.removeFromLeft (48));
             logo.setBounds (toolbar.removeFromRight (56));
 
@@ -374,6 +388,8 @@ namespace melatonin
         std::function<void (bool enabled)> toggleCallback;
         std::function<void (bool enabled)> toggleOverlayCallback;
         std::function<void (bool enabled)> toggleFPSCallback;
+        std::function<void (bool enabled)> toggleMoveCallback;
+        std::function<void (bool enabled)> toggleIgnoreCallback;
 
     private:
         Component::SafePointer<Component> selectedComponent;
@@ -408,6 +424,8 @@ namespace melatonin
         InspectorImageButton clearButton { "clear", { 0, 6 } };
         InspectorImageButton searchIcon { "search", { 8, 8 } };
         InspectorImageButton enabledButton { "enabled", { 8, 6 }, true };
+        InspectorImageButton enableDragging { "move", { 5, 7 }, true };
+        InspectorImageButton enableSelection { "dogfood", { 4, 4 }, true };
         InspectorImageButton fpsToggle { "speedometer", { 2, 7 }, true };
 
         juce::String lastSearchText;
