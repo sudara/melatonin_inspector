@@ -86,6 +86,10 @@ namespace melatonin
             setupCallbacks();
 
             setResizable (true, false); // calls resized
+
+            // order mattecrs, set the mode before we toggle on
+            setSelectionMode (static_cast<SelectionMode> (settings->props->getIntValue ("inspectorSelectionMode", FOLLOWS_MOUSE)));
+
             toggle (inspectorEnabledAtStart);
         }
 
@@ -94,6 +98,10 @@ namespace melatonin
             clearRoot();
 
             this->removeKeyListener (&keyListener);
+
+            // the mouse listener is owned and removes itself on destruction
+            if (selectionMode == FOLLOWS_FOCUS)
+                juce::Desktop::getInstance().removeFocusChangeListener (this);
 
             // needed, otherwise removing look and feel will save bounds
             settings->props.reset();
@@ -299,9 +307,12 @@ namespace melatonin
 
             overlay.setVisible (newStatus);
             if (newStatus)
-                // without this, target apps that have UI to open the inspector
-                // will select that piece of UI within the same click, see #70
-                juce::Timer::callAfterDelay (500, [&] { overlayMouseListener.enable(); });
+            {
+                if (selectionMode == FOLLOWS_MOUSE)
+                    // without this, target apps that have UI to open the inspector
+                    // will select that piece of UI within the same click, see #70
+                    callAfterDelay (500, [&] { overlayMouseListener.enable(); });
+            }
             else
             {
                 clearSelections();
@@ -340,6 +351,7 @@ namespace melatonin
             switch (selectionMode)
             {
                 case FOLLOWS_FOCUS:
+                    selectComponent (nullptr);
                     juce::Desktop::getInstance().removeFocusChangeListener (this);
                     break;
                 case FOLLOWS_MOUSE:
@@ -358,6 +370,9 @@ namespace melatonin
                     overlayMouseListener.enable();
                     break;
             }
+
+            settings->props->setValue ("inspectorSelectionMode", selectionMode);
+            settings->saveIfNeeded();
         }
 
     private:
@@ -401,10 +416,17 @@ namespace melatonin
 
         void globalFocusChanged (Component* focusedComponent) override
         {
-            selectComponent (focusedComponent);
+            // nullptr focus events fire when focus is lost
+            if (focusedComponent == nullptr)
+                return;
+
+            // we only want to respond to focus events related to the UI under inspection (root)
+            // Unfortunately, we can't test to see if the focusedComponent is a child of root
+            // because JUCE UI like list boxes or text editors sometimes technically have no parent :/
+            if (focusedComponent != root && focusedComponent->getTopLevelComponent() != inspectorComponent.getTopLevelComponent())
+                selectComponent (focusedComponent);
         }
 
-    private:
         void timerCallback() override
         {
             for (auto& ms : juce::Desktop::getInstance().getMouseSources())
@@ -420,7 +442,7 @@ namespace melatonin
             overlayMouseListener.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, true); };
             overlayMouseListener.componentStartDraggingCallback = [this] (Component* c, const juce::MouseEvent& e) { this->startDragComponent (c, e); };
             overlayMouseListener.componentDraggedCallback = [this] (Component* c, const juce::MouseEvent& e) { this->dragComponent (c, e); };
-            overlayMouseListener.mouseExitCallback = [this]() { if (this->inspectorEnabled) inspectorComponent.redisplaySelectedComponent(); };
+            overlayMouseListener.mouseExitCallback = [this] { if (this->inspectorEnabled) inspectorComponent.redisplaySelectedComponent(); };
 
             inspectorComponent.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, false); };
             inspectorComponent.outlineComponentCallback = [this] (Component* c) { this->outlineComponent (c); };

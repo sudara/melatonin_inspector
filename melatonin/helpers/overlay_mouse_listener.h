@@ -36,14 +36,19 @@ namespace melatonin
 
         void enable()
         {
+            // replace me with an if condition if you are hitting this on purpose
+            jassert (!enabled);
             enabled = true;
             root->addMouseListener (this, true);
         }
 
         void disable()
         {
-            enabled = false;
-            root->removeMouseListener (this);
+            if (enabled)
+            {
+                enabled = false;
+                root->removeMouseListener (this);
+            }
         }
 
         void mouseEnter (const juce::MouseEvent& event) override
@@ -95,7 +100,7 @@ namespace melatonin
             }
 
             // not sure if there's a better way to ask "is the mouse outside the plugin now?"
-            if (!root->contains(event.getEventRelativeTo(root).position))
+            if (!root->contains (event.getEventRelativeTo (root).position))
                 outlineComponentCallback (nullptr);
         }
 
