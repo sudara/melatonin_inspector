@@ -90,8 +90,13 @@ namespace melatonin
         {
             if (event.originalComponent == root)
             {
+                // TODO: Sudara is wondering if this callback is needed...
                 mouseExitCallback();
             }
+
+            // not sure if there's a better way to ask "is the mouse outside the plugin now?"
+            if (!root->contains(event.getEventRelativeTo(root).position))
+                outlineComponentCallback (nullptr);
         }
 
         std::function<void (juce::Component* c)> outlineComponentCallback;
