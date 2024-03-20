@@ -377,13 +377,13 @@ namespace melatonin
 
     private:
         juce::SharedResourcePointer<InspectorSettings> settings;
-        melatonin::InspectorLookAndFeel inspectorLookAndFeel;
-        melatonin::InspectorComponent inspectorComponent;
+        InspectorLookAndFeel inspectorLookAndFeel;
+        InspectorComponent inspectorComponent;
         juce::Component::SafePointer<juce::Component> root;
         bool inspectorEnabled = false;
-        melatonin::Overlay overlay;
-        melatonin::FPSMeter fpsMeter;
-        melatonin::OverlayMouseListener overlayMouseListener;
+        Overlay overlay;
+        FPSMeter fpsMeter;
+        OverlayMouseListener overlayMouseListener;
         InspectorKeyCommands keyListener { *this };
         bool rootFollowsComponentUnderMouse = false;
 
@@ -416,15 +416,15 @@ namespace melatonin
 
         void globalFocusChanged (Component* focusedComponent) override
         {
-            // nullptr focus events fire when focus is lost
+            // ignore nullptr focus events, they are frequent and cause glitchiness
             if (focusedComponent == nullptr)
                 return;
 
-            // we only want to respond to focus events related to the UI under inspection (root)
-            // Unfortunately, we can't test to see if the focusedComponent is a child of root
-            // because JUCE UI like list boxes or text editors sometimes technically have no parent :/
-            if (focusedComponent != root && focusedComponent->getTopLevelComponent() != inspectorComponent.getTopLevelComponent())
-                selectComponent (focusedComponent);
+            // This gets sent all components, even subcomponents of the inspector
+            // (which will result in the selection being cleared).
+            // I tried filtering those out for cleaner UX,
+            // but it caused glitchy incorrectness in focus selections
+            selectComponent (focusedComponent);
         }
 
         void timerCallback() override
