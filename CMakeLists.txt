@@ -52,10 +52,11 @@ endif ()
 # Assets are precompiled in the module to make it Projucer friendly
 #
 # To add or modify images:
-#  * Uncomment the following lines to generate the assets again
+#  * Uncomment the following CMake lines to generate the MelatoninInspectorAssets binary
+#  * uncomment #include "InspectorBinaryData.h in misc.h and comment out the LatestCompiledAssets include
 #  * build as you would normally via CMake
-#  * run modules/melatonin_inspector/copy_cmake_assets.rb from your main PROJECT folder
-#  * comment these lines back out
+#  * run ./modules/melatonin_inspector/copy_cmake_assets.rb from your root PROJECT folder
+#  * comment these lines back out and swap the misc.h include again
 
 #file(GLOB_RECURSE MelatoninInspectorAssetFiles CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/Assets/*")
 #juce_add_binary_data(MelatoninInspectorAssets SOURCES ${MelatoninInspectorAssetFiles} HEADER_NAME InspectorBinaryData.h NAMESPACE InspectorBinaryData)

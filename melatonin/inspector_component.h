@@ -2,12 +2,12 @@
 
 #include "components/inspector_image_button.h"
 #include "helpers/misc.h"
+#include "melatonin_inspector/melatonin/components/accesibility.h"
 #include "melatonin_inspector/melatonin/components/box_model.h"
 #include "melatonin_inspector/melatonin/components/color_picker.h"
 #include "melatonin_inspector/melatonin/components/component_tree_view_item.h"
 #include "melatonin_inspector/melatonin/components/preview.h"
 #include "melatonin_inspector/melatonin/components/properties.h"
-#include "melatonin_inspector/melatonin/components/accesibility.h"
 #include "melatonin_inspector/melatonin/lookandfeel.h"
 
 /*
@@ -27,8 +27,10 @@ namespace melatonin
             setMouseClickGrabsKeyboardFocus (false);
 
             addAndMakeVisible (enabledButton);
-            addAndMakeVisible (fpsToggle);
             addAndMakeVisible (logo);
+            addAndMakeVisible (fpsToggle);
+            addAndMakeVisible (moveToggle);
+            addAndMakeVisible (tabToggle);
 
             addChildComponent (tree);
             addChildComponent (emptySearchLabel);
@@ -84,8 +86,7 @@ namespace melatonin
             searchBox.setColour (juce::TextEditor::focusedOutlineColourId, juce::Colours::transparentBlack);
             searchBox.setTextToShowWhenEmpty ("Filter components...", colors::searchText);
             searchBox.setJustification (juce::Justification::centredLeft);
-            searchBox.onEscapeKey = [&]
-            {
+            searchBox.onEscapeKey = [&] {
                 searchBox.setText ("");
                 searchBox.giveAwayKeyboardFocus();
                 lastSearchText = {};
@@ -97,7 +98,7 @@ namespace melatonin
                 auto searchText = searchBox.getText();
                 ensureTreeIsConstructed();
 
-                if ( lastSearchText.isNotEmpty() && ! searchText.startsWith ( lastSearchText ) )
+                if (lastSearchText.isNotEmpty() && !searchText.startsWith (lastSearchText))
                 {
                     getRoot()->validateSubItems();
                 }
@@ -134,8 +135,10 @@ namespace melatonin
                 toggleCallback (!inspectorEnabled);
             };
 
+            // TODO: refactor this "on" state, it's terribly named
             fpsToggle.on = false;
             fpsToggle.onClick = [this] {
+                // TODO: I don't like that the "on" state implicitly was toggled here
                 settings->props->setValue ("fpsEnabled", fpsToggle.on);
                 toggleFPSCallback (fpsToggle.on);
             };
@@ -143,6 +146,13 @@ namespace melatonin
             clearButton.onClick = [this] {
                 searchBox.setText ("");
                 searchBox.giveAwayKeyboardFocus();
+            };
+
+            // TODO: sorta sketchy to "know" the enum default...
+            tabToggle.on = settings->props->getIntValue ("selectionMode", 0);
+            tabToggle.onClick = [this] {
+                settings->props->setValue ("selectionMode", fpsToggle.on);
+                toggleSelectionMode (tabToggle.on);
             };
 
             // the tree view is empty even if inspector is enabled
@@ -233,7 +243,8 @@ namespace melatonin
             topArea = mainCol.removeFromTop (headerHeight);
             auto toolbar = topArea;
             enabledButton.setBounds (toolbar.removeFromLeft (48));
-            fpsToggle.setBounds (toolbar.removeFromLeft (48));
+            fpsToggle.setBounds (toolbar.removeFromLeft (42));
+            tabToggle.setBounds (toolbar.removeFromLeft (42));
             logo.setBounds (toolbar.removeFromRight (56));
 
             mainCol.removeFromTop (12);
@@ -255,7 +266,7 @@ namespace melatonin
             colorPickerPanel.setBounds (colorPickerBounds.removeFromTop (32).removeFromLeft (200));
 
             accessibilityPanel.setBounds (mainCol.removeFromTop (32));
-            accessibility.setBounds (mainCol.removeFromTop (accessibility.isVisible() ? 110 : 0).withTrimmedLeft(32));
+            accessibility.setBounds (mainCol.removeFromTop (accessibility.isVisible() ? 110 : 0).withTrimmedLeft (32));
 
             propertiesPanel.setBounds (mainCol.removeFromTop (33)); // extra pixel for divider
             properties.setBounds (mainCol.withTrimmedLeft (32));
@@ -273,7 +284,7 @@ namespace melatonin
             tree.setBounds (treeViewBounds);
         }
 
-        void displayComponentInfo (Component* component, bool collapseTreeBeforeSelection=false)
+        void displayComponentInfo (Component* component, bool collapseTreeBeforeSelection = false)
         {
             TRACE_COMPONENT();
 
@@ -307,7 +318,7 @@ namespace melatonin
             }
         }
 
-        void selectComponent (Component* component, bool collapseTreeBeforeSelection=false)
+        void selectComponent (Component* component, bool collapseTreeBeforeSelection = false)
         {
             TRACE_COMPONENT();
 
@@ -374,6 +385,7 @@ namespace melatonin
         std::function<void (bool enabled)> toggleCallback;
         std::function<void (bool enabled)> toggleOverlayCallback;
         std::function<void (bool enabled)> toggleFPSCallback;
+        std::function<void (bool enabled)> toggleSelectionMode;
 
     private:
         Component::SafePointer<Component> selectedComponent;
@@ -409,6 +421,8 @@ namespace melatonin
         InspectorImageButton searchIcon { "search", { 8, 8 } };
         InspectorImageButton enabledButton { "enabled", { 8, 6 }, true };
         InspectorImageButton fpsToggle { "speedometer", { 2, 7 }, true };
+        InspectorImageButton moveToggle { "move", { 0, 6 }, true };
+        InspectorImageButton tabToggle { "tab", { 0, 6 }, true };
 
         juce::String lastSearchText;
 

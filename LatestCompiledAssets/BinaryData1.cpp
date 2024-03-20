@@ -95,11 +95,13 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
         case 0x14ab743c:  numBytes = 673; return eyedropperoff_png;
         case 0xc74a0a86:  numBytes = 671; return eyedropperon_png;
         case 0x78ded995:  numBytes = 25781; return logo_png;
-        case 0x48464668:  numBytes = 1076; return moveoff_png;
+        case 0x48464668:  numBytes = 1093; return moveoff_png;
         case 0xd13642da:  numBytes = 958; return moveon_png;
         case 0xd5ac3312:  numBytes = 941; return search_png;
         case 0xca80f4b8:  numBytes = 1419; return speedometeroff_png;
         case 0x40c48a8a:  numBytes = 1371; return speedometeron_png;
+        case 0x4714be24:  numBytes = 531; return taboff_png;
+        case 0x8f1be39e:  numBytes = 503; return tabon_png;
         case 0xf76847cf:  numBytes = 850; return timingoff_png;
         case 0x10aaf893:  numBytes = 867; return timingon_png;
         default: break;
@@ -127,6 +129,8 @@ const char* namedResourceList[] =
     "search_png",
     "speedometeroff_png",
     "speedometeron_png",
+    "taboff_png",
+    "tabon_png",
     "timingoff_png",
     "timingon_png"
 };
@@ -149,6 +153,8 @@ const char* originalFilenames[] =
     "search.png",
     "speedometer-off.png",
     "speedometer-on.png",
+    "tab-off.png",
+    "tab-on.png",
     "timing-off.png",
     "timing-on.png"
 };

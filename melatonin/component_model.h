@@ -1,7 +1,7 @@
 #pragma once
 
 #include <utility>
-
+#include "helpers/component_helpers.h"
 #include "juce_gui_basics/juce_gui_basics.h"
 
 namespace melatonin
