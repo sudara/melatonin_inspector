@@ -105,6 +105,16 @@ namespace melatonin
                 }
             }
 
+            // add class specific properies
+            if (dynamic_cast<juce::Button*> (model.getSelectedComponent()))
+            {
+                props.addArray (juce::Array<juce::PropertyComponent*> {
+                    new juce::BooleanPropertyComponent (model.isToggleable, "Is Toggleable", ""),
+                    new juce::BooleanPropertyComponent (model.toggleState, "Toggle State", ""),
+                    new juce::BooleanPropertyComponent (model.clickTogglesState, "Clicking Toggles State", ""),
+                    new juce::TextPropertyComponent (model.radioGroupId, "Radio Group ID", 5, false) });
+            }
+
             // then the rest of the component flags
             props.addArray (juce::Array<juce::PropertyComponent*> {
                 new juce::TextPropertyComponent (model.lookAndFeelValue, "LookAndFeel", 200, false, false),
