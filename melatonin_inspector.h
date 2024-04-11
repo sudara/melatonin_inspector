@@ -420,11 +420,10 @@ namespace melatonin
             if (focusedComponent == nullptr)
                 return;
 
-            // This gets sent all components, even subcomponents of the inspector
-            // (which will result in the selection being cleared).
-            // I tried filtering those out for cleaner UX,
-            // but it caused glitchy incorrectness in focus selections
-            selectComponent (focusedComponent);
+            // This gets sent all components, even subcomponents of the inspector itself
+            // (which is undesirable since we're not dogfoodiing).
+            if (focusedComponent->getPeer() == root->getPeer())
+                selectComponent (focusedComponent);
         }
 
         void timerCallback() override
