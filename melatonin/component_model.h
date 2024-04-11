@@ -24,6 +24,8 @@ namespace melatonin
         juce::Value pickedColor;
         juce::Value timing1, timing2, timing3, timingMax, hasChildren;
 
+        juce::Value isToggleable, toggleState, clickTogglesState, radioGroupId;
+
         struct AccessiblityDetail
         {
             juce::Value title, value, role, handlerType;
@@ -140,6 +142,14 @@ namespace melatonin
             typeValue = type (*selectedComponent);
             accessibilityHandledValue = selectedComponent->isAccessible();
 
+            if (auto button = dynamic_cast<juce::Button*> (selectedComponent.getComponent()))
+            {
+                isToggleable = button->isToggleable();
+                toggleState = button->getToggleState();
+                clickTogglesState = button->getClickingTogglesState();
+                radioGroupId = button->getRadioGroupId();
+            }
+
             nameValue.addListener(this);
             widthValue.addListener (this);
             heightValue.addListener (this);
@@ -153,6 +163,11 @@ namespace melatonin
             accessibilityHandledValue.addListener (this);
             interceptsMouseValue.addListener (this);
             childrenInterceptsMouseValue.addListener (this);
+
+            isToggleable.addListener (this);
+            toggleState.addListener (this);
+            clickTogglesState.addListener (this);
+            radioGroupId.addListener (this);
 
             if (selectedComponent->isAccessible() && selectedComponent->getAccessibilityHandler())
             {
@@ -260,6 +275,11 @@ namespace melatonin
             interceptsMouseValue.removeListener (this);
             childrenInterceptsMouseValue.removeListener (this);
 
+            isToggleable.removeListener (this);
+            toggleState.removeListener (this);
+            clickTogglesState.removeListener (this);
+            radioGroupId.removeListener (this);
+
             for (auto& np : namedProperties)
                 np.value.removeListener (this);
 
@@ -320,6 +340,26 @@ namespace melatonin
                 else if (value.refersToSameSourceAs (interceptsMouseValue) || value.refersToSameSourceAs (childrenInterceptsMouseValue))
                 {
                     selectedComponent->setInterceptsMouseClicks (interceptsMouseValue.getValue(), childrenInterceptsMouseValue.getValue());
+                }
+                else if (value.refersToSameSourceAs (isToggleable))
+                {
+                    if (auto button = dynamic_cast<juce::Button*> (selectedComponent.getComponent()))
+                        button->setToggleable (isToggleable.getValue());
+                }
+                else if (value.refersToSameSourceAs (toggleState))
+                {
+                    if (auto button = dynamic_cast<juce::Button*> (selectedComponent.getComponent()))
+                        button->setToggleState (toggleState.getValue(), juce::dontSendNotification);
+                }
+                else if (value.refersToSameSourceAs (clickTogglesState))
+                {
+                    if (auto button = dynamic_cast<juce::Button*> (selectedComponent.getComponent()))
+                        button->setClickingTogglesState (clickTogglesState.getValue());
+                }
+                else if (value.refersToSameSourceAs (radioGroupId))
+                {
+                    if (auto button = dynamic_cast<juce::Button*> (selectedComponent.getComponent()))
+                        button->setRadioGroupId (radioGroupId.getValue());
                 }
                 else
                 {
