@@ -13,6 +13,11 @@ namespace melatonin
             model.addListener (*this);
         }
 
+        ~Accessibility() override
+        {
+            model.removeListener (*this);
+        }
+
         void updateProperties()
         {
             panel.clear();
