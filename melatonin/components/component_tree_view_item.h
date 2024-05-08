@@ -128,7 +128,7 @@ namespace melatonin
                 g.setColour (colors::treeItemTextDisabled);
 
             auto name = componentString (component);
-            auto font = juce::Font ("Verdana", 15, juce::Font::FontStyleFlags::plain);
+            auto font = juce::Font (juce::FontOptions ("Verdana", 15, juce::Font::FontStyleFlags::plain));
 
             g.setFont (font);
 

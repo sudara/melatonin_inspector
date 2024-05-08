@@ -22,19 +22,19 @@ namespace melatonin
 
             addAndMakeVisible (widthLabel);
             widthLabel.addListener (this);
-            widthLabel.setFont (20.0f);
+            widthLabel.setFont (juce::FontOptions (20.0f));
             widthLabel.setJustificationType (juce::Justification::centredRight);
             widthLabel.setColour (juce::Label::textColourId, colors::white);
 
             addAndMakeVisible (byLabel);
             byLabel.setText (juce::CharPointer_UTF8("\xc3\x97"), juce::dontSendNotification);
-            byLabel.setFont (20.f);
+            byLabel.setFont (juce::FontOptions (20.0f));
             byLabel.setJustificationType (juce::Justification::centred);
             byLabel.setColour (juce::Label::textColourId, colors::white);
 
             addAndMakeVisible (heightLabel);
             heightLabel.addListener (this);
-            heightLabel.setFont (20.0f);
+            heightLabel.setFont (juce::FontOptions (20.0f));
             heightLabel.setJustificationType (juce::Justification::centredLeft);
             heightLabel.setColour (juce::Label::textColourId, colors::white);
 

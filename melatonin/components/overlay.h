@@ -19,14 +19,14 @@ namespace melatonin
 
             for (auto* l : labels)
             {
-                l->setFont (13.f);
+                l->setFont (juce::FontOptions (13.0f));
                 l->setJustificationType (juce::Justification::centred);
                 l->setColour (juce::Label::textColourId, colors::white);
 
                 addAndMakeVisible (l);
             }
 
-            dimensions.setFont (13.f);
+            dimensions.setFont (juce::FontOptions (13.0f));
             dimensions.setJustificationType (juce::Justification::centred);
             dimensions.setColour (juce::Label::textColourId, colors::white);
         }
