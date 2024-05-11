@@ -49,7 +49,13 @@ jobs:
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 9
           sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 9
 
-
+      # This block can be removed once 15.1 is default (JUCE requires it when building on macOS 14)
+      - name: Use latest Xcode on system (macOS)
+        if: ${{ matrix.os == 'macos-14' }}
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+          
       - name: Run sccache-cache
         uses: mozilla-actions/sccache-action@v0.0.4
 
