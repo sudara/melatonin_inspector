@@ -99,7 +99,10 @@ namespace melatonin
                 }
                 else if (!propertiesToIgnore.contains (nv.name))
                 {
-                    auto customProperty = new juce::TextPropertyComponent (nv.value, nv.name, 200, false);
+                    const auto value = nv.value.getValue().isObject()
+                                           ? juce::Value (nv.value.getValue().toString())
+                                           : nv.value;
+                    auto customProperty = new juce::TextPropertyComponent (value, nv.name, 200, false);
                     customProperty->getProperties().set ("isUserProperty", true);
                     props.add (customProperty);
                 }
