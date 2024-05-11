@@ -51,7 +51,7 @@ jobs:
 
 
       - name: Run sccache-cache
-        uses: mozilla-actions/sccache-action@v0.0.3
+        uses: mozilla-actions/sccache-action@v0.0.4
 
       - name: Configure
         run: cmake -B Builds -DTARGET_NAME:STRING=${{ matrix.app }}
