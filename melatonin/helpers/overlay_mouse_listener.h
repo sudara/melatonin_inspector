@@ -63,9 +63,6 @@ namespace melatonin
 
         void mouseMove (const juce::MouseEvent& event) override
         {
-            //if(!selectionEnabled || !dragEnabled)
-            //    return;
-
             if (outlineDistanceCallback && event.mods.isAltDown())
                 outlineDistanceCallback (event.originalComponent);
             else
@@ -131,6 +128,6 @@ namespace melatonin
         juce::Component* root = nullptr;
         bool enabled = false;
         bool isDragging { false };
-        bool dragEnabled { false }, selectionEnabled { false };
+        bool dragEnabled { false };
     };
 }
