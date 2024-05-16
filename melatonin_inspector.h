@@ -68,9 +68,9 @@ namespace melatonin
 
         void restoreMenuState ()
         {
-            overlayMouseListener.enableDragging (settings->props->getBoolValue ("enableDragging", false));
-
-            overlay.enableDragging(settings->props->getBoolValue ("enableDragging", false));
+            bool propValue = settings->props->getBoolValue ("enableDragging", false);
+            overlayMouseListener.enableDragging (propValue);
+            overlay.enableDragging(propValue);
         }
 
         explicit Inspector (juce::Component& rootComponent, bool inspectorEnabledAtStart = true)
