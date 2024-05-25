@@ -19,6 +19,8 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE("-Wredundant-decls")
 #include "LatestCompiledAssets/BinaryData19.cpp"
 #include "LatestCompiledAssets/BinaryData2.cpp"
 #include "LatestCompiledAssets/BinaryData20.cpp"
+#include "LatestCompiledAssets/BinaryData21.cpp"
+#include "LatestCompiledAssets/BinaryData22.cpp"
 #include "LatestCompiledAssets/BinaryData3.cpp"
 #include "LatestCompiledAssets/BinaryData4.cpp"
 #include "LatestCompiledAssets/BinaryData5.cpp"

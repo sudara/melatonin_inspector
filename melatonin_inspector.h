@@ -220,7 +220,7 @@ namespace melatonin
             TRACE_COMPONENT();
 
             // don't dogfood the overlay
-            if (!inspectorEnabled || overlay.isParentOf (c))
+            if (!inspectorEnabled || overlay.isParentOf (c) || selectionLock)
                 return;
 
             overlay.outlineComponent (c);
@@ -241,7 +241,7 @@ namespace melatonin
         {
             TRACE_COMPONENT();
 
-            if (!inspectorEnabled || overlay.isParentOf (c))
+            if (!inspectorEnabled || overlay.isParentOf (c) || selectionLock)
                 return;
 
             overlay.selectComponent (c);
@@ -343,6 +343,7 @@ namespace melatonin
         InspectorComponent inspectorComponent;
         juce::Component::SafePointer<juce::Component> root;
         bool inspectorEnabled = false;
+        bool selectionLock = false;
         Overlay overlay;
         FPSMeter fpsMeter;
         OverlayMouseListener overlayMouseListener;
@@ -416,11 +417,13 @@ namespace melatonin
                 if (enable)
                     this->fpsMeter.setBounds (root->getLocalBounds().removeFromRight (60).removeFromTop (40));
                 this->fpsMeter.setVisible (enable);
+                settings->props->setValue ("fpsEnabled", enable);
+
             };
 
-            inspectorComponent.toggleMoveCallback = [this] (const bool enable) { this->setDraggingEnabled (enable); };
-
+            inspectorComponent.toggleDragEnabledCallback = [this] (const bool enable) { this->setDraggingEnabled (enable); };
             inspectorComponent.toggleSelectionMode = [this] (const bool enable) { this->setSelectionMode (enable ? FOLLOWS_FOCUS : FOLLOWS_MOUSE); };
+            inspectorComponent.toggleLockCallback = [this] (const bool enable) { this->setSelectionLock (enable); };
         }
 
         enum SelectionMode {
@@ -465,11 +468,17 @@ namespace melatonin
         {
             overlayMouseListener.enableDragging (enable);
             overlay.enableDragging (enable);
+            settings->props->setValue ("enableDragging", enable);
+        }
+
+        void setSelectionLock (const bool enable)
+        {
+            selectionLock = enable;
         }
 
         void restoreStateFromProps()
         {
-            setDraggingEnabled(settings->props->getBoolValue ("enableDragging", false));
+            setDraggingEnabled (settings->props->getBoolValue ("enableDragging", false));
             setSelectionMode (static_cast<SelectionMode> (settings->props->getIntValue ("inspectorSelectionMode", FOLLOWS_MOUSE)));
         }
     };

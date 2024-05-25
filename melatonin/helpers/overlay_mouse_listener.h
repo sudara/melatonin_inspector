@@ -36,19 +36,20 @@ namespace melatonin
 
         void enable()
         {
-            // replace me with an if condition if you are hitting this on purpose
-            jassert (!enabled);
+            if (enabled)
+                return;
+
             enabled = true;
             root->addMouseListener (this, true);
         }
 
         void disable()
         {
-            if (enabled)
-            {
-                enabled = false;
-                root->removeMouseListener (this);
-            }
+            if (!enabled)
+                return;
+
+            enabled = false;
+            root->removeMouseListener (this);
         }
 
         void enableDragging (bool enable)
@@ -80,7 +81,7 @@ namespace melatonin
 
         void mouseDown (const juce::MouseEvent& event) override
         {
-            if(!dragEnabled)
+            if (!dragEnabled)
                 return;
 
             if (event.mods.isLeftButtonDown() && event.originalComponent->isMouseOverOrDragging())
@@ -91,7 +92,7 @@ namespace melatonin
 
         void mouseDrag (const juce::MouseEvent& event) override
         {
-            if(!dragEnabled)
+            if (!dragEnabled)
                 return;
 
             // takes care of small mouse position drift on selection
