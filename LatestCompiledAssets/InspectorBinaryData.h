@@ -38,6 +38,12 @@ namespace InspectorBinaryData
     extern const char*   eyedropperon_png;
     const int            eyedropperon_pngSize = 671;
 
+    extern const char*   lockoff_png;
+    const int            lockoff_pngSize = 516;
+
+    extern const char*   lockon_png;
+    const int            lockon_pngSize = 474;
+
     extern const char*   logo_png;
     const int            logo_pngSize = 25781;
 
@@ -69,7 +75,7 @@ namespace InspectorBinaryData
     const int            timingon_pngSize = 867;
 
     // Number of elements in the namedResourceList and originalFileNames arrays.
-    const int namedResourceListSize = 20;
+    const int namedResourceListSize = 22;
 
     // Points to the start of a list of resource names.
     extern const char* namedResourceList[];

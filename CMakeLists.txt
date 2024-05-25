@@ -55,7 +55,7 @@ endif ()
 #  * Uncomment the following CMake lines to generate the MelatoninInspectorAssets binary
 #  * uncomment #include "InspectorBinaryData.h in misc.h and comment out the LatestCompiledAssets include
 #  * build as you would normally via CMake
-#  * run ./modules/melatonin_inspector/copy_cmake_assets.rb from your root PROJECT folder
+#  * run ./modules/melatonin_inspector/copy_cmake_assets.rb from your root PROJECT folder (not the melatonin_inspector folder)
 #  * comment these lines back out and swap the misc.h include again
 
 #file(GLOB_RECURSE MelatoninInspectorAssetFiles CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/Assets/*")

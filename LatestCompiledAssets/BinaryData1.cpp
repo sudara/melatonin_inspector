@@ -94,6 +94,8 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
         case 0xf2aeeae3:  numBytes = 303; return expandon_png;
         case 0x14ab743c:  numBytes = 673; return eyedropperoff_png;
         case 0xc74a0a86:  numBytes = 671; return eyedropperon_png;
+        case 0x219463ce:  numBytes = 516; return lockoff_png;
+        case 0x649be0b4:  numBytes = 474; return lockon_png;
         case 0x78ded995:  numBytes = 25781; return logo_png;
         case 0x48464668:  numBytes = 1093; return moveoff_png;
         case 0xd13642da:  numBytes = 958; return moveon_png;
@@ -123,6 +125,8 @@ const char* namedResourceList[] =
     "expandon_png",
     "eyedropperoff_png",
     "eyedropperon_png",
+    "lockoff_png",
+    "lockon_png",
     "logo_png",
     "moveoff_png",
     "moveon_png",
@@ -147,6 +151,8 @@ const char* originalFilenames[] =
     "expand-on.png",
     "eyedropper-off.png",
     "eyedropper-on.png",
+    "lock-off.png",
+    "lock-on.png",
     "logo.png",
     "move-off.png",
     "move-on.png",
