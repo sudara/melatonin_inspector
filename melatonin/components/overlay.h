@@ -188,24 +188,28 @@ namespace melatonin
             // take over the outline from the hover
             outlinedComponent = nullptr;
             selectedComponent = component;
-            setupResizableComponent(selectedComponent);
+            setupResizableComponent (selectedComponent);
 
-            setSelectedAndResizeableBounds(component);
+            setSelectedAndResizeableBounds (component);
             repaint();
         }
 
-        void setupResizableComponent (Component* component) {
-            if(isDraggingEnabled) {
-                resizable = std::make_unique<juce::ResizableBorderComponent>(component, &constrainer);
-                dynamic_cast<juce::ResizableBorderComponent *>(resizable.get())->setBorderThickness(juce::BorderSize<int>(6));
-                addAndMakeVisible(*resizable);
+        void setupResizableComponent (Component* component)
+        {
+            if (isDraggingEnabled)
+            {
+                resizable = std::make_unique<juce::ResizableBorderComponent> (component, &constrainer);
+                dynamic_cast<juce::ResizableBorderComponent*> (resizable.get())->setBorderThickness (juce::BorderSize<int> (6));
+                addAndMakeVisible (*resizable);
 
-                if (selectedComponent) {
-                    constrainer.setMinimumOnscreenAmounts(selectedComponent->getHeight(), selectedComponent->getWidth(), selectedComponent->getHeight(), selectedComponent->getWidth());
+                if (selectedComponent)
+                {
+                    constrainer.setMinimumOnscreenAmounts (selectedComponent->getHeight(), selectedComponent->getWidth(), selectedComponent->getHeight(), selectedComponent->getWidth());
                     // reset previous selection and update mouse cursor
-                    selectedComponent->setMouseCursor(juce::MouseCursor::DraggingHandCursor);
+                    selectedComponent->setMouseCursor (juce::MouseCursor::DraggingHandCursor);
                 }
-            } else if (resizable)
+            }
+            else if (resizable)
                 resizable.reset();
         }
 
@@ -286,7 +290,11 @@ namespace melatonin
         {
             isDraggingEnabled = enableDragging;
 
-            setupResizableComponent(selectedComponent);
+            if (selectedComponent)
+            {
+                setupResizableComponent (selectedComponent);
+                setSelectedAndResizeableBounds (selectedComponent);
+            }
         }
 
     private:
