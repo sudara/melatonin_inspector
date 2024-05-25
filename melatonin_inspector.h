@@ -66,13 +66,6 @@ namespace melatonin
             }
         };
 
-        void restoreMenuState ()
-        {
-            bool propValue = settings->props->getBoolValue ("enableDragging", false);
-            overlayMouseListener.enableDragging (propValue);
-            overlay.enableDragging(propValue);
-        }
-
         explicit Inspector (juce::Component& rootComponent, bool inspectorEnabledAtStart = true)
             : juce::DocumentWindow ("Melatonin Inspector", colors::background, 7, true)
         {
@@ -84,7 +77,7 @@ namespace melatonin
             // needs to come before the LNF
             restoreBoundsIfNeeded();
 
-            restoreMenuState();
+            restoreStateFromProps();
 
             // use our own lnf for both overlay and inspector
             setLookAndFeel (&inspectorLookAndFeel);
@@ -96,9 +89,6 @@ namespace melatonin
             setupCallbacks();
 
             setResizable (true, false); // calls resized
-
-            // order mattecrs, set the mode before we toggle on
-            setSelectionMode (static_cast<SelectionMode> (settings->props->getIntValue ("inspectorSelectionMode", FOLLOWS_MOUSE)));
 
             toggle (inspectorEnabledAtStart);
         }
@@ -347,44 +337,6 @@ namespace melatonin
 
         std::function<void()> onClose;
 
-        enum SelectionMode {
-            FOLLOWS_MOUSE,
-            FOLLOWS_FOCUS
-        } selectionMode { FOLLOWS_MOUSE };
-
-        void setSelectionMode (SelectionMode newMode)
-        {
-            if (newMode == selectionMode)
-                return;
-
-            // Out with the old
-            switch (selectionMode)
-            {
-                case FOLLOWS_FOCUS:
-                    selectComponent (nullptr);
-                    juce::Desktop::getInstance().removeFocusChangeListener (this);
-                    break;
-                case FOLLOWS_MOUSE:
-                    overlayMouseListener.disable();
-                    break;
-            }
-
-            // And in with the new
-            selectionMode = newMode;
-            switch (selectionMode)
-            {
-                case FOLLOWS_FOCUS:
-                    juce::Desktop::getInstance().addFocusChangeListener (this);
-                    break;
-                case FOLLOWS_MOUSE:
-                    overlayMouseListener.enable();
-                    break;
-            }
-
-            settings->props->setValue ("inspectorSelectionMode", selectionMode);
-            settings->saveIfNeeded();
-        }
-
     private:
         juce::SharedResourcePointer<InspectorSettings> settings;
         InspectorLookAndFeel inspectorLookAndFeel;
@@ -455,23 +407,70 @@ namespace melatonin
 
             inspectorComponent.selectComponentCallback = [this] (Component* c) { this->selectComponent (c, false); };
             inspectorComponent.outlineComponentCallback = [this] (Component* c) { this->outlineComponent (c); };
-            inspectorComponent.toggleCallback = [this] (bool enable) { this->toggle (enable); };
-            inspectorComponent.toggleOverlayCallback = [this] (bool enable) {
+            inspectorComponent.toggleCallback = [this] (const bool enable) { this->toggle (enable); };
+            inspectorComponent.toggleOverlayCallback = [this] (const bool enable) {
                 this->overlay.setVisible (enable);
                 overlayMouseListener.enable();
             };
-            inspectorComponent.toggleFPSCallback = [this] (bool enable) {
+            inspectorComponent.toggleFPSCallback = [this] (const bool enable) {
                 if (enable)
                     this->fpsMeter.setBounds (root->getLocalBounds().removeFromRight (60).removeFromTop (40));
                 this->fpsMeter.setVisible (enable);
             };
 
-            inspectorComponent.toggleMoveCallback = [this] (bool enable) {
-                overlayMouseListener.enableDragging (enable);
-                overlay.enableDragging (enable);
-            };
+            inspectorComponent.toggleMoveCallback = [this] (const bool enable) { this->setDraggingEnabled (enable); };
 
-            inspectorComponent.toggleSelectionMode = [this] (bool enable) { this->setSelectionMode (enable ? FOLLOWS_FOCUS : FOLLOWS_MOUSE); };
+            inspectorComponent.toggleSelectionMode = [this] (const bool enable) { this->setSelectionMode (enable ? FOLLOWS_FOCUS : FOLLOWS_MOUSE); };
+        }
+
+        enum SelectionMode {
+            FOLLOWS_MOUSE,
+            FOLLOWS_FOCUS
+        } selectionMode { FOLLOWS_MOUSE };
+
+        void setSelectionMode (SelectionMode newMode)
+        {
+            if (newMode == selectionMode)
+                return;
+
+            // Out with the old
+            switch (selectionMode)
+            {
+                case FOLLOWS_FOCUS:
+                    selectComponent (nullptr);
+                    juce::Desktop::getInstance().removeFocusChangeListener (this);
+                    break;
+                case FOLLOWS_MOUSE:
+                    overlayMouseListener.disable();
+                    break;
+            }
+
+            // And in with the new
+            selectionMode = newMode;
+            switch (selectionMode)
+            {
+                case FOLLOWS_FOCUS:
+                    juce::Desktop::getInstance().addFocusChangeListener (this);
+                    break;
+                case FOLLOWS_MOUSE:
+                    overlayMouseListener.enable();
+                    break;
+            }
+
+            settings->props->setValue ("inspectorSelectionMode", selectionMode);
+            settings->saveIfNeeded();
+        }
+
+        void setDraggingEnabled (const bool enable)
+        {
+            overlayMouseListener.enableDragging (enable);
+            overlay.enableDragging (enable);
+        }
+
+        void restoreStateFromProps()
+        {
+            setDraggingEnabled(settings->props->getBoolValue ("enableDragging", false));
+            setSelectionMode (static_cast<SelectionMode> (settings->props->getIntValue ("inspectorSelectionMode", FOLLOWS_MOUSE)));
         }
     };
 }
