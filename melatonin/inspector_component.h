@@ -267,7 +267,6 @@ namespace melatonin
             fpsToggle.setBounds (toolbar.removeFromLeft (42));
             tabToggle.setBounds (toolbar.removeFromLeft (42));
             enableDragging.setBounds (toolbar.removeFromLeft (42));
-            fpsToggle.setBounds (toolbar.removeFromLeft (48));
             logo.setBounds (toolbar.removeFromRight (56));
 
             mainCol.removeFromTop (12);
@@ -444,7 +443,7 @@ namespace melatonin
         InspectorImageButton clearButton { "clear", { 0, 6 } };
         InspectorImageButton searchIcon { "search", { 8, 8 } };
         InspectorImageButton enabledButton { "enabled", { 8, 6 }, true };
-        InspectorImageButton enableDragging { "move", { 2, 7 }, true };
+        InspectorImageButton enableDragging { "move", { -1, 7 }, true };
         InspectorImageButton fpsToggle { "speedometer", { 2, 7 }, true };
         InspectorImageButton tabToggle { "tab", { 0, 6 }, true };
 
