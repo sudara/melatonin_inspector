@@ -194,7 +194,7 @@ If you're rolling old school, or just prefer Projucer life, you'll be happy to n
 You can still use git to add it as a submodule if you'd like stay up to date with any changes:
 
 ```
-git submodule add -b main https://github.com/sudara/melatonin_perfetto.git modules/melatonin_perfetto
+git submodule add -b main https://github.com/sudara/melatonin_inspector.git modules/melatonin_inspector
 ```
 
 Or just download it and stick it somewhere.
@@ -278,8 +278,7 @@ void paint (juce::Graphics& g) override
 {
     melatonin::ComponentTimer timer { this };
 
-    // Call derived class paintContent method
-    timedPaint (g);
+    // do all your expensive painting...
  ```
 
 This simply times the method and stores it in the component's own properties. It will store up to 3 values named `timing1`, `timing2`, `timing3`.

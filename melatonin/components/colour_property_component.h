@@ -46,9 +46,9 @@ namespace melatonin
         {
         public:
             explicit ColorSelector (int selectorFlags = (showAlphaChannel | showColourAtTop | showSliders | showColourspace),
-                int edgeGap = 4,
-                int gapAroundColourSpaceComponent = 7)
-                : juce::ColourSelector (selectorFlags, edgeGap, gapAroundColourSpaceComponent)
+                int _edgeGap = 4,
+                int _gapAroundColourSpaceComponent = 7)
+                : juce::ColourSelector (selectorFlags, _edgeGap, _gapAroundColourSpaceComponent)
             {
                 addChangeListener (this);
             }
@@ -112,9 +112,12 @@ namespace melatonin
                     colourSelector->setLookAndFeel (&getLookAndFeel());
                     colourSelector->setSize (300, 300);
                     colourSelector->setCurrentColour (juce::Colour ((uint32_t) int (value.getValue())), juce::dontSendNotification);
-                    colourSelector->onDismiss = [this, cs = colourSelector.get()]() {
-                        value = (int) cs->getCurrentColour().getARGB();
-                        repaint();
+                    colourSelector->onDismiss = [this, parentRef = juce::WeakReference<juce::Component> (this), cs = colourSelector.get()]() {
+                        if (! parentRef.wasObjectDeleted())
+                        {
+                            value = (int) cs->getCurrentColour().getARGB();
+                            repaint();
+                        }
                     };
                     colourSelector->onChange = [this, cs = colourSelector.get()]() {
                         value = (int) cs->getCurrentColour().getARGB();

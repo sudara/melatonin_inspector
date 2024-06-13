@@ -266,6 +266,18 @@ namespace melatonin
             validateSubItems();
         }
 
+        void validateSubItems()
+        {
+            // Ideally we'd just re-render the sub-items branch:
+            // auto subItemToValidate = dynamic_cast<ComponentTreeViewItem*> (getSubItem (i));
+
+            // However, that wasn't working so the scorched earth strategy is
+            // if any child has a deleted component, we re-render the whole branch
+            // (we don't explicitly know if things were added or removed)
+            clearSubItems();
+            addItemsForChildComponents();
+        }
+
         juce::String getComponentName()
         {
             juce::String res = "";
@@ -314,18 +326,6 @@ namespace melatonin
                 if (componentString (child) != "Melatonin Overlay")
                     recursivelyAddChildrenFor (child);
             }
-        }
-
-        void validateSubItems()
-        {
-            // Ideally we'd just re-render the sub-items branch:
-            // auto subItemToValidate = dynamic_cast<ComponentTreeViewItem*> (getSubItem (i));
-
-            // However, that wasn't working so the scorched earth strategy is
-            // if any child has a deleted component, we re-render the whole branch
-            // (we don't explicitly know if things were added or removed)
-            clearSubItems();
-            addItemsForChildComponents();
         }
 
         void selectTabbedComponentChildIfNeeded()

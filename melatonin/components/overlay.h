@@ -196,18 +196,29 @@ namespace melatonin
             // take over the outline from the hover
             outlinedComponent = nullptr;
             selectedComponent = component;
-            resizable = std::make_unique<juce::ResizableBorderComponent> (component, &constrainer);
-            resizable->setBorderThickness (juce::BorderSize<int> (6));
-            addAndMakeVisible (*resizable);
+            setupResizableComponent (selectedComponent);
+
             setSelectedAndResizeableBounds (component);
             repaint();
+        }
 
-            if (selectedComponent)
+        void setupResizableComponent (Component* component)
+        {
+            if (isDraggingEnabled)
             {
-                constrainer.setMinimumOnscreenAmounts (selectedComponent->getHeight(), selectedComponent->getWidth(), selectedComponent->getHeight(), selectedComponent->getWidth());
-                // reset previous selection and update mouse cursor
-                selectedComponent->setMouseCursor (juce::MouseCursor::DraggingHandCursor);
+                resizable = std::make_unique<juce::ResizableBorderComponent> (component, &constrainer);
+                dynamic_cast<juce::ResizableBorderComponent*> (resizable.get())->setBorderThickness (juce::BorderSize<int> (6));
+                addAndMakeVisible (*resizable);
+
+                if (selectedComponent)
+                {
+                    constrainer.setMinimumOnscreenAmounts (selectedComponent->getHeight(), selectedComponent->getWidth(), selectedComponent->getHeight(), selectedComponent->getWidth());
+                    // reset previous selection and update mouse cursor
+                    selectedComponent->setMouseCursor (juce::MouseCursor::DraggingHandCursor);
+                }
             }
+            else if (resizable)
+                resizable.reset();
         }
 
         // When our selected component has been dragged or resized this is our callback
@@ -215,6 +226,9 @@ namespace melatonin
         void componentMovedOrResized (Component& component, bool wasMoved, bool wasResized) override
         {
             TRACE_COMPONENT();
+
+            if (!isDraggingEnabled)
+                return;
 
             if (wasResized || wasMoved)
             {
@@ -243,7 +257,7 @@ namespace melatonin
 
         void mouseEnter (const juce::MouseEvent&) override
         {
-            if (!selectedComponent)
+            if (!selectedComponent || !isDraggingEnabled)
                 return;
 
             selectedComponent->setMouseCursor (juce::MouseCursor::DraggingHandCursor);
@@ -252,7 +266,7 @@ namespace melatonin
 
         void mouseMove (const juce::MouseEvent&) override
         {
-            if (!selectedComponent)
+            if (!selectedComponent || !isDraggingEnabled)
                 return;
             selectedComponent->setMouseCursor (juce::MouseCursor::DraggingHandCursor);
             repaint();
@@ -280,12 +294,24 @@ namespace melatonin
             }
         }
 
+        void enableDragging (bool enableDragging)
+        {
+            isDraggingEnabled = enableDragging;
+
+            if (selectedComponent)
+            {
+                setupResizableComponent (selectedComponent);
+                setSelectedAndResizeableBounds (selectedComponent);
+            }
+        }
+
     private:
         Component::SafePointer<Component> outlinedComponent;
         Component::SafePointer<Component> hoveredComponent;
         juce::Rectangle<int> outlinedBounds;
 
         bool isDragging = false;
+        bool isDraggingEnabled = false;
         juce::ComponentDragger componentDragger;
         juce::ComponentBoundsConstrainer boundsConstrainer;
 
@@ -311,7 +337,7 @@ namespace melatonin
             distanceToRightLabelBounds,
             distanceToBottomLabelBounds;
 
-        std::unique_ptr<juce::ResizableBorderComponent> resizable;
+        std::unique_ptr<juce::Component> resizable;
         juce::ComponentBoundsConstrainer constrainer;
 
         juce::Label dimensions;
@@ -371,7 +397,8 @@ namespace melatonin
             selectedBounds = getLocalAreaForOutline (component, 1);
             drawDimensionsLabel();
             calculateLinesToParent();
-            resizable->setBounds (selectedBounds);
+            if (resizable)
+                resizable->setBounds (selectedBounds);
             repaint();
         }
 
@@ -381,7 +408,7 @@ namespace melatonin
             if (selectedComponent && hoveredComponent)
             {
                 int labelHeight = 15;
-                auto paddingToLabel = 4;
+                auto paddingToLabel = 4.0f;
 
                 // top
                 if (lineToTopHoveredComponent.getLength() > 0)

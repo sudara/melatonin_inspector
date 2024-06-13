@@ -2,6 +2,7 @@
 
 #include "components/inspector_image_button.h"
 #include "helpers/misc.h"
+#include "melatonin_inspector/melatonin/components/accesibility.h"
 #include "melatonin_inspector/melatonin/components/box_model.h"
 #include "melatonin_inspector/melatonin/components/color_picker.h"
 #include "melatonin_inspector/melatonin/components/component_tree_view_item.h"
@@ -19,15 +20,19 @@ namespace melatonin
     class InspectorComponent : public juce::Component
     {
     public:
-        explicit InspectorComponent (juce::Component& rootComponent, bool enabledAtStart = true) : root (rootComponent), inspectorEnabled (enabledAtStart)
+        explicit InspectorComponent()
         {
             TRACE_COMPONENT();
 
             setMouseClickGrabsKeyboardFocus (false);
 
             addAndMakeVisible (enabledButton);
+            addAndMakeVisible (lockedButton);
+            addAndMakeVisible (enableDraggingButton);
             addAndMakeVisible (fpsToggle);
             addAndMakeVisible (logo);
+            addAndMakeVisible (fpsToggle);
+            addAndMakeVisible (tabToggle);
 
             addChildComponent (tree);
             addChildComponent (emptySearchLabel);
@@ -37,18 +42,19 @@ namespace melatonin
             addChildComponent (colorPicker);
             addChildComponent (preview);
             addChildComponent (properties);
+            addChildComponent (accessibility);
 
             // z-order on panels is higher so they are clickable
             addAndMakeVisible (boxModelPanel);
             addAndMakeVisible (colorPickerPanel);
             addAndMakeVisible (previewPanel);
             addAndMakeVisible (propertiesPanel);
+            addAndMakeVisible (accessibilityPanel);
 
             addAndMakeVisible (searchBox);
             addAndMakeVisible (searchIcon);
             addChildComponent (clearButton);
 
-            colorPicker.setRootComponent (&root);
             colorPicker.togglePickerCallback = [this] (bool value) {
                 if (toggleOverlayCallback)
                 {
@@ -86,12 +92,24 @@ namespace melatonin
             searchBox.setColour (juce::TextEditor::focusedOutlineColourId, juce::Colours::transparentBlack);
             searchBox.setTextToShowWhenEmpty ("Filter components...", colors::searchText);
             searchBox.setJustification (juce::Justification::centredLeft);
-            searchBox.onEscapeKey = [&] { searchBox.setText (""); searchBox.giveAwayKeyboardFocus(); };
+            searchBox.onEscapeKey = [&] {
+                searchBox.setText ("");
+                searchBox.giveAwayKeyboardFocus();
+                lastSearchText = {};
+                getRoot()->validateSubItems();
+            };
 
             logo.onClick = []() { juce::URL ("https://github.com/sudara/melatonin_inspector/").launchInDefaultBrowser(); };
             searchBox.onTextChange = [this] {
                 auto searchText = searchBox.getText();
                 ensureTreeIsConstructed();
+
+                if (lastSearchText.isNotEmpty() && !searchText.startsWith (lastSearchText))
+                {
+                    getRoot()->validateSubItems();
+                }
+
+                lastSearchText = searchText;
 
                 // try to find the first item that matches the search string
                 if (searchText.isNotEmpty())
@@ -123,9 +141,14 @@ namespace melatonin
                 toggleCallback (!inspectorEnabled);
             };
 
+            // TODO: refactor this "on" state, it's terribly named
+            enableDraggingButton.on = settings->props->getBoolValue ("enableDragging", false);
+            enableDraggingButton.onClick = [this] {
+                toggleDragEnabledCallback (enableDraggingButton.on);
+            };
+
             fpsToggle.on = false;
             fpsToggle.onClick = [this] {
-                settings->props->setValue ("fpsEnabled", fpsToggle.on);
                 toggleFPSCallback (fpsToggle.on);
             };
 
@@ -134,14 +157,40 @@ namespace melatonin
                 searchBox.giveAwayKeyboardFocus();
             };
 
-            // the tree view is empty even if inspector is enabled
-            // since at the moment when this panel getting initialized, the root component most likely doesn't have any children YET
-            // we can either wait and launch async update or add empty label
+            // TODO: sorta sketchy to "know" the enum default...
+            tabToggle.on = settings->props->getIntValue ("selectionMode", 0);
+            tabToggle.onClick = [this] {
+                toggleSelectionMode (tabToggle.on);
+            };
+
+            // we don't store this in props
+            lockedButton.on = false;
+            lockedButton.onClick = [this] {
+                toggleLockCallback (lockedButton.on);
+            };
         }
 
         ~InspectorComponent() override
         {
             tree.setRootItem (nullptr);
+        }
+
+        void setRoot (juce::Component& r)
+        {
+            root = &r;
+            colorPicker.setRootComponent (root);
+
+            tree.setRootItem (nullptr);
+            rootItem = nullptr;
+
+            if (inspectorEnabled)
+                ensureTreeIsConstructed();
+        }
+
+        void clearRoot()
+        {
+            root = nullptr;
+            colorPicker.setRootComponent (nullptr);
         }
 
         void paint (juce::Graphics& g) override
@@ -176,7 +225,7 @@ namespace melatonin
                 tree.setRootItem (nullptr);
 
             // construct the root item
-            rootItem = std::make_unique<ComponentTreeViewItem> (&root, outlineComponentCallback, selectComponentCallback);
+            rootItem = std::make_unique<ComponentTreeViewItem> (root, outlineComponentCallback, selectComponentCallback);
             tree.setRootItem (rootItem.get());
             getRoot()->setOpenness (ComponentTreeViewItem::Openness::opennessOpen);
 
@@ -204,7 +253,10 @@ namespace melatonin
             topArea = mainCol.removeFromTop (headerHeight);
             auto toolbar = topArea;
             enabledButton.setBounds (toolbar.removeFromLeft (48));
-            fpsToggle.setBounds (toolbar.removeFromLeft (48));
+            fpsToggle.setBounds (toolbar.removeFromLeft (42));
+            tabToggle.setBounds (toolbar.removeFromLeft (42));
+            lockedButton.setBounds (toolbar.removeFromLeft (36));
+            enableDraggingButton.setBounds (toolbar.removeFromLeft (40));
             logo.setBounds (toolbar.removeFromRight (56));
 
             mainCol.removeFromTop (12);
@@ -225,6 +277,9 @@ namespace melatonin
             colorPicker.setBounds (colorPickerBounds.withTrimmedLeft (32));
             colorPickerPanel.setBounds (colorPickerBounds.removeFromTop (32).removeFromLeft (200));
 
+            accessibilityPanel.setBounds (mainCol.removeFromTop (32));
+            accessibility.setBounds (mainCol.removeFromTop (accessibility.isVisible() ? 110 : 0).withTrimmedLeft (32));
+
             propertiesPanel.setBounds (mainCol.removeFromTop (33)); // extra pixel for divider
             properties.setBounds (mainCol.withTrimmedLeft (32));
 
@@ -241,7 +296,7 @@ namespace melatonin
             tree.setBounds (treeViewBounds);
         }
 
-        void displayComponentInfo (Component* component, bool collapseTreeBeforeSelection=false)
+        void displayComponentInfo (Component* component, bool collapseTreeBeforeSelection = false)
         {
             TRACE_COMPONENT();
 
@@ -275,7 +330,7 @@ namespace melatonin
             }
         }
 
-        void selectComponent (Component* component, bool collapseTreeBeforeSelection=false)
+        void selectComponent (Component* component, bool collapseTreeBeforeSelection = false)
         {
             TRACE_COMPONENT();
 
@@ -342,13 +397,16 @@ namespace melatonin
         std::function<void (bool enabled)> toggleCallback;
         std::function<void (bool enabled)> toggleOverlayCallback;
         std::function<void (bool enabled)> toggleFPSCallback;
+        std::function<void (bool enabled)> toggleSelectionMode;
+        std::function<void (bool enabled)> toggleDragEnabledCallback;
+        std::function<void (bool enabled)> toggleLockCallback;
 
     private:
         Component::SafePointer<Component> selectedComponent;
-        Component& root;
+        Component* root = nullptr;
         juce::SharedResourcePointer<InspectorSettings> settings;
         ComponentModel model;
-        bool inspectorEnabled;
+        bool inspectorEnabled = false;
 
         juce::Rectangle<int> mainColumnBounds, topArea, searchBoxBounds, treeViewBounds;
         InspectorImageButton logo { "logo" };
@@ -365,6 +423,9 @@ namespace melatonin
         Properties properties { model };
         CollapsablePanel propertiesPanel { "PROPERTIES", &properties, true };
 
+        Accessibility accessibility { model };
+        CollapsablePanel accessibilityPanel { "ACCESSIBILITY", &accessibility, false };
+
         // TODO: move to its own component
         juce::TreeView tree;
         juce::Label emptySelectionPrompt { "SelectionPrompt", "Select any component to see components tree" };
@@ -373,11 +434,16 @@ namespace melatonin
         InspectorImageButton clearButton { "clear", { 0, 6 } };
         InspectorImageButton searchIcon { "search", { 8, 8 } };
         InspectorImageButton enabledButton { "enabled", { 8, 6 }, true };
+        InspectorImageButton lockedButton { "lock", { 0, 6 }, true };
+        InspectorImageButton enableDraggingButton { "move", { -1, 7 }, true };
         InspectorImageButton fpsToggle { "speedometer", { 2, 7 }, true };
+        InspectorImageButton tabToggle { "tab", { 1, 6 }, true };
+
+        juce::String lastSearchText;
 
         std::unique_ptr<ComponentTreeViewItem> rootItem;
 
-        ComponentTreeViewItem* getRoot()
+        ComponentTreeViewItem* getRoot() const
         {
             return dynamic_cast<ComponentTreeViewItem*> (tree.getRootItem());
         }

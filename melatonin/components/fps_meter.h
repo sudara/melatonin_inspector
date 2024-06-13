@@ -14,16 +14,27 @@ namespace melatonin
     class FPSMeter : public juce::Component, private juce::Timer
     {
     public:
-        explicit FPSMeter (juce::Component& o) : overlay (o)
+        FPSMeter ()
         {
-            overlay.addChildComponent (this);
-
             // don't repaint the parent
             // unfortunately, on macOS, this no longer works
             // See FAQ in README for more info
             setOpaque (true);
 
             setInterceptsMouseClicks (false, false);
+        }
+
+        void setRoot (juce::Component& o)
+        {
+            overlay = &o;
+
+            overlay->addChildComponent (this);
+        }
+
+        void clearRoot()
+        {
+            if (overlay)
+                overlay->removeChildComponent (this);
         }
 
         void timerCallback() override
@@ -108,7 +119,7 @@ namespace melatonin
         }
 
     private:
-        juce::Component& overlay;
+        juce::Component* overlay = nullptr;
         juce::Rectangle<int> bounds;
        #if JUCE_MAJOR_VERSION == 8
         juce::Font font = juce::FontOptions (juce::Font::getDefaultMonospacedFontName(), 16.0f, juce::Font::plain);

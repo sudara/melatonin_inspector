@@ -1,7 +1,7 @@
 #pragma once
 
 #include <utility>
-
+#include "helpers/component_helpers.h"
 #include "juce_gui_basics/juce_gui_basics.h"
 
 namespace melatonin
@@ -16,12 +16,21 @@ namespace melatonin
             virtual void componentModelChanged (ComponentModel& model) = 0;
         };
 
+        juce::Value nameValue;
         juce::Value widthValue, heightValue, xValue, yValue;
         juce::Value enabledValue, opaqueValue, hasCachedImageValue, accessibilityHandledValue;
         juce::Value visibleValue, wantsFocusValue, interceptsMouseValue, childrenInterceptsMouseValue;
         juce::Value lookAndFeelValue, typeValue, fontValue, alphaValue;
         juce::Value pickedColor;
         juce::Value timing1, timing2, timing3, timingMax, hasChildren;
+
+        juce::Value isToggleable, toggleState, clickTogglesState, radioGroupId;
+
+        struct AccessiblityDetail
+        {
+            juce::Value title, value, role, handlerType;
+        } accessiblityDetail;
+
         double timingWithChildren1, timingWithChildren2, timingWithChildren3, timingWithChildrenMax;
 
         ComponentModel() = default;
@@ -121,6 +130,7 @@ namespace melatonin
                 return;
             }
 
+            nameValue = selectedComponent->getName();
             lookAndFeelValue = lnfString (selectedComponent);
             visibleValue = selectedComponent->isVisible();
             enabledValue = selectedComponent->isEnabled();
@@ -132,6 +142,15 @@ namespace melatonin
             typeValue = type (*selectedComponent);
             accessibilityHandledValue = selectedComponent->isAccessible();
 
+            if (auto button = dynamic_cast<juce::Button*> (selectedComponent.getComponent()))
+            {
+                isToggleable = button->isToggleable();
+                toggleState = button->getToggleState();
+                clickTogglesState = button->getClickingTogglesState();
+                radioGroupId = button->getRadioGroupId();
+            }
+
+            nameValue.addListener(this);
             widthValue.addListener (this);
             heightValue.addListener (this);
             xValue.addListener (this);
@@ -144,6 +163,70 @@ namespace melatonin
             accessibilityHandledValue.addListener (this);
             interceptsMouseValue.addListener (this);
             childrenInterceptsMouseValue.addListener (this);
+
+            isToggleable.addListener (this);
+            toggleState.addListener (this);
+            clickTogglesState.addListener (this);
+            radioGroupId.addListener (this);
+
+            if (selectedComponent->isAccessible() && selectedComponent->getAccessibilityHandler())
+            {
+                auto* accH = selectedComponent->getAccessibilityHandler();
+                accessiblityDetail.handlerType = type (*accH);
+                if (accH->getValueInterface())
+                {
+                    accessiblityDetail.value = accH->getValueInterface()->getCurrentValueAsString();
+                }
+                else
+                {
+                    accessiblityDetail.value = "no value interface";
+                }
+                accessiblityDetail.title = accH->getTitle();
+                auto role = accH->getRole();
+                switch (role)
+                {
+                    // Amazingly juce doesn' thave a display name fn for these
+#define DN(x)                          \
+    case juce::AccessibilityRole::x:   \
+        accessiblityDetail.role = #x; \
+        break;
+                    DN (button)
+                    DN (toggleButton)
+                    DN (radioButton)
+                    DN (comboBox)
+                    DN (image)
+                    DN (slider)
+                    DN (label)
+                    DN (staticText)
+                    DN (editableText)
+                    DN (menuItem)
+                    DN (menuBar)
+                    DN (popupMenu)
+                    DN (table)
+                    DN (tableHeader)
+                    DN (column)
+                    DN (row)
+                    DN (cell)
+                    DN (hyperlink)
+                    DN (list)
+                    DN (listItem)
+                    DN (tree)
+                    DN (treeItem)
+                    DN (progressBar)
+                    DN (group)
+                    DN (dialogWindow)
+                    DN (window)
+                    DN (scrollBar)
+                    DN (tooltip)
+                    DN (splashScreen)
+                    DN (ignored)
+                    DN (unspecified)
+#undef DN
+                    default:
+                        accessiblityDetail.role = juce::String ("Unknown ") + juce::String ((int) role);
+                        break;
+                }
+            }
 
             {
                 bool interceptsMouse = false;
@@ -191,6 +274,11 @@ namespace melatonin
             accessibilityHandledValue.removeListener (this);
             interceptsMouseValue.removeListener (this);
             childrenInterceptsMouseValue.removeListener (this);
+
+            isToggleable.removeListener (this);
+            toggleState.removeListener (this);
+            clickTogglesState.removeListener (this);
+            radioGroupId.removeListener (this);
 
             for (auto& np : namedProperties)
                 np.value.removeListener (this);
@@ -252,6 +340,26 @@ namespace melatonin
                 else if (value.refersToSameSourceAs (interceptsMouseValue) || value.refersToSameSourceAs (childrenInterceptsMouseValue))
                 {
                     selectedComponent->setInterceptsMouseClicks (interceptsMouseValue.getValue(), childrenInterceptsMouseValue.getValue());
+                }
+                else if (value.refersToSameSourceAs (isToggleable))
+                {
+                    if (auto button = dynamic_cast<juce::Button*> (selectedComponent.getComponent()))
+                        button->setToggleable (isToggleable.getValue());
+                }
+                else if (value.refersToSameSourceAs (toggleState))
+                {
+                    if (auto button = dynamic_cast<juce::Button*> (selectedComponent.getComponent()))
+                        button->setToggleState (toggleState.getValue(), juce::dontSendNotification);
+                }
+                else if (value.refersToSameSourceAs (clickTogglesState))
+                {
+                    if (auto button = dynamic_cast<juce::Button*> (selectedComponent.getComponent()))
+                        button->setClickingTogglesState (clickTogglesState.getValue());
+                }
+                else if (value.refersToSameSourceAs (radioGroupId))
+                {
+                    if (auto button = dynamic_cast<juce::Button*> (selectedComponent.getComponent()))
+                        button->setRadioGroupId (radioGroupId.getValue());
                 }
                 else
                 {
