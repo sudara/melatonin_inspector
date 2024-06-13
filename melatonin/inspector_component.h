@@ -75,7 +75,11 @@ namespace melatonin
             tree.getViewport()->setScrollBarThickness (20);
 
             searchBox.setHelpText ("search");
+           #if JUCE_MAJOR_VERSION == 8
+            searchBox.setFont (juce::FontOptions ("Verdana", 17, juce::Font::FontStyleFlags::plain));
+           #else
             searchBox.setFont (juce::Font ("Verdana", 17, juce::Font::FontStyleFlags::plain));
+           #endif
             searchBox.setColour (juce::Label::backgroundColourId, juce::Colours::transparentBlack);
             searchBox.setColour (juce::Label::textColourId, colors::treeItemTextSelected);
             searchBox.setColour (juce::TextEditor::outlineColourId, juce::Colours::transparentBlack);

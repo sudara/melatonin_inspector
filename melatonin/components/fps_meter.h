@@ -110,7 +110,11 @@ namespace melatonin
     private:
         juce::Component& overlay;
         juce::Rectangle<int> bounds;
+       #if JUCE_MAJOR_VERSION == 8
+        juce::Font font = juce::FontOptions (juce::Font::getDefaultMonospacedFontName(), 16.0f, juce::Font::plain);
+       #else
         juce::Font font = juce::Font (juce::Font::getDefaultMonospacedFontName(), 16.0f, juce::Font::plain);
+       #endif
         double lastTime = juce::Time::getMillisecondCounterHiRes();
         double frameTime = 0;
         int fps = 0;

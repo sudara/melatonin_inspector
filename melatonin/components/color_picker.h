@@ -23,7 +23,11 @@ namespace melatonin
             g.setColour (colors::customBackground);
             g.fillRoundedRectangle (getLocalBounds().withSizeKeepingCentre (38, 16).toFloat(), 3);
             g.setColour (colors::label);
+           #if JUCE_MAJOR_VERSION == 8
+            g.setFont (juce::FontOptions ("Verdana", 9, juce::Font::FontStyleFlags::bold));
+           #else
             g.setFont (juce::Font ("Verdana", 9, juce::Font::FontStyleFlags::bold));
+           #endif
             g.drawText (rgba ? "RGBA" : "HEX", getLocalBounds(), juce::Justification::centred);
         }
 
@@ -98,14 +102,22 @@ namespace melatonin
                 g.fillRoundedRectangle (colorValueBounds.withTrimmedBottom (1).toFloat(), 4);
 
                 g.setColour (colors::text);
+               #if JUCE_MAJOR_VERSION == 8
+                g.setFont (juce::FontOptions ("Verdana", 14.5, juce::Font::FontStyleFlags::plain));
+               #else
                 g.setFont (juce::Font ("Verdana", 14.5, juce::Font::FontStyleFlags::plain));
+               #endif
                 g.drawText (stringForColor (selectedColor), colorValueBounds.withTrimmedBottom (2), juce::Justification::centred);
             }
 
             if (model.colors.empty())
             {
                 g.setColour (colors::propertyName);
+               #if JUCE_MAJOR_VERSION == 8
+                g.setFont (juce::FontOptions ("Verdana", 15, juce::Font::FontStyleFlags::plain));
+               #else
                 g.setFont (juce::Font ("Verdana", 15, juce::Font::FontStyleFlags::plain));
+               #endif
                 g.drawText ("No Color Properties", panelBounds.withTrimmedLeft (3).withTrimmedTop (2), juce::Justification::topLeft);
             }
         }

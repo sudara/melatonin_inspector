@@ -96,7 +96,11 @@ namespace melatonin
         // don't use the target app's font
         juce::Font getLabelFont (juce::Label& label) override
         {
+           #if JUCE_MAJOR_VERSION == 8
+            return juce::FontOptions { "Verdana", label.getFont().getHeight(), label.getFont().getStyleFlags() };
+           #else
             return { "Verdana", label.getFont().getHeight(), label.getFont().getStyleFlags() };
+           #endif
         }
 
         // oh i dream of css resets...
