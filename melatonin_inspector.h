@@ -3,7 +3,7 @@ BEGIN_JUCE_MODULE_DECLARATION
 
 ID:                 melatonin_inspector
 vendor:             Sudara
-version:            1.3.0
+version:            1.4.0
 name:               Melatonin Inspector
 description:        A component inspector for JUCE, inspired by Figma, web inspector and Jim Credland's Component Debugger
 license:            MIT
@@ -418,7 +418,6 @@ namespace melatonin
                     this->fpsMeter.setBounds (root->getLocalBounds().removeFromRight (60).removeFromTop (40));
                 this->fpsMeter.setVisible (enable);
                 settings->props->setValue ("fpsEnabled", enable);
-
             };
 
             inspectorComponent.toggleDragEnabledCallback = [this] (const bool enable) { this->setDraggingEnabled (enable); };
