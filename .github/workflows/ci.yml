@@ -72,7 +72,7 @@ jobs:
           ${{ matrix.app }}.app/Contents/MacOS/${{ matrix.app }} &
 
       - name: Run
-        if: ${{ matrix.os == 'windows-latest' }}
+        if: ${{ runner.os == 'Windows' }}
         working-directory: Builds/${{ matrix.app }}_artefacts
         timeout-minutes: 2
         run: |
@@ -80,6 +80,6 @@ jobs:
           ./Debug/${{ matrix.app }}.exe &
 
       - uses: OrbitalOwen/desktop-screenshot-action@0.1
-        if: ${{ matrix.os == 'windows-latest' }}
+        if: ${{ runner.os == 'Windows' }}
         with:
           file-name: ${{ matrix.os }}-${{matrix.app}}.jpg
