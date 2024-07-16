@@ -365,15 +365,21 @@ namespace melatonin
             {
                 clearRoot();
 
-                auto& d = juce::Desktop::getInstance();
-                for (int i = 0; i < d.getNumComponents(); i++)
+                juce::Timer::callAfterDelay (50, [this, safeThis = juce::Component::SafePointer<Inspector> (this)]
                 {
-                    if (auto c = d.getComponent (i); c != nullptr && c != this)
-                    {
-                        setRoot (*c);
+                    if (safeThis == nullptr)
                         return;
+
+                    auto& d = juce::Desktop::getInstance();
+                    for (int i = 0; i < d.getNumComponents(); i++)
+                    {
+                        if (auto c = d.getComponent (i); c != nullptr && c != this)
+                        {
+                            setRoot (*c);
+                            return;
+                        }
                     }
-                }
+                });
             }
         }
 
