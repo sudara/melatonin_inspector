@@ -384,10 +384,6 @@ namespace melatonin
                     }
                 }
             }
-            else
-            {
-                jassertfalse;
-            }
         }
 
         void componentMovedOrResized (juce::Component&, bool wasMoved, bool wasResized) override
