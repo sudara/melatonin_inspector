@@ -77,7 +77,7 @@ jobs:
         timeout-minutes: 2
         run: |
           ls -ahl
-          ./Debug/${{ matrix.app }}.exe &
+          ./Debug/${{ matrix.app }}.exe
 
       - uses: OrbitalOwen/desktop-screenshot-action@0.1
         if: ${{ runner.os == 'Windows' }}
