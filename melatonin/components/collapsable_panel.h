@@ -67,11 +67,7 @@ namespace melatonin
 
             void drawToggleButton (juce::Graphics& g, juce::ToggleButton& button, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override
             {
-               #if JUCE_MAJOR_VERSION == 8
-                auto font = juce::FontOptions ("Verdana", 14.5, juce::Font::FontStyleFlags::plain).withKerningFactor (0.1f);
-               #else
-                auto font = juce::Font ("Verdana", 14.5, juce::Font::FontStyleFlags::plain).withExtraKerningFactor (0.1f);
-               #endif
+                auto font = InspectorLookAndFeel::getInspectorFont (14.5, juce::Font::FontStyleFlags::plain).withExtraKerningFactor (0.1f);
                 auto tickWidth = font.getHeight();
 
                 drawTickBox (g, button, 6.0f, ((float) button.getHeight() - tickWidth) * 0.5f, tickWidth, tickWidth, button.getToggleState(), button.isEnabled(), shouldDrawButtonAsHighlighted, shouldDrawButtonAsDown);

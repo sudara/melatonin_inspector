@@ -96,11 +96,7 @@ namespace melatonin
         // don't use the target app's font
         juce::Font getLabelFont (juce::Label& label) override
         {
-           #if JUCE_MAJOR_VERSION == 8
-            return juce::FontOptions { "Verdana", label.getFont().getHeight(), label.getFont().getStyleFlags() };
-           #else
-            return { "Verdana", label.getFont().getHeight(), label.getFont().getStyleFlags() };
-           #endif
+            return getInspectorFont(label.getFont().getHeight(), label.getFont().getStyleFlags());
         }
 
         // oh i dream of css resets...
@@ -232,6 +228,27 @@ namespace melatonin
             g.setColour (colors::highlight.withAlpha (0.7f));
             g.strokePath (path, juce::PathStrokeType (2.0f));
         }
-    };
 
+        static juce::Font getInspectorFont(float fontHeight, int styleFlags) {
+            static juce::String inspectorFont;
+            if (inspectorFont.isEmpty ()) {
+               #if JUCE_MAJOR_VERSION == 8
+                juce::Font testFont = juce::FontOptions { "Verdana", 12, juce::Font::FontStyleFlags::plain };
+               #else
+                juce::Font testFont = { "Verdana", 12, juce::Font::FontStyleFlags::plain }
+               #endif
+                if (juce::Typeface::createSystemTypefaceFor (testFont)) {
+                    inspectorFont = "Verdana";
+                } else {
+                    inspectorFont = juce::Font::getDefaultSansSerifFontName ();
+                }
+            }
+           #if JUCE_MAJOR_VERSION == 8
+            return juce::FontOptions { inspectorFont, fontHeight, styleFlags };
+           #else
+            return { inspectorFont, fontHeight, styleFlags };
+           #endif
+
+        }
+    };
 }
