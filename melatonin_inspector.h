@@ -318,8 +318,6 @@ namespace melatonin
                 clearSelections();
                 overlayMouseListener.disable();
             }
-
-            toFront(true);
         }
 
         void toggle()
