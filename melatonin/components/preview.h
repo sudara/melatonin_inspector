@@ -19,11 +19,7 @@ namespace melatonin
             addAndMakeVisible (timingToggle);
             maxLabel.setColour (juce::Label::textColourId, colors::iconOff);
             maxLabel.setJustificationType (juce::Justification::centredTop);
-           #if JUCE_MAJOR_VERSION == 8
-            maxLabel.setFont (juce::FontOptions ("Verdana", 18, juce::Font::FontStyleFlags::bold));
-           #else
-            maxLabel.setFont (juce::Font ("Verdana", 18, juce::Font::FontStyleFlags::bold));
-           #endif
+            maxLabel.setFont (InspectorLookAndFeel::getInspectorFont (18, juce::Font::FontStyleFlags::bold));
 
             // by default timings aren't on
             timingToggle.on = settings->props->getBoolValue ("showPerformanceTimings", false);
