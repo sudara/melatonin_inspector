@@ -72,14 +72,16 @@ jobs:
         uses: mozilla-actions/sccache-action@v0.0.5
 
       - name: Configure (Windows without Ninja)
+        if: runner.os == 'Windows'
         run: |
           if [ "${{ matrix.juce }}" == "JUCE7" ]; then
             cmake -B Builds -DTARGET_NAME:STRING=${{ matrix.app }} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache . -DJUCE7=ON
           else 
-            cmake -B Builds-DTARGET_NAME:STRING=${{ matrix.app }} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache .
+            cmake -B Builds -DTARGET_NAME:STRING=${{ matrix.app }} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache .
           fi
 
       - name: Configure (Non-Windows with Ninja)
+        if: runner.os != 'Windows'
         run: |
             if [ "${{ matrix.juce }}" == "JUCE7" ]; then
               cmake -B Builds -G Ninja -DTARGET_NAME:STRING=${{ matrix.app }} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache . -DJUCE7=ON
