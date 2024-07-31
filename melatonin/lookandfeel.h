@@ -235,7 +235,7 @@ namespace melatonin
                #if JUCE_MAJOR_VERSION == 8
                 juce::Font testFont = juce::FontOptions { "Verdana", 12, juce::Font::FontStyleFlags::plain };
                #else
-                juce::Font testFont = { "Verdana", 12, juce::Font::FontStyleFlags::plain }
+                juce::Font testFont = { "Verdana", 12, juce::Font::FontStyleFlags::plain };
                #endif
                 if (juce::Typeface::createSystemTypefaceFor (testFont)) {
                     inspectorFont = "Verdana";
