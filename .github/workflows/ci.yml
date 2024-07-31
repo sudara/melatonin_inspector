@@ -34,6 +34,7 @@ jobs:
       matrix:
         app: [ member_enabled, member_disabled, unique_ptr_enabled, unique_ptr_disabled ]
         os: [ macos-14, windows-2022, ubuntu-latest ]
+        juce: [ JUCE7, JUCE8 ]
 
     steps:
       - name: Checkout
@@ -55,10 +56,15 @@ jobs:
           xcode-version: latest-stable
 
       - name: Run sccache-cache
-        uses: mozilla-actions/sccache-action@v0.0.4
+        uses: mozilla-actions/sccache-action@v0.0.5
 
       - name: Configure
-        run: cmake -B Builds -DTARGET_NAME:STRING=${{ matrix.app }}
+        run: |
+          if [ "${{ matrix.juce }}" == "JUCE7" ]; then
+            cmake -B ${{ env.BUILD_DIR }} -G Ninja -DTARGET_NAME:STRING=${{ matrix.app }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE}} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache . -DJUCE7=ON
+          else 
+            cmake -B ${{ env.BUILD_DIR }} -G Ninja -DTARGET_NAME:STRING=${{ matrix.app }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE}} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache .
+          fi
 
       - name: Build
         run: cmake --build Builds --parallel 4
