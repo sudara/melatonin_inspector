@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.20)
 
 project(MelatoninInspector VERSION 1.3.0 LANGUAGES CXX
-        DESCRIPTION "JUCE module for inspecting Components"
-        HOMEPAGE_URL "https://github.com/sudara/melatonin_inspector")
+    DESCRIPTION "JUCE module for inspecting Components"
+    HOMEPAGE_URL "https://github.com/sudara/melatonin_inspector")
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED YES)
@@ -14,16 +14,16 @@ if (MelatoninInspector_IS_TOP_LEVEL)
     message(STATUS "Cloning JUCE...")
     if (JUCE7)
         FetchContent_Declare(JUCE
-                GIT_REPOSITORY https://github.com/juce-framework/JUCE.git
-                GIT_TAG 7.0.12
-                GIT_PROGRESS TRUE
+            GIT_REPOSITORY https://github.com/juce-framework/JUCE.git
+            GIT_TAG 7.0.12
+            GIT_PROGRESS TRUE
         )
     else ()
 
         FetchContent_Declare(JUCE
-                GIT_REPOSITORY https://github.com/juce-framework/JUCE.git
-                GIT_TAG develop
-                GIT_PROGRESS TRUE
+            GIT_REPOSITORY https://github.com/juce-framework/JUCE.git
+            GIT_TAG develop
+            GIT_PROGRESS TRUE
         )
     endif ()
 
@@ -31,13 +31,23 @@ if (MelatoninInspector_IS_TOP_LEVEL)
 
     SET(TARGET_NAME "unique_ptr_disabled" CACHE STRING "Name of cpp and target to compile")
 
-    juce_add_gui_app ("${TARGET_NAME}" VERSION 1.0.0)
+    juce_add_gui_app("${TARGET_NAME}" VERSION 1.0.0)
     target_sources("${TARGET_NAME}" PRIVATE "tests/${TARGET_NAME}.cpp")
 
     target_compile_definitions("${TARGET_NAME}" PUBLIC
         JUCE_USE_CURL=0
         JUCE_WEB_BROWSER=0
     )
+
+    # Windows errors due to sccache issues
+    # see https://github.com/mozilla/sccache/pull/963/files
+    if (MSVC)
+        if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+            string(REPLACE "/Zi" "/Z7" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
+        elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
+            string(REPLACE "/Zi" "/Z7" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+        endif ()
+    endif ()
 
     set_target_properties("${TARGET_NAME}" PROPERTIES COMPILE_WARNING_AS_ERROR ON)
 
@@ -53,9 +63,9 @@ add_library(Melatonin::Inspector ALIAS melatonin_inspector)
 
 if (MelatoninInspector_IS_TOP_LEVEL)
     target_link_libraries("${TARGET_NAME}" PRIVATE melatonin_inspector
-    juce::juce_recommended_config_flags
-    juce::juce_recommended_lto_flags
-    juce::juce_recommended_warning_flags)
+        juce::juce_recommended_config_flags
+        juce::juce_recommended_lto_flags
+        juce::juce_recommended_warning_flags)
 endif ()
 
 # Assets are precompiled in the module to make it Projucer friendly
