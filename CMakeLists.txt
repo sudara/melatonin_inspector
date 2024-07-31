@@ -14,7 +14,7 @@ if (MelatoninInspector_IS_TOP_LEVEL)
     message(STATUS "Cloning JUCE...")
     if (JUCE7)
         FetchContent_Declare(JUCE
-                GIT_REPOSITORY
+                GIT_REPOSITORY https://github.com/juce-framework/JUCE.git
                 GIT_TAG 7.0.12
                 GIT_PROGRESS TRUE
         )
