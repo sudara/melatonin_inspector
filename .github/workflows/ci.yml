@@ -9,7 +9,7 @@ on:
       - next
 
 env:
-  CMAKE_BUILD_PARALLEL_LEVEL: 3 # Use up to 3 cpus to build juceaide, etc
+  SCCACHE_GHA_ENABLED: "true"
 
 concurrency:
   group: ${{ github.workflow }}.${{ github.ref }}
@@ -34,6 +34,7 @@ jobs:
       matrix:
         app: [ member_enabled, member_disabled, unique_ptr_enabled, unique_ptr_disabled ]
         os: [ macos-14, windows-2022, ubuntu-latest ]
+        juce: [ JUCE7, JUCE8 ]
 
     steps:
       - name: Checkout
@@ -41,11 +42,24 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Use dev command prompt (Windows)
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          sdk: 10.0.22621.0 # fixed to break random CI breakage
+
+      - name: Install Ninja (Windows)
+        if: runner.os == 'Windows'
+        run: choco install ninja
+
+      - name: Install macOS Deps
+        if: ${{ runner.os == 'macOS' }}
+        run: brew install ninja osxutils
+
       - name: Install Linux Deps
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt install libasound2-dev libx11-dev libxcomposite-dev libxcursor-dev libxext-dev libxinerama-dev libxrandr-dev libxrender-dev libfreetype6-dev libglu1-mesa-dev libjack-jackd2-dev
+          sudo apt install libasound2-dev libx11-dev libxcomposite-dev libxcursor-dev libxext-dev libxinerama-dev libxrandr-dev libxrender-dev libfreetype6-dev libglu1-mesa-dev libjack-jackd2-dev ninja-build
 
       # This block can be removed once 15.1 is default (JUCE requires it when building on macOS 14)
       - name: Use latest Xcode on system (macOS)
@@ -55,10 +69,25 @@ jobs:
           xcode-version: latest-stable
 
       - name: Run sccache-cache
-        uses: mozilla-actions/sccache-action@v0.0.4
+        uses: mozilla-actions/sccache-action@v0.0.5
 
-      - name: Configure
-        run: cmake -B Builds -DTARGET_NAME:STRING=${{ matrix.app }}
+      - name: Configure (Windows without Ninja)
+        if: runner.os == 'Windows'
+        run: |
+          if [ "${{ matrix.juce }}" == "JUCE7" ]; then
+            cmake -B Builds -DTARGET_NAME:STRING=${{ matrix.app }} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache . -DJUCE7=ON
+          else 
+            cmake -B Builds -DTARGET_NAME:STRING=${{ matrix.app }} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache .
+          fi
+
+      - name: Configure (Non-Windows with Ninja)
+        if: runner.os != 'Windows'
+        run: |
+            if [ "${{ matrix.juce }}" == "JUCE7" ]; then
+              cmake -B Builds -G Ninja -DTARGET_NAME:STRING=${{ matrix.app }} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache . -DJUCE7=ON
+            else 
+              cmake -B Builds -G Ninja -DTARGET_NAME:STRING=${{ matrix.app }} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache .
+            fi
 
       - name: Build
         run: cmake --build Builds --parallel 4
