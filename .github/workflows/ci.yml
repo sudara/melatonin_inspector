@@ -42,11 +42,22 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Use dev command prompt (Windows)
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Install Ninja (Windows)
+        if: runner.os == 'Windows'
+        run: choco install ninja
+
+      - name: Install macOS Deps
+        if: ${{ runner.os == 'macOS' }}
+        run: brew install ninja osxutils
+
       - name: Install Linux Deps
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt install libasound2-dev libx11-dev libxcomposite-dev libxcursor-dev libxext-dev libxinerama-dev libxrandr-dev libxrender-dev libfreetype6-dev libglu1-mesa-dev libjack-jackd2-dev
+          sudo apt install libasound2-dev libx11-dev libxcomposite-dev libxcursor-dev libxext-dev libxinerama-dev libxrandr-dev libxrender-dev libfreetype6-dev libglu1-mesa-dev libjack-jackd2-dev ninja-build
 
       # This block can be removed once 15.1 is default (JUCE requires it when building on macOS 14)
       - name: Use latest Xcode on system (macOS)
@@ -61,9 +72,9 @@ jobs:
       - name: Configure
         run: |
           if [ "${{ matrix.juce }}" == "JUCE7" ]; then
-            cmake -B Builds -G Ninja -DTARGET_NAME:STRING=${{ matrix.app }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE}} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache . -DJUCE7=ON
+            cmake -B Builds -G Ninja -DTARGET_NAME:STRING=${{ matrix.app }} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache . -DJUCE7=ON
           else 
-            cmake -B Builds -G Ninja -DTARGET_NAME:STRING=${{ matrix.app }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE}} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache .
+            cmake -B Builds -G Ninja -DTARGET_NAME:STRING=${{ matrix.app }} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache .
           fi
 
       - name: Build
