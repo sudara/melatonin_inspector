@@ -41,8 +41,9 @@ if (MelatoninInspector_IS_TOP_LEVEL)
 
     # https://learn.microsoft.com/en-us/cpp/build/reference/mp-build-with-multiple-processes
     # Needed for ninja to be happy in CI
+    # Hacky, ideally would be add_compile_options, but that didn't work
     if (MSVC)
-        add_compile_options(/MP)
+        set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} /MP")
     endif ()
 
     set_target_properties("${TARGET_NAME}" PROPERTIES COMPILE_WARNING_AS_ERROR ON)
