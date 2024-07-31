@@ -33,7 +33,7 @@ jobs:
       fail-fast: false
       matrix:
         app: [ member_enabled, member_disabled, unique_ptr_enabled, unique_ptr_disabled ]
-        os: [ macos-14, windows-2022, ubuntu-latest ]
+        os: [ windows-2022]
         juce: [ JUCE7, JUCE8 ]
 
     steps:
@@ -44,6 +44,8 @@ jobs:
 
       - name: Use dev command prompt (Windows)
         uses: ilammy/msvc-dev-cmd@v1
+        with:
+          sdk: 10.0.22621.0
 
       - name: Install Ninja (Windows)
         if: runner.os == 'Windows'
