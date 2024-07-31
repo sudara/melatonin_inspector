@@ -39,6 +39,12 @@ if (MelatoninInspector_IS_TOP_LEVEL)
         JUCE_WEB_BROWSER=0
     )
 
+    # https://learn.microsoft.com/en-us/cpp/build/reference/mp-build-with-multiple-processes
+    # Needed for ninja to be happy in CI
+    if (MSVC)
+        add_compile_options(/MP)
+    endif ()
+
     set_target_properties("${TARGET_NAME}" PROPERTIES COMPILE_WARNING_AS_ERROR ON)
 
 endif ()
