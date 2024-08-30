@@ -311,7 +311,13 @@ namespace melatonin
                 if (selectionMode == FOLLOWS_MOUSE)
                     // without this, target apps that have UI to open the inspector
                     // will select that piece of UI within the same click, see #70
-                    callAfterDelay (500, [&] { overlayMouseListener.enable(); });
+                    callAfterDelay (500, [safeThis = juce::Component::SafePointer<Inspector> (this)]
+                                    {
+                                        if (safeThis == nullptr)
+                                            return;
+
+                                        safeThis->overlayMouseListener.enable();
+                                    });
             }
             else
             {
