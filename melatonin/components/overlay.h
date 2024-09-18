@@ -351,7 +351,7 @@ namespace melatonin
 
         void drawDimensionsLabel()
         {
-            int labelWidth = (int) dimensions.getFont().getStringWidthFloat (dimensionsString (selectedBounds)) + 15;
+            int labelWidth = (int) juce::GlyphArrangement::getStringWidth ( dimensions.getFont(), dimensionsString (selectedBounds)) + 15;
             int labelHeight = 15;
             auto paddingToLabel = 4;
             auto labelCenterX = selectedBounds.getX() + selectedBounds.getWidth() / 2;
@@ -413,7 +413,7 @@ namespace melatonin
                 // top
                 if (lineToTopHoveredComponent.getLength() > 0)
                 {
-                    int labelWidth = (int) distanceToTopHoveredLabel.getFont().getStringWidthFloat (distanceString (lineToTopHoveredComponent)) + 15;
+                    int labelWidth = (int) juce::GlyphArrangement::getStringWidth ( distanceToTopHoveredLabel.getFont(), distanceString (lineToTopHoveredComponent)) + 15;
 
                     // todo draw on left or right side of line
                     auto labelCenterY = lineToTopHoveredComponent.getPointAlongLineProportionally (0.5f).getY();
@@ -429,7 +429,7 @@ namespace melatonin
                 // bottom
                 if (lineToBottomHoveredComponent.getLength() > 0)
                 {
-                    int labelWidth = (int) distanceToBottomHoveredLabel.getFont().getStringWidthFloat (distanceString (lineToBottomHoveredComponent)) + 15;
+                    int labelWidth = (int) juce::GlyphArrangement::getStringWidth ( distanceToBottomHoveredLabel.getFont(), distanceString (lineToBottomHoveredComponent)) + 15;
 
                     // todo draw on left or right side of line
                     auto labelCenterY = lineToBottomHoveredComponent.getPointAlongLineProportionally (0.5f).getY();
@@ -445,7 +445,7 @@ namespace melatonin
                 // right
                 if (lineToRightHoveredComponent.getLength() > 0)
                 {
-                    int labelWidth = (int) distanceToRightHoveredLabel.getFont().getStringWidthFloat (distanceString (lineToRightHoveredComponent)) + 15;
+                    int labelWidth = (int) juce::GlyphArrangement::getStringWidth ( distanceToRightHoveredLabel.getFont(), distanceString (lineToRightHoveredComponent)) + 15;
 
                     // todo draw on top or bottom side of line
                     auto labelCenterX = lineToRightHoveredComponent.getPointAlongLineProportionally (0.5f).getX();
@@ -461,7 +461,7 @@ namespace melatonin
                 // left
                 if (lineToLeftHoveredComponent.getLength() > 0)
                 {
-                    int labelWidth = (int) distanceToLeftHoveredLabel.getFont().getStringWidthFloat (distanceString (lineToLeftHoveredComponent)) + 15;
+                    int labelWidth = (int) juce::GlyphArrangement::getStringWidth ( distanceToLeftHoveredLabel.getFont(), distanceString (lineToLeftHoveredComponent)) + 15;
 
                     // todo draw on top or bottom side of line
                     auto labelCenterX = lineToLeftHoveredComponent.getPointAlongLineProportionally (0.5f).getX();
