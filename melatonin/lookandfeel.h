@@ -96,7 +96,7 @@ namespace melatonin
         // don't use the target app's font
         juce::Font getLabelFont (juce::Label& label) override
         {
-            return getInspectorFont(label.getFont().getHeight(), label.getFont().getStyleFlags());
+            return getInspectorFont (label.getFont().getHeight(), label.getFont().getStyleFlags());
         }
 
         // oh i dream of css resets...
@@ -164,7 +164,7 @@ namespace melatonin
 
             if (component.getProperties().getWithDefault ("isUserProperty", false))
             {
-                auto textWidth = (float) g.getCurrentFont().getStringWidth (component.getName());
+                auto textWidth = getStringWidth (g.getCurrentFont(), component.getName());
                 auto tagBounds = juce::Rectangle<float> (3 + textWidth + 3, 7, 40, 14).toFloat();
                 g.setColour (colors::panelBackgroundDarker);
                 g.fillRoundedRectangle (tagBounds, 3);
@@ -249,6 +249,15 @@ namespace melatonin
             return { inspectorFont, fontHeight, styleFlags };
            #endif
 
+        }
+
+        static float getStringWidth (const juce::Font& font, const juce::String& text)
+        {
+#if JUCE_MAJOR_VERSION == 8 && JUCE_BUILDNUMBER >= 2
+            return juce::GlyphArrangement::getStringWidth (font, text);
+#else
+            return font.getStringWidthFloat (text);
+#endif
         }
     };
 }
