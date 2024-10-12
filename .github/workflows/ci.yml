@@ -3,10 +3,13 @@ name: CI
 on:
   workflow_dispatch:
   push:
+  schedule:
+    - cron:  '10 5 * * *' # run once a day
   pull_request:
     branches:
       - main
       - next
+
 
 env:
   SCCACHE_GHA_ENABLED: "true"
