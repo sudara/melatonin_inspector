@@ -33,7 +33,8 @@ namespace melatonin
             addAndMakeVisible (logo);
             addAndMakeVisible (fpsToggle);
             addAndMakeVisible (tabToggle);
-
+            addAndMakeVisible (mybutton);
+            
             addChildComponent (tree);
             addChildComponent (emptySearchLabel);
 
@@ -96,6 +97,10 @@ namespace melatonin
             };
 
             logo.onClick = []() { juce::URL ("https://github.com/sudara/melatonin_inspector/").launchInDefaultBrowser(); };
+            mybutton.onClick = [this]() {
+                addComponent();
+            };
+            
             searchBox.onTextChange = [this] {
                 auto searchText = searchBox.getText();
                 ensureTreeIsConstructed();
@@ -254,6 +259,7 @@ namespace melatonin
             lockedButton.setBounds (toolbar.removeFromLeft (36));
             enableDraggingButton.setBounds (toolbar.removeFromLeft (40));
             logo.setBounds (toolbar.removeFromRight (56));
+            mybutton.setBounds (toolbar.removeFromRight (46));
 
             mainCol.removeFromTop (12);
             boxModelPanel.setBounds (mainCol.removeFromTop (32));
@@ -338,7 +344,21 @@ namespace melatonin
             selectedComponent = component;
             displayComponentInfo (selectedComponent, collapseTreeBeforeSelection);
         }
-
+        
+        juce::OwnedArray<Component> dynItems;
+        
+        void addComponent()
+        {
+            if (!selectedComponent)
+                return;
+            Component *comp = new juce::TextButton("a button");
+            selectedComponent->addAndMakeVisible( comp, 0 );
+            outlineComponentCallback( selectedComponent );
+            selectComponent( comp );
+            displayComponentInfo( comp );
+            dynItems.add( comp );
+        }
+        
         void deselectComponent()
         {
             TRACE_COMPONENT();
@@ -406,6 +426,7 @@ namespace melatonin
 
         juce::Rectangle<int> mainColumnBounds, topArea, searchBoxBounds, treeViewBounds;
         InspectorImageButton logo { "logo" };
+        InspectorImageButton mybutton { "dogfoodon" };
 
         BoxModel boxModel { model };
         CollapsablePanel boxModelPanel { "BOX MODEL", &boxModel };
