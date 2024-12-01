@@ -345,9 +345,10 @@ namespace melatonin
             displayComponentInfo (selectedComponent, collapseTreeBeforeSelection);
         }
         
-        juce::OwnedArray<Component> dynItems;
-        
-        void addComponent()
+        void addComponent();
+        void addComponentFromXML(const juce::String &componentXML);
+
+#if 0
         {
             if (!selectedComponent)
                 return;
@@ -356,9 +357,8 @@ namespace melatonin
             outlineComponentCallback( selectedComponent );
             selectComponent( comp );
             displayComponentInfo( comp );
-            dynItems.add( comp );
         }
-        
+#endif
         void deselectComponent()
         {
             TRACE_COMPONENT();
