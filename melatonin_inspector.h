@@ -30,7 +30,7 @@ END_JUCE_MODULE_DECLARATION
 
 namespace melatonin
 {
-    class Inspector : public juce::ComponentListener, public juce::DocumentWindow, private juce::Timer, public juce::FocusChangeListener
+    class Inspector : public juce::ComponentListener, public juce::DocumentWindow, private juce::Timer, public juce::FocusChangeListener, public juce::DragAndDropContainer
     {
     public:
         class InspectorKeyCommands : public juce::KeyListener

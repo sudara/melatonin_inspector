@@ -335,5 +335,33 @@ namespace melatonin
                 dynamic_cast<juce::TabbedComponent*> (parent->component.getComponent())->setCurrentTabIndex (getIndexInParent());
             }
         }
+        
+        juce::var getDragSourceDescription() override
+        {
+            return (juce::int64)(component.getComponent());
+            //return "melatonin::drag";
+        }
+
+        bool isInterestedInDragSource (const juce::DragAndDropTarget::SourceDetails& dragSourceDetails) override
+        {
+            return true;//dragSourceDetails.description == "melatonin::drag";
+        }
+
+        void itemDropped (const juce::DragAndDropTarget::SourceDetails &dragSourceDetails, int insertIndex) override
+        {
+            juce::Component *treeView = dragSourceDetails.sourceComponent;
+            juce::Component *other = (juce::Component *)(juce::int64)dragSourceDetails.description;
+            juce::Component *thisComp = component.getComponent();
+            thisComp->addAndMakeVisible( other );
+
+//            treeView->outlineComponentCallback( thisComp );
+//            treeView->selectComponent( other );
+//            treeView->displayComponentInfo( other );
+
+//            OwnedArray<ValueTree> selectedTrees;
+//            getSelectedTreeViewItems (*getOwnerView(), selectedTrees);
+//
+//            moveItems (*getOwnerView(), selectedTrees, tree, insertIndex, undoManager);
+        }
     };
 }
