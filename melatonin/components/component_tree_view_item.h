@@ -344,15 +344,23 @@ namespace melatonin
 
         bool isInterestedInDragSource (const juce::DragAndDropTarget::SourceDetails& dragSourceDetails) override
         {
+            juce::Component *treeView = dragSourceDetails.sourceComponent;
+            treeView->repaint();
             return true;//dragSourceDetails.description == "melatonin::drag";
         }
 
         void itemDropped (const juce::DragAndDropTarget::SourceDetails &dragSourceDetails, int insertIndex) override
         {
             juce::Component *treeView = dragSourceDetails.sourceComponent;
-            juce::Component *other = (juce::Component *)(juce::int64)dragSourceDetails.description;
-            juce::Component *thisComp = component.getComponent();
-            thisComp->addAndMakeVisible( other );
+            juce::Component *draggedComp = (juce::Component *)(juce::int64)dragSourceDetails.description;
+            juce::Component *draggedCompParent = draggedComp->getParentComponent();
+            juce::Point draggedCompParentPos = draggedCompParent->getScreenPosition();
+            juce::Component *newParentComp = component.getComponent();
+            juce::Point newParentPos = newParentComp->getScreenPosition();
+            juce::Point offsetPt =  draggedCompParentPos - newParentPos;
+            
+            newParentComp->addAndMakeVisible( draggedComp );
+            draggedComp->setTopLeftPosition( draggedComp->getPosition() + offsetPt );
 
 //            treeView->outlineComponentCallback( thisComp );
 //            treeView->selectComponent( other );
