@@ -11,7 +11,12 @@ namespace melatonin
                      private ComponentModel::Listener
     {
     public:
-        explicit BoxModel (ComponentModel& componentModel) : model (componentModel)
+        explicit BoxModel (ComponentModel& componentModel)
+            : model (componentModel),
+        tackTopToParentButton("tackTopToParentButton", juce::DrawableButton::ImageFitted),
+        tackRightToParentButton("tackRightToParentButton", juce::DrawableButton::ImageFitted),
+        tackBottomToParentButton("tackBottomToParentButton", juce::DrawableButton::ImageFitted),
+        tackLeftToParentButton("tackLeftToParentButton", juce::DrawableButton::ImageFitted)
         {
             addAndMakeVisible (componentLabel);
             componentLabel.setColour (juce::Label::textColourId, colors::boxModelBoundingBox);
@@ -98,7 +103,8 @@ namespace melatonin
                         l->setText ("0", juce::dontSendNotification);
                 };
             }
-
+            moreLayout();
+            
             model.addListener (*this);
         }
 
@@ -126,48 +132,11 @@ namespace melatonin
             g.drawRect (componentRectangle(), (int) padding);
         }
 
-        void resized() override
-        {
-            auto bounds = parentComponentRectangle();
-            auto center = bounds.getCentre();
-            auto labelHeight = 30;
-
-            parentComponentLabel.setBounds (bounds.getX(), bounds.getY() - labelHeight + 4, bounds.getWidth(), labelHeight);
-            componentLabel.setBounds (componentRectangle().getX(), componentRectangle().getY() - labelHeight + 4, componentRectangle().getWidth(), labelHeight);
-
-            widthLabel.setBounds (center.getX() - 10 - paddingToParent, center.getY() - 15, paddingToParent, labelHeight);
-            byLabel.setBounds (center.getX() - 10, center.getY() - 15, 20, labelHeight);
-            heightLabel.setBounds (center.getX() + 10, center.getY() - 15, paddingToParent, labelHeight);
-
-            topToParentLabel.setBounds (center.getX() - paddingToParent / 2, padding + paddingToParent / 2 - labelHeight / 2 - 3, paddingToParent, labelHeight);
-            rightToParentLabel.setBounds (getWidth() - padding - paddingToParent / 2 - paddingToParent / 2, center.getY() - labelHeight / 2, paddingToParent, labelHeight);
-            bottomToParentLabel.setBounds (center.getX() - paddingToParent / 2, getHeight() - padding - paddingToParent / 2 - labelHeight / 2 + 3, paddingToParent, labelHeight);
-            leftToParentLabel.setBounds (padding + paddingToParent / 2 - paddingToParent / 2, center.getY() - labelHeight / 2, paddingToParent, labelHeight);
-
-            auto area1 = bounds.reduced (paddingToParent)
-                             .removeFromTop (padding)
-                             .withSizeKeepingCentre (padding, padding);
-            paddingTopLabel.setBounds (area1);
-
-            auto area2 = bounds.reduced (paddingToParent)
-                             .removeFromBottom (padding)
-                             .withSizeKeepingCentre (padding, padding);
-            paddingBottomLabel.setBounds (area2);
-
-            auto area3 = bounds.reduced (paddingToParent)
-                             .removeFromLeft (padding)
-                             .withSizeKeepingCentre (padding, padding);
-            paddingLeftLabel.setBounds (area3);
-
-            auto area4 = bounds.reduced (paddingToParent)
-                             .removeFromRight (padding)
-                             .withTrimmedTop (padding)
-                             .withTrimmedBottom (padding)
-                             .withSizeKeepingCentre (padding, padding);
-            paddingRightLabel.setBounds (area4);
-        }
+        void resized() override;
 
     private:
+        void moreLayout();
+
         ComponentModel& model;
 
         juce::Label componentLabel;
@@ -178,10 +147,14 @@ namespace melatonin
         juce::Label heightLabel;
 
         juce::Label topToParentLabel;
+        juce::DrawableButton tackTopToParentButton;
         juce::Label rightToParentLabel;
+        juce::DrawableButton tackRightToParentButton;
         juce::Label bottomToParentLabel;
+        juce::DrawableButton tackBottomToParentButton;
         juce::Label leftToParentLabel;
-
+        juce::DrawableButton tackLeftToParentButton;
+        
         juce::Label paddingTopLabel,
             paddingRightLabel,
             paddingBottomLabel,
