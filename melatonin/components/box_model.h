@@ -166,7 +166,7 @@ namespace melatonin
         bool isPaddingComponent { false };
 
         void handleAlignButtonStateChange( const std::string &direction, bool state );
-        void initButton( juce::DrawableButton &button, const std::string &svgFile );
+        void initButton( juce::DrawableButton &button, const std::string &direction, const std::string &svgFile );
         
         void labelTextChanged (juce::Label* changedLabel) override
         {
@@ -193,11 +193,7 @@ namespace melatonin
             }
         }
 
-        void componentModelChanged (ComponentModel&) override
-        {
-            updateLabels();
-            updatePaddingLabelsIfNeeded();
-        }
+        void componentModelChanged (ComponentModel&) override;
 
         juce::Rectangle<int> parentComponentRectangle()
         {
