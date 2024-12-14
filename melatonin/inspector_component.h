@@ -348,17 +348,6 @@ namespace melatonin
         void addComponent();
         void addComponentFromXML(const juce::String &componentXML);
 
-#if 0
-        {
-            if (!selectedComponent)
-                return;
-            Component *comp = new juce::TextButton("a button");
-            selectedComponent->addAndMakeVisible( comp, 0 );
-            outlineComponentCallback( selectedComponent );
-            selectComponent( comp );
-            displayComponentInfo( comp );
-        }
-#endif
         void deselectComponent()
         {
             TRACE_COMPONENT();
