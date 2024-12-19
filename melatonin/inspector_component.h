@@ -20,7 +20,10 @@ namespace melatonin
     class InspectorComponent : public juce::Component
     {
     public:
-        explicit InspectorComponent()
+        explicit InspectorComponent() :
+            addComponentButton( "addComponent", juce::DrawableButton::ImageFitted ),
+            deleteComponentButton( "deleteComponent", juce::DrawableButton::ImageFitted ),
+            downloadXMLButton( "downloadXML", juce::DrawableButton::ImageFitted )
         {
             TRACE_COMPONENT();
 
@@ -33,8 +36,11 @@ namespace melatonin
             addAndMakeVisible (logo);
             addAndMakeVisible (fpsToggle);
             addAndMakeVisible (tabToggle);
-            addAndMakeVisible (mybutton);
             
+            initDrawableButton( addComponentButton, "widgets.svg" );
+            initDrawableButton( deleteComponentButton, "delete.svg" );
+            initDrawableButton( downloadXMLButton, "download.svg" );
+
             addChildComponent (tree);
             addChildComponent (emptySearchLabel);
 
@@ -97,9 +103,16 @@ namespace melatonin
             };
 
             logo.onClick = []() { juce::URL ("https://github.com/sudara/melatonin_inspector/").launchInDefaultBrowser(); };
-            mybutton.onClick = [this]() {
+            addComponentButton.onClick = [this]() {
                 addComponent();
             };
+            deleteComponentButton.onClick = [this]() {
+                deleteComponent();
+            };
+            downloadXMLButton.onClick = [this]() {
+                downloadXML();
+            };
+
             
             searchBox.onTextChange = [this] {
                 auto searchText = searchBox.getText();
@@ -237,6 +250,10 @@ namespace melatonin
             resized();
         }
 
+        void repositionOnRight( juce::Rectangle<int> &toolbar, Component &comp, int fromRight ) {
+            comp.setTopLeftPosition (toolbar.removeFromRight (fromRight).getX(), toolbar.getCentreY()-comp.getHeight()/2);
+        }
+        
         void resized() override
         {
             TRACE_COMPONENT();
@@ -259,7 +276,10 @@ namespace melatonin
             lockedButton.setBounds (toolbar.removeFromLeft (36));
             enableDraggingButton.setBounds (toolbar.removeFromLeft (40));
             logo.setBounds (toolbar.removeFromRight (56));
-            mybutton.setBounds (toolbar.removeFromRight (46));
+
+            repositionOnRight( toolbar, addComponentButton, 30 );
+            repositionOnRight( toolbar, deleteComponentButton, 30 );
+            repositionOnRight( toolbar, downloadXMLButton, 30 );
 
             mainCol.removeFromTop (12);
             boxModelPanel.setBounds (mainCol.removeFromTop (32));
@@ -346,8 +366,10 @@ namespace melatonin
         }
         
         void addComponent();
+        void deleteComponent();
         void addComponentFromXML(const juce::String &componentXML);
-
+        void downloadXML();
+        
         void deselectComponent()
         {
             TRACE_COMPONENT();
@@ -397,6 +419,24 @@ namespace melatonin
             resized();
         }
 
+        void initDrawableButton( juce::DrawableButton &button, const std::string &svgFile )
+        {
+            std::unique_ptr< juce::Drawable > drawable = juce::Drawable::createFromSVGFile(juce::File( juce::File::getSpecialLocation (juce::File::currentApplicationFile)
+                       .getChildFile ("Contents")
+                       .getChildFile ("Resources")
+                       .getChildFile (svgFile) ));
+            juce::Colour origColour( 0xff5f6368 );
+            std::unique_ptr< juce::Drawable > one = drawable->createCopy();
+            one->replaceColour(origColour, juce::Colours::goldenrod);
+            std::unique_ptr< juce::Drawable > two = drawable->createCopy();
+            two->replaceColour(origColour, juce::Colours::goldenrod.darker());
+            std::unique_ptr< juce::Drawable > three = drawable->createCopy();
+            three->replaceColour(origColour, juce::Colours::goldenrod.darker(.4*2));
+            button.setSize( 24, 24 );
+            button.setImages(one.get(), two.get(), three.get() );
+            addAndMakeVisible ( button );
+        }
+        
         std::function<void (Component* c)> selectComponentCallback;
         std::function<void (Component* c)> outlineComponentCallback;
         std::function<void (bool enabled)> toggleCallback;
@@ -415,7 +455,9 @@ namespace melatonin
 
         juce::Rectangle<int> mainColumnBounds, topArea, searchBoxBounds, treeViewBounds;
         InspectorImageButton logo { "logo" };
-        InspectorImageButton mybutton { "dogfoodon" };
+        juce::DrawableButton addComponentButton;
+        juce::DrawableButton deleteComponentButton;
+        juce::DrawableButton downloadXMLButton;
 
         BoxModel boxModel { model };
         CollapsablePanel boxModelPanel { "BOX MODEL", &boxModel };
