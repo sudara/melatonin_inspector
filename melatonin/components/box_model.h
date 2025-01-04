@@ -136,7 +136,7 @@ namespace melatonin
 
     private:
         void moreLayout();
-
+        
         ComponentModel& model;
 
         juce::Label componentLabel;
@@ -165,8 +165,8 @@ namespace melatonin
         juce::Path parentRectanglePath; // complicated b/c it's dashed
         bool isPaddingComponent { false };
 
-        void handleAlignButtonStateChange( const std::string &direction, bool state );
-        void initButton( juce::DrawableButton &button, const std::string &direction, const std::string &svgFile );
+        void handleAlignButtonStateChange( juce::Label &label, const juce::Identifier &direction, bool state );
+        void initButton( juce::DrawableButton &button, juce::Label &label, const juce::Identifier &direction, const std::string &svgFile );
         
         void labelTextChanged (juce::Label* changedLabel) override
         {
