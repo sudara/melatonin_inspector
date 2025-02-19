@@ -80,17 +80,61 @@ namespace melatonin
             juce::Value value;
         };
 
+        enum class StyleType
+        {
+            SliderStyle,
+            SliderTextPosition,
+            ButtonStyle,
+            ComboBoxEditable
+        };
+
         struct StyleProperty
         {
             StyleProperty() = default;
-            StyleProperty(juce::String n, const juce::var& v, juce::StringArray opts = {})
-                : name(std::move(n)), value(v), options(std::move(opts))
+            StyleProperty(StyleType t, const juce::var& v, juce::StringArray opts = {})
+                : type(t), value(v), options(std::move(opts))
             {
             }
 
-            juce::String name;
+            StyleType type;
             juce::Value value;
-            juce::StringArray options;
+            juce::StringArray options;  // For choice/enum properties
+
+            // Helper to get display name
+            juce::String getDisplayName() const
+            {
+                switch (type)
+                {
+                    case StyleType::SliderStyle: return "Slider Style";
+                    case StyleType::SliderTextPosition: return "Text Position";
+                    case StyleType::ButtonStyle: return "Button Style";
+                    case StyleType::ComboBoxEditable: return "Text Editable";
+                    default: return "Unknown";
+                }
+            }
+
+            // Helper to get options for the style type
+            static juce::StringArray getOptionsForType(StyleType t)
+            {
+                switch (t)
+                {
+                    case StyleType::SliderStyle:
+                        return {"LinearHorizontal", "LinearVertical", "LinearBar",
+                            "Rotary", "RotaryHorizontalDrag", "RotaryVerticalDrag",
+                            "IncDecButtons", "TwoValueHorizontal", "TwoValueVertical"};
+
+                    case StyleType::SliderTextPosition:
+                        return {"NoTextBox", "TextBoxLeft", "TextBoxRight",
+                            "TextBoxAbove", "TextBoxBelow"};
+
+                    case StyleType::ButtonStyle:
+                        return {"TextButton", "DrawableButton", "ImageButton",
+                            "ArrowButton", "HyperlinkButton"};
+
+                    default:
+                        return {};
+                }
+            }
         };
 
         std::vector<NamedProperty> namedProperties;
@@ -287,29 +331,28 @@ namespace melatonin
         {
             if (auto* slider = dynamic_cast<juce::Slider*>(selectedComponent.getComponent()))
             {
-                sliderStyleValue = static_cast<int>(slider->getSliderStyle());
-                sliderTextBoxPositionValue = static_cast<int>(slider->getTextBoxPosition());
+                styles.emplace_back(
+                    StyleType::SliderStyle,
+                    static_cast<int>(slider->getSliderStyle()),
+                    StyleProperty::getOptionsForType(StyleType::SliderStyle));
 
-                styles.emplace_back("Slider Style", sliderStyleValue,
-                    juce::StringArray{"LinearHorizontal", "LinearVertical", "LinearBar",
-                        "Rotary", "RotaryHorizontalDrag", "RotaryVerticalDrag",
-                        "IncDecButtons", "TwoValueHorizontal", "TwoValueVertical"});
-
-                styles.emplace_back("Text Position", sliderTextBoxPositionValue,
-                    juce::StringArray{"NoTextBox", "TextBoxLeft", "TextBoxRight",
-                        "TextBoxAbove", "TextBoxBelow"});
+                styles.emplace_back(
+                    StyleType::SliderTextPosition,
+                    static_cast<int>(slider->getTextBoxPosition()),
+                    StyleProperty::getOptionsForType(StyleType::SliderTextPosition));
             }
             else if (auto* button = dynamic_cast<juce::Button*>(selectedComponent.getComponent()))
             {
-                buttonStyleValue = button->getButtonText().isEmpty() ? 1 : 0;
-                styles.emplace_back("Button Style", buttonStyleValue,
-                    juce::StringArray{"TextButton", "DrawableButton", "ImageButton",
-                        "ArrowButton", "HyperlinkButton"});
+                styles.emplace_back(
+                    StyleType::ButtonStyle,
+                    button->getButtonText().isEmpty() ? 1 : 0,
+                    StyleProperty::getOptionsForType(StyleType::ButtonStyle));
             }
             else if (auto* comboBox = dynamic_cast<juce::ComboBox*>(selectedComponent.getComponent()))
             {
-                comboBoxTextEditableValue = comboBox->isTextEditable();
-                styles.emplace_back("Text Editable", comboBoxTextEditableValue);
+                styles.emplace_back(
+                    StyleType::ComboBoxEditable,
+                    comboBox->isTextEditable());
             }
         }
 
@@ -444,6 +487,43 @@ namespace melatonin
                             selectedComponent->getProperties().set (nv.name, nv.value.getValue());
                             selectedComponent->repaint();
                             break;
+                        }
+                    }
+
+                    for (auto& style : styles)
+                    {
+                        if (value.refersToSameSourceAs(style.value))
+                        {
+                            switch (style.type)
+                            {
+                                case StyleType::SliderStyle:
+                                    if (auto* slider = dynamic_cast<juce::Slider*>(selectedComponent.getComponent()))
+                                        slider->setSliderStyle(static_cast<juce::Slider::SliderStyle>(int(style.value.getValue())));
+                                    break;
+
+                                case StyleType::SliderTextPosition:
+                                    if (auto* slider = dynamic_cast<juce::Slider*>(selectedComponent.getComponent()))
+                                        slider->setTextBoxStyle(
+                                            static_cast<juce::Slider::TextEntryBoxPosition>(int(style.value.getValue())),
+                                            false,
+                                            slider->getTextBoxWidth(),
+                                            slider->getTextBoxHeight());
+                                    break;
+
+                                case StyleType::ButtonStyle:
+                                    if (auto* button = dynamic_cast<juce::Button*>(selectedComponent.getComponent()))
+                                    {
+                                        // Handle button style changes
+                                        selectedComponent->repaint();
+                                    }
+                                    break;
+
+                                case StyleType::ComboBoxEditable:
+                                    if (auto* comboBox = dynamic_cast<juce::ComboBox*>(selectedComponent.getComponent()))
+                                        comboBox->setEditableText(style.value.getValue());
+                                    break;
+                            }
+                            return; // Style was handled, exit early
                         }
                     }
                 }

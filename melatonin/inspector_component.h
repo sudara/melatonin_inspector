@@ -279,7 +279,7 @@ namespace melatonin
             int numOfStyleToDisplay = juce::jlimit (0, 5, (int) model.styles.size());
             auto stylePropertiesHeight = 32;
             if (styleProperties.isVisible() && !model.styles.empty())
-                stylePropertiesHeight += 24 * numOfStyleToDisplay;
+                stylePropertiesHeight += 32 * numOfStyleToDisplay;
             auto stylePropertiesBounds = mainCol.removeFromTop (stylePropertiesHeight);
             stylePanel.setBounds (stylePropertiesBounds.removeFromTop (32).removeFromLeft (200));
             styleProperties.setBounds (stylePropertiesBounds.withTrimmedLeft (32));

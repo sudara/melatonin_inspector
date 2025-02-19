@@ -9,6 +9,7 @@ namespace melatonin
         explicit StyleProperties(ComponentModel& _model) : model(_model)
         {
             reset();
+
             addAndMakeVisible(&panel);
             model.addListener(*this);
         }
@@ -20,6 +21,7 @@ namespace melatonin
 
         void resized() override
         {
+            TRACE_COMPONENT();
             panel.setBounds(getLocalBounds().withTrimmedTop(padding));
         }
 
@@ -41,6 +43,7 @@ namespace melatonin
 
         void updateProperties()
         {
+            TRACE_COMPONENT();
             panel.clear();
 
             if (!model.getSelectedComponent())
@@ -58,6 +61,7 @@ namespace melatonin
 
         [[nodiscard]] juce::Array<juce::PropertyComponent*> createStylePropertyComponents() const
         {
+            TRACE_COMPONENT();
             juce::Array<juce::PropertyComponent*> props;
 
             for (const auto& style : model.styles)
@@ -68,19 +72,19 @@ namespace melatonin
                     juce::Array<juce::var> optionIndices;
                     for (int i = 0; i < style.options.size(); ++i)
                         optionIndices.add(i);
-
-                    props.add(new juce::ChoicePropertyComponent(
+                    auto choiceComp = new juce::ChoicePropertyComponent(
                         style.value,
-                        style.name,
+                        style.getDisplayName(),
                         style.options,
-                        optionIndices));
+                        optionIndices);
+                    props.add(choiceComp);
                 }
                 else if (style.value.getValue().isBool())
                 {
                     // For boolean properties
                     props.add(new juce::BooleanPropertyComponent(
                         style.value,
-                        style.name,
+                        style.getDisplayName(),
                         ""));
                 }
                 else
@@ -88,7 +92,7 @@ namespace melatonin
                     // For text/numeric properties
                     props.add(new juce::TextPropertyComponent(
                         style.value,
-                        style.name,
+                        style.getDisplayName(),
                         50,
                         false));
                 }
