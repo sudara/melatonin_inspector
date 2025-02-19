@@ -101,7 +101,7 @@ namespace melatonin
             juce::StringArray options;  // For choice/enum properties
 
             // Helper to get display name
-            juce::String getDisplayName() const
+            [[nodiscard]] juce::String getDisplayName() const
             {
                 switch (type)
                 {
@@ -130,6 +130,9 @@ namespace melatonin
                     case StyleType::ButtonStyle:
                         return {"TextButton", "DrawableButton", "ImageButton",
                             "ArrowButton", "HyperlinkButton"};
+
+                    case StyleType::ComboBoxEditable:
+                        return {"NotEditable", "Editable"};
 
                     default:
                         return {};
