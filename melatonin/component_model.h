@@ -25,6 +25,7 @@ namespace melatonin
         juce::Value timing1, timing2, timing3, timingMax, hasChildren;
 
         juce::Value isToggleable, toggleState, clickTogglesState, radioGroupId;
+        juce::Value sliderStyleValue, sliderTextBoxPositionValue, buttonStyleValue, comboBoxTextEditableValue;
 
         struct AccessiblityDetail
         {
@@ -79,8 +80,69 @@ namespace melatonin
             juce::Value value;
         };
 
+        enum class StyleType
+        {
+            SliderStyle,
+            SliderTextPosition,
+            ButtonStyle,
+            ComboBoxEditable
+        };
+
+        struct StyleProperty
+        {
+            StyleProperty() = default;
+            StyleProperty(StyleType t, const juce::var& v, juce::StringArray opts = {})
+                : type(t), value(v), options(std::move(opts))
+            {
+            }
+
+            StyleType type;
+            juce::Value value;
+            juce::StringArray options;  // For choice/enum properties
+
+            // Helper to get display name
+            [[nodiscard]] juce::String getDisplayName() const
+            {
+                switch (type)
+                {
+                    case StyleType::SliderStyle: return "Slider Style";
+                    case StyleType::SliderTextPosition: return "Text Position";
+                    case StyleType::ButtonStyle: return "Button Style";
+                    case StyleType::ComboBoxEditable: return "Text Editable";
+                    default: return "Unknown";
+                }
+            }
+
+            // Helper to get options for the style type
+            static juce::StringArray getOptionsForType(StyleType t)
+            {
+                switch (t)
+                {
+                    case StyleType::SliderStyle:
+                        return {"LinearHorizontal", "LinearVertical", "LinearBar",
+                            "Rotary", "RotaryHorizontalDrag", "RotaryVerticalDrag",
+                            "IncDecButtons", "TwoValueHorizontal", "TwoValueVertical"};
+
+                    case StyleType::SliderTextPosition:
+                        return {"NoTextBox", "TextBoxLeft", "TextBoxRight",
+                            "TextBoxAbove", "TextBoxBelow"};
+
+                    case StyleType::ButtonStyle:
+                        return {"TextButton", "DrawableButton", "ImageButton",
+                            "ArrowButton", "HyperlinkButton"};
+
+                    case StyleType::ComboBoxEditable:
+                        return {"NotEditable", "Editable"};
+
+                    default:
+                        return {};
+                }
+            }
+        };
+
         std::vector<NamedProperty> namedProperties;
         std::vector<NamedProperty> colors;
+        std::vector<StyleProperty> styles;
 
         void refresh()
         {
@@ -142,6 +204,8 @@ namespace melatonin
             typeValue = type (*selectedComponent);
             accessibilityHandledValue = selectedComponent->isAccessible();
 
+            updateStyleProperties();
+
             if (auto button = dynamic_cast<juce::Button*> (selectedComponent.getComponent()))
             {
                 isToggleable = button->isToggleable();
@@ -168,6 +232,11 @@ namespace melatonin
             toggleState.addListener (this);
             clickTogglesState.addListener (this);
             radioGroupId.addListener (this);
+
+            sliderStyleValue.addListener (this);
+            sliderTextBoxPositionValue.addListener (this);
+            buttonStyleValue.addListener (this);
+            comboBoxTextEditableValue.addListener (this);
 
             if (selectedComponent->isAccessible() && selectedComponent->getAccessibilityHandler())
             {
@@ -254,8 +323,40 @@ namespace melatonin
 
                 for (auto& nv : colors)
                     nv.value.addListener (this);
+
+                for (auto& style : styles)
+                    style.value.addListener (this);
             }
             notifyListeners();
+        }
+
+        void updateStyleProperties()
+        {
+            if (auto* slider = dynamic_cast<juce::Slider*>(selectedComponent.getComponent()))
+            {
+                styles.emplace_back(
+                    StyleType::SliderStyle,
+                    static_cast<int>(slider->getSliderStyle()),
+                    StyleProperty::getOptionsForType(StyleType::SliderStyle));
+
+                styles.emplace_back(
+                    StyleType::SliderTextPosition,
+                    static_cast<int>(slider->getTextBoxPosition()),
+                    StyleProperty::getOptionsForType(StyleType::SliderTextPosition));
+            }
+            else if (auto* button = dynamic_cast<juce::Button*>(selectedComponent.getComponent()))
+            {
+                styles.emplace_back(
+                    StyleType::ButtonStyle,
+                    button->getButtonText().isEmpty() ? 1 : 0,
+                    StyleProperty::getOptionsForType(StyleType::ButtonStyle));
+            }
+            else if (auto* comboBox = dynamic_cast<juce::ComboBox*>(selectedComponent.getComponent()))
+            {
+                styles.emplace_back(
+                    StyleType::ComboBoxEditable,
+                    comboBox->isTextEditable());
+            }
         }
 
         void removeListeners()
@@ -280,14 +381,23 @@ namespace melatonin
             clickTogglesState.removeListener (this);
             radioGroupId.removeListener (this);
 
+            sliderStyleValue.removeListener (this);
+            sliderTextBoxPositionValue.removeListener (this);
+            buttonStyleValue.removeListener (this);
+            comboBoxTextEditableValue.removeListener (this);
+
             for (auto& np : namedProperties)
                 np.value.removeListener (this);
 
             for (auto& np : colors)
                 np.value.removeListener (this);
 
+            for (auto& style : styles)
+                style.value.removeListener (this);
+
             colors.clear();
             namedProperties.clear();
+            styles.clear();
         }
 
         // allows properties to be set from our properties
@@ -380,6 +490,43 @@ namespace melatonin
                             selectedComponent->getProperties().set (nv.name, nv.value.getValue());
                             selectedComponent->repaint();
                             break;
+                        }
+                    }
+
+                    for (auto& style : styles)
+                    {
+                        if (value.refersToSameSourceAs(style.value))
+                        {
+                            switch (style.type)
+                            {
+                                case StyleType::SliderStyle:
+                                    if (auto* slider = dynamic_cast<juce::Slider*>(selectedComponent.getComponent()))
+                                        slider->setSliderStyle(static_cast<juce::Slider::SliderStyle>(int(style.value.getValue())));
+                                    break;
+
+                                case StyleType::SliderTextPosition:
+                                    if (auto* slider = dynamic_cast<juce::Slider*>(selectedComponent.getComponent()))
+                                        slider->setTextBoxStyle(
+                                            static_cast<juce::Slider::TextEntryBoxPosition>(int(style.value.getValue())),
+                                            false,
+                                            slider->getTextBoxWidth(),
+                                            slider->getTextBoxHeight());
+                                    break;
+
+                                case StyleType::ButtonStyle:
+                                    if (auto* button = dynamic_cast<juce::Button*>(selectedComponent.getComponent()))
+                                    {
+                                        // Handle button style changes
+                                        selectedComponent->repaint();
+                                    }
+                                    break;
+
+                                case StyleType::ComboBoxEditable:
+                                    if (auto* comboBox = dynamic_cast<juce::ComboBox*>(selectedComponent.getComponent()))
+                                        comboBox->setEditableText(style.value.getValue());
+                                    break;
+                            }
+                            return; // Style was handled, exit early
                         }
                     }
                 }

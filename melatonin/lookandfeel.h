@@ -38,6 +38,11 @@ namespace melatonin
             setColour (juce::BooleanPropertyComponent::backgroundColourId, juce::Colours::transparentBlack);
             setColour (juce::BooleanPropertyComponent::outlineColourId, juce::Colours::transparentBlack);
 
+            setColour (juce::ChoicePropertyComponent::backgroundColourId, juce::Colours::transparentBlack);
+            setColour (juce::ChoicePropertyComponent::labelTextColourId, colors::propertyValue);
+            setColour (juce::ComboBox::backgroundColourId, juce::Colours::transparentBlack);
+            setColour (juce::PopupMenu::backgroundColourId, colors::headerBackground);
+
             // this is transparent so that we can paint it in our item
             setColour (juce::TreeView::ColourIds::selectedItemBackgroundColourId, colors::black.withAlpha (0.0f));
             setColour (juce::TreeView::ColourIds::backgroundColourId, juce::Colours::transparentBlack);
@@ -52,6 +57,7 @@ namespace melatonin
             setColour (juce::TextEditor::highlightColourId, colors::highlightedText);
             setColour (juce::Slider::textBoxBackgroundColourId, juce::Colours::transparentBlack);
             setColour (juce::Slider::textBoxHighlightColourId, colors::highlightedText);
+            setColour (juce::Slider::textBoxOutlineColourId, juce::Colours::transparentBlack);
             setColour (juce::Slider::textBoxOutlineColourId, juce::Colours::transparentBlack);
         }
 
