@@ -25,6 +25,7 @@ namespace melatonin
         juce::Value timing1, timing2, timing3, timingMax, hasChildren;
 
         juce::Value isToggleable, toggleState, clickTogglesState, radioGroupId;
+        juce::Value sliderStyleValue, sliderTextBoxPositionValue, buttonStyleValue, comboBoxTextEditableValue;
 
         struct AccessiblityDetail
         {
@@ -79,8 +80,22 @@ namespace melatonin
             juce::Value value;
         };
 
+        struct StyleProperty
+        {
+            StyleProperty() = default;
+            StyleProperty(juce::String n, const juce::var& v, juce::StringArray opts = {})
+                : name(std::move(n)), value(v), options(std::move(opts))
+            {
+            }
+
+            juce::String name;
+            juce::Value value;
+            juce::StringArray options;
+        };
+
         std::vector<NamedProperty> namedProperties;
         std::vector<NamedProperty> colors;
+        std::vector<StyleProperty> styles;
 
         void refresh()
         {
@@ -142,6 +157,8 @@ namespace melatonin
             typeValue = type (*selectedComponent);
             accessibilityHandledValue = selectedComponent->isAccessible();
 
+            updateStyleProperties();
+
             if (auto button = dynamic_cast<juce::Button*> (selectedComponent.getComponent()))
             {
                 isToggleable = button->isToggleable();
@@ -168,6 +185,11 @@ namespace melatonin
             toggleState.addListener (this);
             clickTogglesState.addListener (this);
             radioGroupId.addListener (this);
+
+            sliderStyleValue.addListener (this);
+            sliderTextBoxPositionValue.addListener (this);
+            buttonStyleValue.addListener (this);
+            comboBoxTextEditableValue.addListener (this);
 
             if (selectedComponent->isAccessible() && selectedComponent->getAccessibilityHandler())
             {
@@ -254,8 +276,41 @@ namespace melatonin
 
                 for (auto& nv : colors)
                     nv.value.addListener (this);
+
+                for (auto& style : styles)
+                    style.value.addListener (this);
             }
             notifyListeners();
+        }
+
+        void updateStyleProperties()
+        {
+            if (auto* slider = dynamic_cast<juce::Slider*>(selectedComponent.getComponent()))
+            {
+                sliderStyleValue = static_cast<int>(slider->getSliderStyle());
+                sliderTextBoxPositionValue = static_cast<int>(slider->getTextBoxPosition());
+
+                styles.emplace_back("Slider Style", sliderStyleValue,
+                    juce::StringArray{"LinearHorizontal", "LinearVertical", "LinearBar",
+                        "Rotary", "RotaryHorizontalDrag", "RotaryVerticalDrag",
+                        "IncDecButtons", "TwoValueHorizontal", "TwoValueVertical"});
+
+                styles.emplace_back("Text Position", sliderTextBoxPositionValue,
+                    juce::StringArray{"NoTextBox", "TextBoxLeft", "TextBoxRight",
+                        "TextBoxAbove", "TextBoxBelow"});
+            }
+            else if (auto* button = dynamic_cast<juce::Button*>(selectedComponent.getComponent()))
+            {
+                buttonStyleValue = button->getButtonText().isEmpty() ? 1 : 0;
+                styles.emplace_back("Button Style", buttonStyleValue,
+                    juce::StringArray{"TextButton", "DrawableButton", "ImageButton",
+                        "ArrowButton", "HyperlinkButton"});
+            }
+            else if (auto* comboBox = dynamic_cast<juce::ComboBox*>(selectedComponent.getComponent()))
+            {
+                comboBoxTextEditableValue = comboBox->isTextEditable();
+                styles.emplace_back("Text Editable", comboBoxTextEditableValue);
+            }
         }
 
         void removeListeners()
@@ -280,14 +335,23 @@ namespace melatonin
             clickTogglesState.removeListener (this);
             radioGroupId.removeListener (this);
 
+            sliderStyleValue.removeListener (this);
+            sliderTextBoxPositionValue.removeListener (this);
+            buttonStyleValue.removeListener (this);
+            comboBoxTextEditableValue.removeListener (this);
+
             for (auto& np : namedProperties)
                 np.value.removeListener (this);
 
             for (auto& np : colors)
                 np.value.removeListener (this);
 
+            for (auto& style : styles)
+                style.value.removeListener (this);
+
             colors.clear();
             namedProperties.clear();
+            styles.clear();
         }
 
         // allows properties to be set from our properties
