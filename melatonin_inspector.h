@@ -27,6 +27,7 @@ END_JUCE_MODULE_DECLARATION
 #include "melatonin_inspector/melatonin/helpers/overlay_mouse_listener.h"
 #include "melatonin_inspector/melatonin/inspector_component.h"
 #include <melatonin_inspector/melatonin/components/fps_meter.h>
+#include <melatonin_inspector/melatonin/components/undo_manager_inspector.h>
 
 namespace melatonin
 {
@@ -106,6 +107,11 @@ namespace melatonin
             // needed, otherwise removing look and feel will save bounds
             settings->props.reset();
             setLookAndFeel (nullptr);
+        }
+
+        void setUndoManager (juce::UndoManager* newUndoManager)
+        {
+            undoManager = newUndoManager;
         }
 
         void setRoot (juce::Component& rootComponent)
@@ -311,13 +317,12 @@ namespace melatonin
                 if (selectionMode == FOLLOWS_MOUSE)
                     // without this, target apps that have UI to open the inspector
                     // will select that piece of UI within the same click, see #70
-                    callAfterDelay (500, [safeThis = juce::Component::SafePointer<Inspector> (this)]
-                                    {
-                                        if (safeThis == nullptr)
-                                            return;
+                    callAfterDelay (500, [safeThis = juce::Component::SafePointer<Inspector> (this)] {
+                        if (safeThis == nullptr)
+                            return;
 
-                                        safeThis->overlayMouseListener.enable();
-                                    });
+                        safeThis->overlayMouseListener.enable();
+                    });
             }
             else
             {
@@ -345,6 +350,8 @@ namespace melatonin
 
     private:
         juce::SharedResourcePointer<InspectorSettings> settings;
+        juce::UndoManager* undoManager;
+        std::unique_ptr<UndoManagerInspector> undoManagerInspector;
         InspectorLookAndFeel inspectorLookAndFeel;
         InspectorComponent inspectorComponent;
         juce::Component::SafePointer<juce::Component> root;
@@ -371,8 +378,7 @@ namespace melatonin
             {
                 clearRoot();
 
-                juce::Timer::callAfterDelay (50, [this, safeThis = juce::Component::SafePointer<Inspector> (this)]
-                {
+                juce::Timer::callAfterDelay (50, [this, safeThis = juce::Component::SafePointer<Inspector> (this)] {
                     if (safeThis == nullptr)
                         return;
 
@@ -435,6 +441,7 @@ namespace melatonin
             inspectorComponent.toggleDragEnabledCallback = [this] (const bool enable) { this->setDraggingEnabled (enable); };
             inspectorComponent.toggleSelectionMode = [this] (const bool enable) { this->setSelectionMode (enable ? FOLLOWS_FOCUS : FOLLOWS_MOUSE); };
             inspectorComponent.toggleLockCallback = [this] (const bool enable) { this->setSelectionLock (enable); };
+            inspectorComponent.toggleUndoManagerCallback = [this] (const bool enable) { this->toggleUndoManager(enable); };
         }
 
         enum SelectionMode {
@@ -485,6 +492,17 @@ namespace melatonin
         void setSelectionLock (const bool enable)
         {
             selectionLock = enable;
+        }
+
+        void toggleUndoManager (const bool enable)
+        {
+            if (enable && undoManager != nullptr)
+            {
+                undoManagerInspector = std::make_unique<UndoManagerInspector> (undoManager);
+                undoManagerInspector->setLookAndFeel (&inspectorLookAndFeel);
+                undoManagerInspector->setVisible(true);
+                toggle(false);
+            }
         }
 
         void restoreStateFromProps()

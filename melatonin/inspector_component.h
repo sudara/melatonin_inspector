@@ -33,6 +33,7 @@ namespace melatonin
             addAndMakeVisible (logo);
             addAndMakeVisible (fpsToggle);
             addAndMakeVisible (tabToggle);
+            addAndMakeVisible (openUndoManager);
 
             addChildComponent (tree);
             addChildComponent (emptySearchLabel);
@@ -164,6 +165,11 @@ namespace melatonin
             lockedButton.onClick = [this] {
                 toggleLockCallback (lockedButton.on);
             };
+
+            openUndoManager.on = settings->props->getBoolValue ("openUndoManager", false);
+            openUndoManager.onClick = [this] {
+                toggleUndoManagerCallback (openUndoManager.on);
+            };
         }
 
         ~InspectorComponent() override
@@ -253,6 +259,7 @@ namespace melatonin
             tabToggle.setBounds (toolbar.removeFromLeft (42));
             lockedButton.setBounds (toolbar.removeFromLeft (36));
             enableDraggingButton.setBounds (toolbar.removeFromLeft (40));
+            openUndoManager.setBounds (toolbar.removeFromLeft (36)); // undo manager button
             logo.setBounds (toolbar.removeFromRight (56));
 
             mainCol.removeFromTop (12);
@@ -396,6 +403,7 @@ namespace melatonin
         std::function<void (bool enabled)> toggleSelectionMode;
         std::function<void (bool enabled)> toggleDragEnabledCallback;
         std::function<void (bool enabled)> toggleLockCallback;
+        std::function<void (bool enabled)> toggleUndoManagerCallback;
 
     private:
         Component::SafePointer<Component> selectedComponent;
@@ -434,6 +442,7 @@ namespace melatonin
         InspectorImageButton enableDraggingButton { "move", { -1, 7 }, true };
         InspectorImageButton fpsToggle { "speedometer", { 2, 7 }, true };
         InspectorImageButton tabToggle { "tab", { 1, 6 }, true };
+        InspectorImageButton openUndoManager { "undo", { 0, 8 } };
 
         juce::String lastSearchText;
 
