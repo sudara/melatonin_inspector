@@ -351,8 +351,8 @@ namespace melatonin
     private:
         juce::SharedResourcePointer<InspectorSettings> settings;
         juce::UndoManager* undoManager;
-        std::unique_ptr<UndoManagerInspector> undoManagerInspector;
         InspectorLookAndFeel inspectorLookAndFeel;
+        std::unique_ptr<UndoManagerInspector> undoManagerInspector;
         InspectorComponent inspectorComponent;
         juce::Component::SafePointer<juce::Component> root;
         bool inspectorEnabled = false;
@@ -441,7 +441,7 @@ namespace melatonin
             inspectorComponent.toggleDragEnabledCallback = [this] (const bool enable) { this->setDraggingEnabled (enable); };
             inspectorComponent.toggleSelectionMode = [this] (const bool enable) { this->setSelectionMode (enable ? FOLLOWS_FOCUS : FOLLOWS_MOUSE); };
             inspectorComponent.toggleLockCallback = [this] (const bool enable) { this->setSelectionLock (enable); };
-            inspectorComponent.toggleUndoManagerCallback = [this] (const bool enable) { this->toggleUndoManager(enable); };
+            inspectorComponent.toggleUndoManagerCallback = [this] (const bool enable) { this->toggleUndoManager (enable); };
         }
 
         enum SelectionMode {
@@ -500,8 +500,8 @@ namespace melatonin
             {
                 undoManagerInspector = std::make_unique<UndoManagerInspector> (undoManager);
                 undoManagerInspector->setLookAndFeel (&inspectorLookAndFeel);
-                undoManagerInspector->setVisible(true);
-                toggle(false);
+                undoManagerInspector->setVisible (true);
+                toggle (false);
             }
         }
 

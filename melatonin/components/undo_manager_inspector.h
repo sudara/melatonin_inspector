@@ -64,7 +64,8 @@ namespace melatonin
             {
                 g.setFont (InspectorLookAndFeel::getInspectorFont (15, juce::Font::FontStyleFlags::plain));
                 g.setColour (colors::text);
-                text = redos[rowNumber - 1];
+                // these should display in reverse order
+                text = redos[redos.size() - (rowNumber - 1)];
                 g.drawText (text, textPadding, 0, width - 2 * textPadding, height, juce::Justification::centredLeft);
             }
             else if (rowNumber == redos.size() + 1)
