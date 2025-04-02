@@ -10,7 +10,7 @@ namespace melatonin
     class RepaintWhenDirty
     {
     public:
-        explicit RepaintWhenDirty (juce::Component* component) : component (component)
+        explicit RepaintWhenDirty (juce::Component* c) : component (c)
         {
             vBlankCallback = { component, [this] {
                                   if (this->isDirty)
@@ -44,7 +44,7 @@ namespace melatonin
             clearButton.onClick = [&]() { if (undoManager) undoManager->clearUndoHistory(); };
         }
 
-        ~UndoManagerList()
+        ~UndoManagerList() override
         {
             if (undoManager)
                 undoManager->removeChangeListener (this);
