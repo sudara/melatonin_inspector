@@ -350,7 +350,7 @@ namespace melatonin
 
     private:
         juce::SharedResourcePointer<InspectorSettings> settings;
-        juce::UndoManager* undoManager;
+        juce::UndoManager* undoManager = nullptr;
         InspectorLookAndFeel inspectorLookAndFeel;
         std::unique_ptr<UndoManagerInspector> undoManagerInspector;
         InspectorComponent inspectorComponent;
@@ -496,7 +496,7 @@ namespace melatonin
 
         void toggleUndoManager (const bool enable)
         {
-            if (enable && undoManager != nullptr)
+            if (enable)
             {
                 undoManagerInspector = std::make_unique<UndoManagerInspector> (undoManager);
                 undoManagerInspector->setLookAndFeel (&inspectorLookAndFeel);

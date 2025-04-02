@@ -4,6 +4,31 @@
 
 namespace melatonin
 {
+    // This class is just a convenience.
+    // Our change listener shouldn't call repaint
+    // As the UndoManager could be called on the audio thread (by apvts, for example)
+    class RepaintWhenDirty
+    {
+    public:
+        explicit RepaintWhenDirty (juce::Component* component) : component (component)
+        {
+            vBlankCallback = { component, [this] {
+                                  if (this->isDirty)
+                                  {
+                                      this->component->repaint();
+                                  }
+                              } };
+        }
+
+        void dirty() { isDirty = true; }
+        void clean() { isDirty = false; }
+
+    private:
+        juce::Component::SafePointer<juce::Component> component;
+        juce::VBlankAttachment vBlankCallback {};
+        bool isDirty = false;
+    };
+
     class UndoManagerList : public juce::Component, juce::ListBoxModel, juce::ChangeListener
     {
     public:
@@ -12,35 +37,52 @@ namespace melatonin
             listBox.setModel (this);
             listBox.setRowHeight (24);
             addAndMakeVisible (listBox);
-            undoManager->addChangeListener (this); // listen for changes to the undo manager
+            if (undoManager)
+                undoManager->addChangeListener (this); // listen for changes to the undo manager
             listBox.setColour (juce::ListBox::backgroundColourId, colors::panelBackgroundLighter);
             addAndMakeVisible (clearButton);
-            clearButton.onClick = [&]() { undoManager->clearUndoHistory(); };
+            clearButton.onClick = [&]() { if (undoManager) undoManager->clearUndoHistory(); };
         }
 
         ~UndoManagerList()
         {
-            undoManager->removeChangeListener (this);
+            if (undoManager)
+                undoManager->removeChangeListener (this);
         }
 
         void paint (juce::Graphics& g) override
         {
+            repaintWhenDirty.clean();
             g.fillAll (colors::panelBackgroundDarker);
-            g.setColour (colors::label);
-            const auto numUndos = undoManager->getUndoDescriptions().size();
-            const auto numRedos = undoManager->getRedoDescriptions().size();
-            g.drawText (juce::String (numUndos) + " Undos" + " | " + juce::String (numRedos) + " Redos", juce::Rectangle { 40, 40, 200, 20 }, juce::Justification::centredLeft, true);
+
+            if (undoManager)
+            {
+                listBox.updateContent();
+                g.setColour (colors::label);
+                const auto numUndos = undoManager->getUndoDescriptions().size();
+                const auto numRedos = undoManager->getRedoDescriptions().size();
+                g.drawText (juce::String (numUndos) + " Undos" + " | " + juce::String (numRedos) + " Redos", juce::Rectangle { 40, 40, 200, 20 }, juce::Justification::centredLeft, true);
+            }
+            else
+            {
+                g.setColour (colors::propertyValueError);
+                g.drawText ("No UndoManager set", juce::Rectangle { 40, 40, 200, 20 }, juce::Justification::centredLeft, true);
+            }
         }
 
         void changeListenerCallback (juce::ChangeBroadcaster* source) override
         {
-            listBox.updateContent();
-            repaint();
+            // this can't call repaint directly
+            // as it could be called from the audio thread
+            repaintWhenDirty.dirty();
         }
 
         // ListBoxModel implementation
         int getNumRows() override
         {
+            if (!undoManager)
+                return 0;
+
             return undoManager->getRedoDescriptions().size() + undoManager->getUndoDescriptions().size() + 2; // including headers
         }
 
@@ -65,7 +107,7 @@ namespace melatonin
                 g.setFont (InspectorLookAndFeel::getInspectorFont (15, juce::Font::FontStyleFlags::plain));
                 g.setColour (colors::text);
                 // these should display in reverse order
-                text = redos[redos.size() - (rowNumber - 1)];
+                text = redos[redos.size() - (rowNumber)];
                 g.drawText (text, textPadding, 0, width - 2 * textPadding, height, juce::Justification::centredLeft);
             }
             else if (rowNumber == redos.size() + 1)
@@ -89,21 +131,22 @@ namespace melatonin
         void resized() override
         {
             contentBounds = getLocalBounds().reduced (40);
-            clearButton.setBounds(contentBounds.removeFromTop (30).removeFromRight (60));
+            clearButton.setBounds (contentBounds.removeFromTop (30).removeFromRight (60));
             listBox.setBounds (contentBounds);
         }
 
     private:
         juce::ListBox listBox;
         juce::TextButton clearButton { "clear" };
-        juce::UndoManager* undoManager; // not owned, passed in via constructor
+        juce::UndoManager* undoManager = nullptr;
         juce::Rectangle<int> contentBounds;
+        RepaintWhenDirty repaintWhenDirty { this };
     };
 
     class UndoManagerInspector : public juce::DocumentWindow
     {
     public:
-        UndoManagerInspector (juce::UndoManager* um) : DocumentWindow ("Undo Manager Inspector", colors::panelBackgroundDarker, allButtons)
+        UndoManagerInspector (juce::UndoManager* um = nullptr) : DocumentWindow ("Undo Manager Inspector", colors::panelBackgroundDarker, allButtons)
         {
             setContentOwned (new UndoManagerList (um), true);
             setResizable (true, false);

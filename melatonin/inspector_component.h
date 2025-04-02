@@ -257,9 +257,9 @@ namespace melatonin
             enabledButton.setBounds (toolbar.removeFromLeft (48));
             fpsToggle.setBounds (toolbar.removeFromLeft (42));
             tabToggle.setBounds (toolbar.removeFromLeft (42));
-            lockedButton.setBounds (toolbar.removeFromLeft (36));
-            enableDraggingButton.setBounds (toolbar.removeFromLeft (40));
-            openUndoManager.setBounds (toolbar.removeFromLeft (36)); // undo manager button
+            lockedButton.setBounds (toolbar.removeFromLeft (34));
+            enableDraggingButton.setBounds (toolbar.removeFromLeft (38));
+            openUndoManager.setBounds (toolbar.removeFromLeft (34)); // undo manager button
             logo.setBounds (toolbar.removeFromRight (56));
 
             mainCol.removeFromTop (12);
