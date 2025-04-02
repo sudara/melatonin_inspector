@@ -138,6 +138,18 @@ Keep track of the max. Double click to `repaint` and get fresh timings. See [set
 
 ![AudioPluginHost - 2023-08-16 57](https://github.com/sudara/melatonin_inspector/assets/472/7b08ea30-ebd1-4900-bb67-02bb8393211b)
 
+## Undo Manager Inspection 
+
+Set it up with
+
+```cpp
+inspector->setUndoManager (&myUndoManager);
+```
+
+<p align="center">
+<img src="https://github.com/user-attachments/assets/c8ffd81d-885d-4a31-88d7-0f3cd5ca7a75"
+width="400"/>
+</p>
 
 ## Installing with CMake
 
