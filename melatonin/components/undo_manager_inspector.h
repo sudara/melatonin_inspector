@@ -70,7 +70,7 @@ namespace melatonin
             }
         }
 
-        void changeListenerCallback (juce::ChangeBroadcaster* source) override
+        void changeListenerCallback (juce::ChangeBroadcaster* /*source*/) override
         {
             // this can't call repaint directly
             // as it could be called from the audio thread
