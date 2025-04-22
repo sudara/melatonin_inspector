@@ -72,7 +72,7 @@ jobs:
           xcode-version: latest-stable
 
       - name: Run sccache-cache
-        uses: mozilla-actions/sccache-action@v0.0.5
+        uses: mozilla-actions/sccache-action@v0.0.9
 
       - name: Configure (Windows without Ninja)
         if: runner.os == 'Windows'
