@@ -4,7 +4,9 @@
 
 // VBlank was added in 7.0.3
 #if (JUCE_MAJOR_VERSION >= 7) && (JUCE_MINOR_VERSION >= 1 || JUCE_BUILDNUMBER >= 3)
+    #ifndef MELATONIN_VBLANK
     #define MELATONIN_VBLANK 1
+    #endif
 #else
     #define MELATONIN_VBLANK 0
 #endif
