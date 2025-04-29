@@ -8,6 +8,7 @@
 #include "melatonin_inspector/melatonin/components/component_tree_view_item.h"
 #include "melatonin_inspector/melatonin/components/preview.h"
 #include "melatonin_inspector/melatonin/components/properties.h"
+#include "melatonin_inspector/melatonin/components/style_component.h"
 #include "melatonin_inspector/melatonin/lookandfeel.h"
 
 /*
@@ -43,6 +44,7 @@ namespace melatonin
             addChildComponent (colorPicker);
             addChildComponent (preview);
             addChildComponent (properties);
+            addChildComponent (styleProperties);
             addChildComponent (accessibility);
 
             // z-order on panels is higher so they are clickable
@@ -50,6 +52,7 @@ namespace melatonin
             addAndMakeVisible (colorPickerPanel);
             addAndMakeVisible (previewPanel);
             addAndMakeVisible (propertiesPanel);
+            addAndMakeVisible (stylePanel);
             addAndMakeVisible (accessibilityPanel);
 
             addAndMakeVisible (searchBox);
@@ -280,6 +283,14 @@ namespace melatonin
             colorPicker.setBounds (colorPickerBounds.withTrimmedLeft (32));
             colorPickerPanel.setBounds (colorPickerBounds.removeFromTop (32).removeFromLeft (200));
 
+            int numOfStyleToDisplay = juce::jlimit (0, 5, (int) model.styles.size());
+            auto stylePropertiesHeight = 32;
+            if (styleProperties.isVisible() && !model.styles.empty())
+                stylePropertiesHeight += 32 * numOfStyleToDisplay;
+            auto stylePropertiesBounds = mainCol.removeFromTop (stylePropertiesHeight);
+            stylePanel.setBounds (stylePropertiesBounds.removeFromTop (32).removeFromLeft (200));
+            styleProperties.setBounds (stylePropertiesBounds.withTrimmedLeft (32));
+
             accessibilityPanel.setBounds (mainCol.removeFromTop (32));
             accessibility.setBounds (mainCol.removeFromTop (accessibility.isVisible() ? 110 : 0).withTrimmedLeft (32));
 
@@ -354,6 +365,7 @@ namespace melatonin
             tree.clearSelectedItems();
 
             properties.reset();
+            styleProperties.reset();
             model.deselectComponent();
             tree.setRootItem (getRoot());
 
@@ -377,6 +389,7 @@ namespace melatonin
             previewPanel.setVisible (nowEnabled);
             colorPickerPanel.setVisible (nowEnabled);
             propertiesPanel.setVisible (nowEnabled);
+            stylePanel.setVisible(nowEnabled);
             tree.setVisible (nowEnabled);
 
             if (!nowEnabled)
@@ -426,6 +439,9 @@ namespace melatonin
 
         Properties properties { model };
         CollapsablePanel propertiesPanel { "PROPERTIES", &properties, true };
+
+        StyleProperties styleProperties { model };
+        CollapsablePanel stylePanel { "STYLE", &styleProperties, false };
 
         Accessibility accessibility { model };
         CollapsablePanel accessibilityPanel { "ACCESSIBILITY", &accessibility, false };
