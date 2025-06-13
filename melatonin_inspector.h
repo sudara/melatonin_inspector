@@ -25,9 +25,16 @@ END_JUCE_MODULE_DECLARATION
 #include "melatonin_inspector/melatonin/components/overlay.h"
 #include "melatonin_inspector/melatonin/helpers/inspector_settings.h"
 #include "melatonin_inspector/melatonin/helpers/overlay_mouse_listener.h"
+#include "melatonin_inspector/melatonin/helpers/timing.h"
 #include "melatonin_inspector/melatonin/inspector_component.h"
 #include <melatonin_inspector/melatonin/components/fps_meter.h>
 #include <melatonin_inspector/melatonin/components/undo_manager_inspector.h>
+
+#if MELATONIN_TIMING
+ #define MELATONIN_TIMER    melatonin::ComponentTimer timer { this };
+#else
+ #define MELATONIN_TIMER
+#endif
 
 namespace melatonin
 {
