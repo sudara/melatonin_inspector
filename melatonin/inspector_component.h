@@ -6,6 +6,7 @@
 #include "melatonin_inspector/melatonin/components/box_model.h"
 #include "melatonin_inspector/melatonin/components/color_picker.h"
 #include "melatonin_inspector/melatonin/components/component_tree_view_item.h"
+#include "melatonin_inspector/melatonin/components/custom_properties.h"
 #include "melatonin_inspector/melatonin/components/preview.h"
 #include "melatonin_inspector/melatonin/components/properties.h"
 #include "melatonin_inspector/melatonin/lookandfeel.h"
@@ -43,6 +44,7 @@ namespace melatonin
             addChildComponent (colorPicker);
             addChildComponent (preview);
             addChildComponent (properties);
+            addChildComponent (customProperties);
             addChildComponent (accessibility);
 
             // z-order on panels is higher so they are clickable
@@ -50,6 +52,7 @@ namespace melatonin
             addAndMakeVisible (colorPickerPanel);
             addAndMakeVisible (previewPanel);
             addAndMakeVisible (propertiesPanel);
+            addAndMakeVisible (customPropertiesPanel);
             addAndMakeVisible (accessibilityPanel);
 
             addAndMakeVisible (searchBox);
@@ -283,6 +286,10 @@ namespace melatonin
             accessibilityPanel.setBounds (mainCol.removeFromTop (32));
             accessibility.setBounds (mainCol.removeFromTop (accessibility.isVisible() ? 110 : 0).withTrimmedLeft (32));
 
+            customPropertiesPanel.setBounds (mainCol.removeFromTop (33)); // extra pixel for divider
+            int customPropsHeight = customProperties.isVisible() ? calculateCustomPropertiesHeight() : 0;
+            customProperties.setBounds (mainCol.removeFromTop (customPropsHeight).withTrimmedLeft (32));
+
             propertiesPanel.setBounds (mainCol.removeFromTop (33)); // extra pixel for divider
             properties.setBounds (mainCol.withTrimmedLeft (32));
 
@@ -354,6 +361,7 @@ namespace melatonin
             tree.clearSelectedItems();
 
             properties.reset();
+            customProperties.reset();
             model.deselectComponent();
             tree.setRootItem (getRoot());
 
@@ -377,6 +385,7 @@ namespace melatonin
             previewPanel.setVisible (nowEnabled);
             colorPickerPanel.setVisible (nowEnabled);
             propertiesPanel.setVisible (nowEnabled);
+            customPropertiesPanel.setVisible (nowEnabled);
             tree.setVisible (nowEnabled);
 
             if (!nowEnabled)
@@ -427,6 +436,9 @@ namespace melatonin
         Properties properties { model };
         CollapsablePanel propertiesPanel { "PROPERTIES", &properties, true };
 
+        CustomProperties customProperties { model };
+        CollapsablePanel customPropertiesPanel { "CUSTOM PROPERTIES", &customProperties, false };
+
         Accessibility accessibility { model };
         CollapsablePanel accessibilityPanel { "ACCESSIBILITY", &accessibility, false };
 
@@ -451,6 +463,13 @@ namespace melatonin
         ComponentTreeViewItem* getRoot() const
         {
             return dynamic_cast<ComponentTreeViewItem*> (tree.getRootItem());
+        }
+
+        [[nodiscard]] int calculateCustomPropertiesHeight() const
+        {
+            // Each property is approximately 24 pixels tall + padding
+            int numProperties = static_cast<int>(model.namedProperties.size());
+            return numProperties > 0 ? (numProperties * 24 + 6) : 0;
         }
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InspectorComponent)

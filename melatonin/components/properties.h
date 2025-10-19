@@ -6,16 +6,6 @@ namespace melatonin
     class Properties : public juce::Component, private ComponentModel::Listener
     {
     public:
-        // Used internally by the inspector and shouldn't be redundantly displayed
-        static inline juce::StringArray propertiesToIgnore { "paddingLeft",
-            "paddingRight",
-            "paddingTop",
-            "paddingBottom",
-            "timing1",
-            "timing2",
-            "timing3",
-            "timingMax" };
-
         explicit Properties (ComponentModel& _model) : model (_model)
         {
             reset();
@@ -84,29 +74,6 @@ namespace melatonin
                 new juce::TextPropertyComponent (model.typeValue, "Class", 200, false, false),
                 new juce::TextPropertyComponent (model.nameValue, "Name", 200, false, false),
             };
-
-            // Then prioritize model properties
-            for (auto& nv : model.namedProperties)
-            {
-                if (nv.value.getValue().isBool())
-                    props.add (new juce::BooleanPropertyComponent (nv.value, nv.name, ""));
-                else if (nv.value.getValue().isInt64() && nv.name.getLastCharacters (2) == "At")
-                {
-                    auto datetime = juce::Value (juce::Time (nv.value.getValue()).toString (false, true, true, true));
-                    auto datetimeProp = new juce::TextPropertyComponent (datetime, nv.name, 200, false, false);
-                    datetimeProp->setEnabled (false);
-                    props.add (datetimeProp);
-                }
-                else if (!propertiesToIgnore.contains (nv.name))
-                {
-                    const auto value = nv.value.getValue().isObject()
-                                           ? juce::Value (nv.value.getValue().toString())
-                                           : nv.value;
-                    auto customProperty = new juce::TextPropertyComponent (value, nv.name, 200, false);
-                    customProperty->getProperties().set ("isUserProperty", true);
-                    props.add (customProperty);
-                }
-            }
 
             // add class specific properies
             if (dynamic_cast<juce::Button*> (model.getSelectedComponent()))
