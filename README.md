@@ -134,7 +134,7 @@ A life saving feature.
 
 See time spent exclusively in a component's `paint` method as well as conveniently provide you with a sum with all children.
 
-Keep track of the max. Double click to `repaint` and get fresh timings. See [setup paint timing](#7-optional-setup-component-timing).
+Keep track of the max. Double click to `repaint` and get fresh timings. See [setup paint timing](#6-optional-setup-component-timing).
 
 ![AudioPluginHost - 2023-08-16 57](https://github.com/sudara/melatonin_inspector/assets/472/7b08ea30-ebd1-4900-bb67-02bb8393211b)
 
