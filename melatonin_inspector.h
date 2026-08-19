@@ -24,6 +24,7 @@ END_JUCE_MODULE_DECLARATION
 #include "melatonin/lookandfeel.h"
 #include "melatonin_inspector/melatonin/components/overlay.h"
 #include "melatonin_inspector/melatonin/helpers/inspector_settings.h"
+#include "melatonin_inspector/melatonin/helpers/ipc_server.h"
 #include "melatonin_inspector/melatonin/helpers/overlay_mouse_listener.h"
 #include "melatonin_inspector/melatonin/inspector_component.h"
 #include <melatonin_inspector/melatonin/components/fps_meter.h>
@@ -92,6 +93,9 @@ namespace melatonin
             setResizable (true, false); // calls resized
 
             toggle (inspectorEnabledAtStart);
+
+            ipcServer = std::make_unique<IpcServer> (*this);
+            ipcServer->start();
         }
 
         ~Inspector() override
@@ -132,6 +136,11 @@ namespace melatonin
             fpsMeter.setRoot (*root);
             overlayMouseListener.setRoot (*root);
             inspectorComponent.setRoot (*root);
+        }
+
+        juce::Component* getRootComponent() const
+        {
+            return root.getComponent();
         }
 
         void clearRoot()
@@ -353,6 +362,7 @@ namespace melatonin
         juce::UndoManager* undoManager = nullptr;
         InspectorLookAndFeel inspectorLookAndFeel;
         std::unique_ptr<UndoManagerInspector> undoManagerInspector;
+        std::unique_ptr<IpcServer> ipcServer;
         InspectorComponent inspectorComponent;
         juce::Component::SafePointer<juce::Component> root;
         bool inspectorEnabled = false;
@@ -512,3 +522,5 @@ namespace melatonin
         }
     };
 }
+
+#include "melatonin_inspector/melatonin/helpers/ipc_server_impl.h"

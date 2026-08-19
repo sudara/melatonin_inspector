@@ -1,0 +1,4 @@
+node_modules/
+src/index.d.ts
+src/index.js
+src/index.*.map
