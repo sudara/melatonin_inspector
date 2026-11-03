@@ -176,8 +176,6 @@ namespace melatonin
             typeValue = type (*selectedComponent);
             accessibilityHandledValue = selectedComponent->isAccessible();
 
-            // z-order is implicit: it's the child's index in the parent's private childComponentList
-            // 0 is the back-most child, numChildren - 1 is front-most (always-on-top children sort last)
             if (auto* parent = selectedComponent->getParentComponent())
                 zOrderValue = juce::String (parent->getIndexOfChildComponent (selectedComponent.getComponent()))
                               + " of " + juce::String (parent->getNumChildComponents() - 1);
