@@ -75,6 +75,9 @@ namespace melatonin
             auto hasCachedImage = new juce::BooleanPropertyComponent (model.hasCachedImageValue, "CachedToImage", "");
             hasCachedImage->setEnabled (false);
 
+            auto zOrder = new juce::TextPropertyComponent (model.zOrderValue, "Z-Order", 20, false, false);
+            zOrder->setEnabled (false);
+
             // Always have class up top
             juce::Array<juce::PropertyComponent*> props = {
                 new juce::TextPropertyComponent (model.typeValue, "Class", 200, false, false),
@@ -118,6 +121,7 @@ namespace melatonin
             props.addArray (juce::Array<juce::PropertyComponent*> {
                 new juce::TextPropertyComponent (model.lookAndFeelValue, "LookAndFeel", 200, false, false),
                 new juce::BooleanPropertyComponent (model.visibleValue, "Visible", ""),
+                zOrder,
                 new juce::BooleanPropertyComponent (model.enabledValue, "Enabled", ""),
                 new juce::TextPropertyComponent (model.alphaValue, "Alpha", 5, false),
                 new juce::BooleanPropertyComponent (model.opaqueValue, "Opaque", ""),
