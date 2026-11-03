@@ -31,6 +31,7 @@ namespace melatonin
         juce::Value enabledValue, opaqueValue, hasCachedImageValue, accessibilityHandledValue;
         juce::Value visibleValue, wantsFocusValue, interceptsMouseValue, childrenInterceptsMouseValue;
         juce::Value lookAndFeelValue, typeValue, fontValue, alphaValue;
+        juce::Value zOrderValue;
         juce::Value pickedColor;
 
         juce::Value isToggleable, toggleState, clickTogglesState, radioGroupId;
@@ -174,6 +175,14 @@ namespace melatonin
             hasCachedImageValue = selectedComponent->getCachedComponentImage() != nullptr;
             typeValue = type (*selectedComponent);
             accessibilityHandledValue = selectedComponent->isAccessible();
+
+            // z-order is implicit: it's the child's index in the parent's private childComponentList
+            // 0 is the back-most child, numChildren - 1 is front-most (always-on-top children sort last)
+            if (auto* parent = selectedComponent->getParentComponent())
+                zOrderValue = juce::String (parent->getIndexOfChildComponent (selectedComponent.getComponent()))
+                              + " of " + juce::String (parent->getNumChildComponents() - 1);
+            else
+                zOrderValue = "top-level";
 
             if (auto button = dynamic_cast<juce::Button*> (selectedComponent.getComponent()))
             {
