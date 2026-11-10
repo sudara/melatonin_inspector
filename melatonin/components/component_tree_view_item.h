@@ -187,9 +187,12 @@ namespace melatonin
 
             forceSelectAndOpen();
             selectComponentCallback (component);
-            selectTabbedComponentChildIfNeeded();
             if (mightContainSubItems())
                 setOpen (true);
+
+            // Switching tabs changes the TabbedComponent's children, which can rebuild
+            // the parent's sub-items and delete this item, so it must happen last
+            selectTabbedComponentChildIfNeeded();
         }
 
         void recursivelyCloseSubItems()
@@ -259,6 +262,10 @@ namespace melatonin
         // Callback from the component listener. Reconstruct children when component is deleted
         void componentChildrenChanged (juce::Component& /*changedComponent*/) override
         {
+            // Switching tabs adds/removes children without changing which tabs exist
+            if (hasTabbedComponent && subItemsMatchTabs())
+                return;
+
             validateSubItems();
         }
 
@@ -322,6 +329,27 @@ namespace melatonin
                 if (dynamic_cast<Overlay*> (child) == nullptr)
                     recursivelyAddChildrenFor (child);
             }
+        }
+
+        [[nodiscard]] bool subItemsMatchTabs() const
+        {
+            auto tabs = dynamic_cast<juce::TabbedComponent*> (component.getComponent());
+            if (!tabs)
+                return false;
+
+            int itemIndex = 0;
+            for (int i = 0; i < tabs->getNumTabs(); ++i)
+            {
+                if (auto content = tabs->getTabContentComponent (i))
+                {
+                    auto item = dynamic_cast<ComponentTreeViewItem*> (getSubItem (itemIndex));
+                    if (!item || item->component.getComponent() != content)
+                        return false;
+                    ++itemIndex;
+                }
+            }
+
+            return itemIndex == getNumSubItems();
         }
 
         void selectTabbedComponentChildIfNeeded()
