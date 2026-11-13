@@ -16,28 +16,19 @@ namespace melatonin
             std::function<void (juce::Component* c)> select)
             : outlineComponentCallback (outline), selectComponentCallback (select), component (c)
         {
-            // A few JUCE component types need massaging to get their child components
-            if (auto multiPanel = dynamic_cast<juce::MultiDocumentPanel*> (c))
-            {
-                recursivelyAddChildrenFor (multiPanel->getCurrentTabbedComponent());
-            }
-            else if (auto tabs = dynamic_cast<juce::TabbedComponent*> (c))
-            {
-                hasTabbedComponent = true;
-                for (int i = 0; i < tabs->getNumTabs(); ++i)
-                {
-                    recursivelyAddChildrenFor (tabs->getTabContentComponent (i));
-                }
-            }
-            else
-            {
-                addItemsForChildComponents();
-            }
+            auto tabs = dynamic_cast<juce::TabbedComponent*> (c);
+            hasTabbedComponent = tabs != nullptr;
+            addItemsForChildComponents();
 
             setDrawsInLeftMargin (true);
 
             // Make our tree self-aware
             component->addComponentListener (this);
+
+            // Inactive tabs aren't child components, so adding or closing one only changes the tab bar
+            tabBar = findTabBar (tabs);
+            if (tabBar)
+                tabBar->addComponentListener (this);
         }
 
         ~ComponentTreeViewItem() override
@@ -45,6 +36,8 @@ namespace melatonin
             // The component can be deleted before this tree view item
             if (component)
                 component->removeComponentListener (this);
+            if (tabBar)
+                tabBar->removeComponentListener (this);
         }
 
         static juce::Path getKeyboardIcon()
@@ -263,10 +256,8 @@ namespace melatonin
         void componentChildrenChanged (juce::Component& /*changedComponent*/) override
         {
             // Switching tabs adds/removes children without changing which tabs exist
-            if (hasTabbedComponent && subItemsMatchTabs())
-                return;
-
-            validateSubItems();
+            if (!subItemsMatch (getComponentsToDisplay()))
+                validateSubItems();
         }
 
         void validateSubItems()
@@ -308,48 +299,80 @@ namespace melatonin
 
     private:
         juce::Component::SafePointer<juce::Component> component;
+        juce::Component::SafePointer<juce::Component> tabBar;
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentTreeViewItem)
         constexpr static int additionalTextIndent = 18;
         bool selectable = false;
         juce::Rectangle<float> disclosureRect;
 
-        void recursivelyAddChildrenFor (juce::Component* child)
+        // A few JUCE component types need massaging to get their child components
+        [[nodiscard]] juce::Array<juce::Component*> getComponentsToDisplay() const
         {
-            // Components such as Labels can have a nullptr component child
-            // Rather than display empty placeholders in the tree view, we will hide them
-            if (child)
-                addSubItem (new ComponentTreeViewItem (child, outlineComponentCallback, selectComponentCallback));
+            juce::Array<juce::Component*> result;
+
+            auto addIfValid = [&result] (juce::Component* child) {
+                // Components such as Labels can have a nullptr component child
+                // Rather than display empty placeholders in the tree view, we will hide them
+                if (child != nullptr && dynamic_cast<Overlay*> (child) == nullptr)
+                    result.add (child);
+            };
+
+            auto multiPanel = dynamic_cast<juce::MultiDocumentPanel*> (component.getComponent());
+            auto tabs = dynamic_cast<juce::TabbedComponent*> (component.getComponent());
+
+            // While a TabbedComponent is being destroyed it can't be asked for its tabs,
+            // but its tab bar can, until the tab bar is removed
+            auto bar = findTabBar (tabs);
+
+            if (multiPanel != nullptr && multiPanel->getCurrentTabbedComponent() != nullptr)
+            {
+                addIfValid (multiPanel->getCurrentTabbedComponent());
+            }
+            else if (bar != nullptr)
+            {
+                for (int i = 0; i < bar->getNumTabs(); ++i)
+                    addIfValid (tabs->getTabContentComponent (i));
+            }
+            else
+            {
+                for (auto* child : component->getChildren())
+                    addIfValid (child);
+            }
+
+            return result;
+        }
+
+        [[nodiscard]] static juce::TabbedButtonBar* findTabBar (const juce::TabbedComponent* tabs)
+        {
+            if (tabs == nullptr)
+                return nullptr;
+
+            for (auto* child : tabs->getChildren())
+                if (auto bar = dynamic_cast<juce::TabbedButtonBar*> (child))
+                    return bar;
+
+            return nullptr;
+        }
+
+        [[nodiscard]] bool subItemsMatch (const juce::Array<juce::Component*>& components) const
+        {
+            if (getNumSubItems() != components.size())
+                return false;
+
+            for (int i = 0; i < getNumSubItems(); ++i)
+            {
+                auto item = dynamic_cast<ComponentTreeViewItem*> (getSubItem (i));
+                if (item == nullptr || item->component.getComponent() != components[i])
+                    return false;
+            }
+
+            return true;
         }
 
         void addItemsForChildComponents()
         {
-            for (int i = 0; i < component->getNumChildComponents(); ++i)
-            {
-                auto child = component->getChildComponent (i);
-                if (dynamic_cast<Overlay*> (child) == nullptr)
-                    recursivelyAddChildrenFor (child);
-            }
-        }
-
-        [[nodiscard]] bool subItemsMatchTabs() const
-        {
-            auto tabs = dynamic_cast<juce::TabbedComponent*> (component.getComponent());
-            if (!tabs)
-                return false;
-
-            int itemIndex = 0;
-            for (int i = 0; i < tabs->getNumTabs(); ++i)
-            {
-                if (auto content = tabs->getTabContentComponent (i))
-                {
-                    auto item = dynamic_cast<ComponentTreeViewItem*> (getSubItem (itemIndex));
-                    if (!item || item->component.getComponent() != content)
-                        return false;
-                    ++itemIndex;
-                }
-            }
-
-            return itemIndex == getNumSubItems();
+            for (auto* child : getComponentsToDisplay())
+                addSubItem (new ComponentTreeViewItem (child, outlineComponentCallback, selectComponentCallback));
         }
 
         void selectTabbedComponentChildIfNeeded()
