@@ -41,7 +41,8 @@ jobs:
           - { app: unique_ptr_enabled,  os: macos-15,      juce: JUCE8 }
           - { app: unique_ptr_enabled,  os: windows-2022,  juce: JUCE8 }
           # Sanity checks (single platform each)
-          - { app: unique_ptr_enabled,  os: ubuntu-latest, juce: JUCE7 }
+          # JUCE 7's extern "C" main fails -Wpedantic with the GCC on Ubuntu 26.04; fixed only in JUCE 9
+          - { app: unique_ptr_enabled,  os: ubuntu-24.04,  juce: JUCE7 }
           - { app: unique_ptr_disabled, os: ubuntu-latest, juce: JUCE8 }
           - { app: member_enabled,      os: ubuntu-latest, juce: JUCE8 }
 
