@@ -4,7 +4,8 @@
 
 namespace melatonin
 {
-    class InspectorImageButton : public juce::Component
+    class InspectorImageButton : public juce::Component,
+                                 public juce::SettableTooltipClient
     {
     public:
         bool on = false;

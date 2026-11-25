@@ -296,6 +296,28 @@ namespace melatonin
             return (getParentItem() == nullptr) ? normalItemHeight + 12 : normalItemHeight;
         }
 
+        // Return the full width this item needs, including the text indent and
+        // a little breathing room. TreeView uses this to size its content, so
+        // returning a width wider than the viewport makes JUCE show its
+        // horizontal scrollbar automatically.
+        int getItemWidth() const override
+        {
+            if (!component)
+                return 0;
+
+            const auto font = InspectorLookAndFeel::getInspectorFont (15, juce::Font::FontStyleFlags::plain);
+            const auto textWidth = InspectorLookAndFeel::getStringWidth (font, componentString (component));
+
+            // Matches paintItem(): additionalTextIndent + 7 before the text.
+            // Reserve space for the keyboard-focus icon even when it's hidden,
+            // so focusing an item doesn't clip its text.
+            constexpr int textIndent = additionalTextIndent + 7;
+            constexpr int keyboardIconSpace = additionalTextIndent + 3;
+            constexpr int rightPadding = 16;
+
+            return textIndent + keyboardIconSpace + juce::roundToInt (textWidth) + rightPadding;
+        }
+
         std::function<void (juce::Component* c)> outlineComponentCallback;
         std::function<void (juce::Component* c)> selectComponentCallback;
 
