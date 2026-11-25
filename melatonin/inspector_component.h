@@ -1,6 +1,7 @@
 #pragma once
 
 #include "components/inspector_image_button.h"
+#include "components/splitter_bar.h"
 #include "helpers/misc.h"
 #include "melatonin_inspector/melatonin/components/accesibility.h"
 #include "melatonin_inspector/melatonin/components/box_model.h"
@@ -26,6 +27,8 @@ namespace melatonin
 
             setMouseClickGrabsKeyboardFocus (false);
 
+            mainColumnProportion = juce::jlimit (0.0, 1.0, settings->props->getDoubleValue ("mainColumnProportion", 0.6));
+
             addAndMakeVisible (enabledButton);
             addAndMakeVisible (lockedButton);
             addAndMakeVisible (enableDraggingButton);
@@ -36,6 +39,9 @@ namespace melatonin
             addAndMakeVisible (openUndoManager);
 
             addChildComponent (tree);
+            addChildComponent (splitterBar);
+            splitterBar.getTargetWidth = [this] { return mainColumnBounds.getWidth(); };
+            splitterBar.setTargetWidth = [this] (int newWidth) { setMainColumnWidth (newWidth); };
             addChildComponent (emptySearchLabel);
 
             // visibilities of these are managed by the panels above
@@ -245,9 +251,26 @@ namespace melatonin
             auto area = getLocalBounds();
 
             if (!inspectorEnabled)
+            {
+                splitterBar.setVisible (false);
                 mainColumnBounds = area.removeFromLeft (380);
+            }
             else
-                mainColumnBounds = area.removeFromRight (juce::jmax (380, int ((float) area.getWidth() * 0.6f)));
+            {
+                constexpr int splitterWidth = 6;
+                constexpr int minMainColumnWidth = 380;
+                constexpr int minTreeWidth = 180;
+
+                const auto available = juce::jmax (0, area.getWidth() - splitterWidth);
+                const auto maxMainColumnWidth = juce::jmax (minMainColumnWidth, available - minTreeWidth);
+                const auto mainColumnWidth = juce::jlimit (minMainColumnWidth,
+                    maxMainColumnWidth,
+                    juce::roundToInt ((double) available * mainColumnProportion));
+
+                mainColumnBounds = area.removeFromRight (mainColumnWidth);
+                splitterBar.setBounds (area.removeFromRight (splitterWidth));
+                splitterBar.setVisible (true);
+            }
 
             auto mainCol = mainColumnBounds;
             auto headerHeight = 48;
@@ -297,6 +320,25 @@ namespace melatonin
             // these bounds are used to paint the background
             treeViewBounds = area;
             tree.setBounds (treeViewBounds);
+        }
+
+        void setMainColumnWidth (int newWidth)
+        {
+            const auto available = getWidth() - splitterBar.getWidth();
+            if (available <= 0)
+                return;
+
+            constexpr int minMainColumnWidth = 380;
+            constexpr int minTreeWidth = 180;
+            const auto maxMainColumnWidth = juce::jmax (minMainColumnWidth, available - minTreeWidth);
+            const auto clampedWidth = juce::jlimit (minMainColumnWidth, maxMainColumnWidth, newWidth);
+
+            mainColumnProportion = (double) clampedWidth / (double) available;
+            settings->props->setValue ("mainColumnProportion", mainColumnProportion);
+            settings->saveIfNeeded();
+
+            resized();
+            repaint();
         }
 
         void displayComponentInfo (Component* component, bool collapseTreeBeforeSelection = false)
@@ -411,6 +453,7 @@ namespace melatonin
         juce::SharedResourcePointer<InspectorSettings> settings;
         ComponentModel model;
         bool inspectorEnabled = false;
+        double mainColumnProportion = 0.6;
 
         juce::Rectangle<int> mainColumnBounds, topArea, searchBoxBounds, treeViewBounds;
         InspectorImageButton logo { "logo" };
@@ -432,6 +475,7 @@ namespace melatonin
 
         // TODO: move to its own component
         juce::TreeView tree;
+        SplitterBar splitterBar;
         juce::Label emptySelectionPrompt { "SelectionPrompt", "Select any component to see components tree" };
         juce::Label emptySearchLabel { "EmptySearchResultsPrompt", "No component found" };
         juce::TextEditor searchBox { "Search box" };
