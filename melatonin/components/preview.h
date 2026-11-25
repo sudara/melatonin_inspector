@@ -34,6 +34,7 @@ namespace melatonin
                 if (auto* parent = getParentComponent())
                     parent->resized();
             };
+            timingToggle.setTooltip ("Show paint performance timings.\n\nDouble click the histograms to clear the history.");
 #endif
         }
 

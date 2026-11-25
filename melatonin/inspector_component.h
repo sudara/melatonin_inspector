@@ -176,6 +176,20 @@ namespace melatonin
             openUndoManager.onClick = [this] {
                 toggleUndoManagerCallback (openUndoManager.on);
             };
+
+            logo.setTooltip ("Open the Melatonin Inspector project page");
+            enabledButton.setTooltip ("Enable or disable the inspector");
+            fpsToggle.setTooltip ("Show the FPS meter.\n\nNB: The timing icon in the preview panel will show the time taken to render the selected component");
+            tabToggle.setTooltip ("Follow keyboard focus instead of the mouse");
+            lockedButton.setTooltip ("Lock the current selection");
+            enableDraggingButton.setTooltip ("Enable dragging components");
+            openUndoManager.setTooltip ("Open the undo history");
+            clearButton.setTooltip ("Clear the search filter");
+            searchIcon.setTooltip ("Filter components by name");
+
+            // Scope tooltips to the inspector window so the host app doesn't
+            // need to provide a TooltipWindow for them to work.
+            tooltipWindow = std::make_unique<juce::TooltipWindow> (this, 600);
         }
 
         ~InspectorComponent() override
@@ -476,6 +490,7 @@ namespace melatonin
         // TODO: move to its own component
         juce::TreeView tree;
         SplitterBar splitterBar;
+        std::unique_ptr<juce::TooltipWindow> tooltipWindow;
         juce::Label emptySelectionPrompt { "SelectionPrompt", "Select any component to see components tree" };
         juce::Label emptySearchLabel { "EmptySearchResultsPrompt", "No component found" };
         juce::TextEditor searchBox { "Search box" };

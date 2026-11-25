@@ -7,7 +7,8 @@ namespace melatonin
 {
     // A thin vertical handle that resizes the tree/main-column split.
     // The actual layout logic stays in InspectorComponent via these callbacks.
-    class SplitterBar : public juce::Component
+    class SplitterBar : public juce::Component,
+                        public juce::SettableTooltipClient
     {
     public:
         SplitterBar()
@@ -15,6 +16,7 @@ namespace melatonin
             setOpaque (true);
             setMouseCursor (juce::MouseCursor::LeftRightResizeCursor);
             setRepaintsOnMouseActivity (true);
+            setTooltip ("Drag to resize the component tree");
         }
 
         // Returns the current width of the component being resized.

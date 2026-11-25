@@ -42,6 +42,10 @@ namespace melatonin
             setColour (juce::TreeView::ColourIds::selectedItemBackgroundColourId, colors::black.withAlpha (0.0f));
             setColour (juce::TreeView::ColourIds::backgroundColourId, juce::Colours::transparentBlack);
 
+            setColour (juce::TooltipWindow::backgroundColourId, colors::treeBackgroundDarker);
+            setColour (juce::TooltipWindow::textColourId, colors::treeItemTextSelected);
+            setColour (juce::TooltipWindow::outlineColourId, colors::panelLineSeparator);
+
             // ColourSelector sliders
             setColour (juce::ColourSelector::backgroundColourId, colors::treeBackgroundDarker);
             setColour (juce::ColourSelector::labelTextColourId, colors::label);
